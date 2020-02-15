@@ -1,0 +1,8 @@
+﻿@charset "UTF-8";
+
+*{FONT-WEIGHT: normal; FONT-SIZE: 18px; FONT-FAMILY: "Courier New", serif;}
+body {background-color: #DDDDDD}
+
+.prewrap {white-space: pre-wrap}
+.preline {white-space: pre-line}
+.red {color: red; font-weight: bold;}
