@@ -36,6 +36,8 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 		saveTimers();
 		drawTimers();
 	}
+
+	playNull();
 };
 
 function saveTimers()
@@ -148,7 +150,7 @@ function getNewId(timers)
 };
 
 var silentEndTime = 0;
-function play(freq)
+function play(freq, time, volume)
 {
 	if (silentEndTime > new Date().getTime())
 		return;
@@ -179,18 +181,19 @@ function play(freq)
 	// i*440/AC.sampleRate = 1
 	// i = AC.sampleRate / 440;
 
-	freq = freq ? freq : 261.626;
+	freq     = freq ? freq : 261.626;
 	var qw   = freq*Math.PI*2/AC.sampleRate;
 	// Ячеек массива в одном периоде
 	var T    = Math.PI*2 / qw;
-	var time = 1.0;
+	time     = time   ? time   : 1.0;
+	volume   = volume ? volume : 1.0;
 	var bufferSize = Math.round(Math.floor(AC.sampleRate/T*time)*T);
 
 	var buffer = AC.createBuffer(1, bufferSize, AC.sampleRate);
 	var data = buffer.getChannelData(0);
 	for (var i = 0; i < bufferSize; i++)
 	{
-		data[i] = Math.sin(i * qw);
+		data[i] = volume * Math.sin(i * qw);
 	}
 
 /*
@@ -483,7 +486,13 @@ function drawTimers()
 function hideAlert()
 {
 	document.getElementById("alert").style.display = 'none';
+	playNull();
 };
+
+function playNull()
+{
+	play(440, 0.01, 0.01);
+}
 
 var SoundRegimeText = 
 		[
