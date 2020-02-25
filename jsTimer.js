@@ -270,7 +270,8 @@ function onAudioLoad()
 				]
 	};
 
-	hideAlert();
+	// hideAlert();
+	playNull();
 
 	return !!AC;
 };
