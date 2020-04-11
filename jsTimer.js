@@ -464,11 +464,18 @@ function onClickToSavedTimer(Element, timer)
 	return function()
 	{
 		var textElement = document.getElementById("text");
-		textElement.value = timer.name;
 
-		document.getElementById("hours")  .value = timer.h || "";
-		document.getElementById("minutes").value = timer.m || "";
-		document.getElementById("seconds").value = timer.s || "";
+		if (timer.name)
+			textElement.value = timer.name;
+
+		if (timer.h)
+			document.getElementById("hours")  .value = timer.h || "";
+		
+		if (timer.m)
+			document.getElementById("minutes").value = timer.m || "";
+
+		if (timer.s)
+			document.getElementById("seconds").value = timer.s || "";
 	};
 };
 
