@@ -459,10 +459,20 @@ function onClickToTimer(Element, text)
 	};
 };
 
-function onClickToSavedTimer(Element, timer)
+function onClickToSavedTimer(Element, timer, addImmideatly)
 {
-	return function()
+	return function(mouseEvent)
 	{
+		if (addImmideatly || mouseEvent.shiftKey)
+		{
+			var id = getNewId(timersObject.timers);
+			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), timer.name);
+
+			// Контекстное меню не должно появится
+			mouseEvent.preventDefault();
+			return true;
+		}
+
 		var textElement = document.getElementById("text");
 
 		if (timer.name)
@@ -763,7 +773,8 @@ function drawSavedTimer(timer)
 	var te   = document.createElement("div");
 	div.appendChild(te);
 	te.textContent = timer.name;
-	te.addEventListener('click', onClickToSavedTimer(te, timer));
+	te.addEventListener('click',       onClickToSavedTimer(te, timer, false));
+	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, true ));
 	// te.style.marginLeft = '5%';
 
 	var tc = document.createElement("div");
