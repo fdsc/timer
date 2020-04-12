@@ -598,34 +598,40 @@ function getSoundRegimeText(soundRegime)
 
 function MakeNotification(timer, header, text)
 {
-	// var notification = new Notification('To do list', { body: text, icon: img });
-	var notification = new Notification
-							(
-								header,
-								{
-									body: 				text || 'Таймер активен',
-									requireInteraction: true
-								}
-							);
+	try
+	{
+		// var notification = new Notification('To do list', { body: text, icon: img });
+		var notification = new Notification
+								(
+									header,
+									{
+										body: 				text || 'Таймер активен',
+										requireInteraction: true,
+										vibrate: 			[300, 2500, 500]
+									}
+								);
 
-	notification.addEventListener
-	(
-		'notificationclick',
-		function(event)
-		{console.error(event);
-			event.notification.close();
-			if (event.action === 'close')
-			{
-				deleteTimer
-				(
-					{
-						tid: timer.id
-					}
-				);
-			}
-		},
-		false
-	);
+		notification.addEventListener
+		(
+			'click',
+			function(event)
+			{console.error(event);
+				event.notification.close();
+				if (event.action === 'close')
+				{
+					deleteTimer
+					(
+						{
+							tid: timer.id
+						}
+					);
+				}
+			},
+			false
+		);
+	}
+	catch
+	{}
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
