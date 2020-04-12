@@ -375,7 +375,7 @@ function interval()
 					console.error(e);
 				}
 
-				MakeNotification(cur.text);
+				MakeNotification(cur, cur.text);
 			}
 
 			tt.textContent = '00:00:00';
@@ -596,16 +596,41 @@ function getSoundRegimeText(soundRegime)
 	return SoundRegimeText[soundRegime];
 }
 
-function MakeNotification(header, text)
+function MakeNotification(timer, header, text)
 {
 	// var notification = new Notification('To do list', { body: text, icon: img });
 	var notification = new Notification
 							(
 								header,
 								{
-									body: text || 'Таймер активен'
+									body: 				text || 'Таймер активен',
+									requireInteraction: true,
+									actions:
+									{
+										action: 'close',
+										title:  'Убрать таймер'
+									}
 								}
 							);
+
+	notification.addEventListener
+	(
+		'notificationclick',
+		function(event)
+		{
+			event.notification.close();
+			if (event.action === 'close')
+			{
+				deleteTimer
+				(
+					{
+						tid: timer.id
+					}
+				);
+			}
+		},
+		false
+	);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
