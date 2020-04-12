@@ -616,7 +616,7 @@ function MakeNotification(timer, header, text)
 			'click',
 			function(event)
 			{
-				event.notification.close();
+				notification.close();
 				deleteTimer
 				(
 					{
