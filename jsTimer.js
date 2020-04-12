@@ -617,7 +617,7 @@ function MakeNotification(timer, header, text)
 			function(event)
 			{
 				notification.close();
-				deleteTimer
+				deleteTimer.apply
 				(
 					{
 						tid: timer.id
