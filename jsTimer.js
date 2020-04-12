@@ -596,14 +596,14 @@ function getSoundRegimeText(soundRegime)
 	return SoundRegimeText[soundRegime];
 }
 
-function MakeNotification(text, header)
+function MakeNotification(header, text)
 {
 	// var notification = new Notification('To do list', { body: text, icon: img });
 	var notification = new Notification
 							(
-								header || 'Таймер активен',
+								header,
 								{
-									body: text
+									body: text || 'Таймер активен'
 								}
 							);
 }
