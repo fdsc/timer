@@ -606,10 +606,12 @@ function MakeNotification(timer, header, text)
 									body: 				text || 'Таймер активен',
 									requireInteraction: true,
 									actions:
-									{
-										action: 'close',
-										title:  'Убрать таймер'
-									}
+									[
+										{
+											action: 'close',
+											title:  'Убрать таймер'
+										}
+									]
 								}
 							);
 
