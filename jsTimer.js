@@ -171,15 +171,17 @@ function addTimer24()
 	addTimer_Mil(24*60*60*1000);
 };
 
+var ID = 1;
 function getNewId(timers)
 {
-	var id = 1;
+	var id = ID;
 	for (var cur of timers)
 	{
 		if (cur.id >= id)
 			id = cur.id + 1;
 	}
 
+	ID = id + 1;
 	return id;
 };
 
