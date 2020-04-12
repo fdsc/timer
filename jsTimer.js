@@ -374,6 +374,8 @@ function interval()
 				{
 					console.error(e);
 				}
+
+				MakeNotification(cur.text);
 			}
 
 			tt.textContent = '00:00:00';
@@ -594,6 +596,53 @@ function getSoundRegimeText(soundRegime)
 	return SoundRegimeText[soundRegime];
 }
 
+function MakeNotification(text, header)
+{
+	// var notification = new Notification('To do list', { body: text, icon: img });
+	var notification = new Notification
+							(
+								header || 'Таймер активен',
+								{
+									body: text
+								}
+							);
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
+function InitializeNotification()
+{
+	try
+	{
+		var timersFromStorage = localStorage.getItem(timerStorageName);
+		if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
+		{
+			var t = JSON.parse(timersFromStorage);
+			if (t && timersFromStorage.notifications)
+				timersObject.notifications = timersFromStorage.notifications;
+
+			if (!timersObject.notifications)
+				timersObject.notifications = {};
+		}
+
+		if (Notification.permission != 'granted')
+		{
+			Notification.requestPermission().then
+			(
+				function(result)
+				{
+					if (!timersObject.notifications)
+						timersObject.notifications = {};
+
+					timersObject.notifications.permission = result;	// 'granted', 'denied', 'default'
+					saveTimers();
+				}
+			);
+		}
+	}
+	catch
+	{}
+}
+
 window.onload = function()
 {
 	if (document.location.search)
@@ -733,6 +782,7 @@ window.onload = function()
 	// audio = document.getElementById("audio");
 
 	drawTimers();
+	InitializeNotification();
 
 	setInterval
 	(
