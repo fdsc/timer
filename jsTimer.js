@@ -615,17 +615,14 @@ function MakeNotification(timer, header, text)
 		(
 			'click',
 			function(event)
-			{console.error(event);
+			{
 				event.notification.close();
-				if (event.action === 'close')
-				{
-					deleteTimer
-					(
-						{
-							tid: timer.id
-						}
-					);
-				}
+				deleteTimer
+				(
+					{
+						tid: timer.id
+					}
+				);
 			},
 			false
 		);
