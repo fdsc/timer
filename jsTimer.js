@@ -604,14 +604,7 @@ function MakeNotification(timer, header, text)
 								header,
 								{
 									body: 				text || 'Таймер активен',
-									requireInteraction: true,
-									actions:
-									[
-										{
-											action: 'close',
-											title:  'Убрать таймер'
-										}
-									]
+									requireInteraction: true
 								}
 							);
 
@@ -619,7 +612,7 @@ function MakeNotification(timer, header, text)
 	(
 		'notificationclick',
 		function(event)
-		{
+		{console.error(event);
 			event.notification.close();
 			if (event.action === 'close')
 			{
