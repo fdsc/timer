@@ -66,15 +66,16 @@ function deleteTimer(MouseEvent)
 		if (cur.id == this.tid)
 		{
 			timers.splice(curI, 1);
+
+			saveTimers();
+			main.removeChild(toDel);
 			break;
 		}
 	}
 
-	saveTimers();
 
-	main.removeChild(toDel);
-
-	hideAlert();
+	// hideAlert нельзя делать, т.к. вызов удаления таймера может быть из push-уведомления
+	// hideAlert();
 }
 
 function deleteSavedTimer(MouseEvent)
@@ -91,13 +92,12 @@ function deleteSavedTimer(MouseEvent)
 		if (cur.id == this.tid)
 		{
 			timers.splice(curI, 1);
+
+			saveTimers();
+			main.removeChild(toDel);
 			break;
 		}
 	}
-
-	saveTimers();
-
-	main.removeChild(toDel);
 
 	hideAlert();
 }
