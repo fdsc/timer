@@ -59,7 +59,7 @@ function deleteTimer(MouseEvent)
 	var main  = document.getElementById("main");
 	var toDel = document.getElementById('timer-' + this.tid);
 
-	var timers = timersObject.timers;
+	var timers = timersObject.saved;
 	for (var curI = 0; curI < timers.length; curI++)
 	{
 		var cur = timers[curI];
