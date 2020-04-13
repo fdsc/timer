@@ -822,8 +822,7 @@ function addSavedTimer(h, m, s, timerName)
 		timersObject.saved = [];
 
 	var seconds = h*3600 + m*60 + s;
-	timersObject.saved.push
-	(
+	var newTimer =
 		{
 			h:  h,
 			m:  m,
@@ -833,8 +832,11 @@ function addSavedTimer(h, m, s, timerName)
 			totalSeconds: seconds,
 			name:         timerName,
 			timeVal:      formatDate(new Date(seconds*1000))
-		}
-	);
+		};
+
+	timersObject.saved.push(newTimer);
+
+	return newTimer;
 }
 
 function drawSavedTimer(timer)
@@ -909,8 +911,8 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					addSavedTimer(cur.h, cur.m, cur.s, cur.name);
-					drawSavedTimer(cur);
+					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name);
+					drawSavedTimer(newTimer);
 				}
 			}
 		}
