@@ -920,11 +920,14 @@ function drawSavedTimer(timer)
 	tc.appendChild(tt);
 	tt.id = 'timer-' + timer.id + "-t";
 
-	var tend = document.createElement("span");
-	tc.appendChild(tend);
-	tend.id = 'timer-' + timer.id + "-end";
-	tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
-	//tend.style.marginLeft = '10%';
+	if (timer.totalSeconds > 0)
+	{
+		var tend = document.createElement("span");
+		tc.appendChild(tend);
+		tend.id = 'timer-' + timer.id + "-end";
+		tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
+		//tend.style.marginLeft = '10%';
+	}
 
 	var tdel = document.createElement("div");
 	div.appendChild(tdel);
