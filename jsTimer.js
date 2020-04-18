@@ -94,7 +94,9 @@ function deleteSavedTimer(MouseEvent)
 			timers.splice(curI, 1);
 
 			saveTimers();
-			main.removeChild(toDel);
+			// main.removeChild(toDel);
+			drawTimersShorts();
+
 			break;
 		}
 	}
@@ -338,6 +340,33 @@ function formatDate(date)
 	return str;
 }
 
+function formatDateMinimal(date)
+{
+	var h = date.getUTCHours();
+	var m = date.getUTCMinutes();
+	var s = date.getUTCSeconds();
+	var str = addNull(s);
+
+	if (m > 0)
+	{
+		str = addNull(m) + ":" + str;
+	}
+
+	if (h > 0)
+	{
+		str = addNull(h) + ":" + str;
+	}
+
+	var days = date.getTime() / (24*3600*1000);
+	if (days >= 1.0)
+	{
+		days = Math.floor(days);
+		str = days + " дн. " + str;
+	}
+
+	return str;
+}
+
 function interval()
 {
 	var now = new Date().getTime();
@@ -472,7 +501,7 @@ function onClickToSavedTimer(Element, timer, addImmideatly)
 			var id = getNewId(timersObject.timers);
 			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), timer.name);
 
-			// Контекстное меню не должно появится
+			// Контекстное меню не должно появится (здесь - от клика на таймер)
 			mouseEvent.preventDefault();
 			return true;
 		}
@@ -490,6 +519,9 @@ function onClickToSavedTimer(Element, timer, addImmideatly)
 
 		if (timer.s)
 			document.getElementById("seconds").value = timer.s || "";
+
+		// Контекстное меню не должно появится (здесь - от интервала)
+		mouseEvent.preventDefault();
 	};
 };
 
@@ -686,7 +718,8 @@ window.onload = function()
 		}
 	}
 
-	var btn = document.getElementById("addTimer");
+	var btn = null; // document.getElementById("addTimer");
+	/*
 	btn.addEventListener('click', addTimer0);
 	btn = document.getElementById("addTimer01");
 	btn.addEventListener('click', addTimer01);
@@ -702,7 +735,7 @@ window.onload = function()
 	btn.addEventListener('click', addTimer8);
 	btn = document.getElementById("addTimer24");
 	btn.addEventListener('click', addTimer24);
-
+*/
 	btn = document.getElementById("alert");
 	btn.addEventListener('click', hideAlert);
 
@@ -798,7 +831,26 @@ window.onload = function()
 
 			var timerName = document.getElementById("text").value;
 
-			addSavedTimer(h, m, s, timerName);
+			addSavedTimer(h, m, s, timerName, false);
+			saveTimers();
+			drawTimersShorts();
+		}
+	);
+	
+	
+	btn = document.getElementById("saveInterval");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			var h = parseFloat(document.getElementById("hours")  .value || 0);
+			var m = parseFloat(document.getElementById("minutes").value || 0);
+			var s = parseFloat(document.getElementById("seconds").value || 0);
+
+			var timerName = ""; // document.getElementById("text").value;
+
+			addSavedTimer(h, m, s, timerName, true);
 			saveTimers();
 			drawTimersShorts();
 		}
@@ -816,12 +868,18 @@ window.onload = function()
 	);
 };
 
-function addSavedTimer(h, m, s, timerName)
+function addSavedTimer(h, m, s, timerName, savedInterval)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
 
 	var seconds = h*3600 + m*60 + s;
+	var date = new Date(seconds*1000);
+	if (savedInterval)
+	{
+		timerName = formatDateMinimal(date);
+	}
+
 	var newTimer =
 		{
 			h:  h,
@@ -831,7 +889,8 @@ function addSavedTimer(h, m, s, timerName)
 
 			totalSeconds: seconds,
 			name:         timerName,
-			timeVal:      formatDate(new Date(seconds*1000))
+			timeVal:      formatDate(date),
+			isInterval:   savedInterval
 		};
 
 	timersObject.saved.push(newTimer);
@@ -842,7 +901,7 @@ function addSavedTimer(h, m, s, timerName)
 function drawSavedTimer(timer)
 {
 	var main = document.getElementById("timersShort");
-	
+
 	var div  = document.createElement("div");
 	div.id   = 'savedtimer-' + timer.id;
 	main.appendChild(div);
@@ -880,10 +939,43 @@ function drawSavedTimer(timer)
 	div.appendChild(hr);
 }
 
+function drawSavedInterval(timer)
+{
+	var main = document.getElementById("timersIntervalShort");
+
+	var div  = document.createElement("span");
+	div.id   = 'savedtimer-' + timer.id;
+	main.appendChild(div);
+
+	var te   = document.createElement("input");
+	te.type = "button";
+	div.appendChild(te);
+	te.value = timer.name;
+	te.addEventListener('click',       onClickToSavedTimer(te, timer, true ));
+	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, false));
+	// te.style.marginLeft = '5%';
+
+	var tdel = document.createElement("input");
+	tdel.type = "button";
+	div.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.value = "X";
+	tdel.style["background-color"] = "red";
+	tdel.addEventListener('click', deleteSavedTimer);
+	tdel.id = 'timer-' + timer.id + "-del";
+
+	var hr = document.createElement("span");
+	hr.textContent = " ";
+	div.appendChild(hr);
+}
+
 function drawTimersShorts()
 {
 	var main = document.getElementById("timersShort");
 	main.textContent = "";
+	
+	var intervals = document.getElementById("timersIntervalShort");
+	intervals.textContent = "";
 
 	var timersFromStorage = localStorage.getItem(timerStorageName);
 	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
@@ -911,8 +1003,11 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name);
-					drawSavedTimer(newTimer);
+					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
+					if (newTimer.isInterval)
+						drawSavedInterval(newTimer);
+					else
+						drawSavedTimer(newTimer);
 				}
 			}
 		}
