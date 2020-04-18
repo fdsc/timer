@@ -718,9 +718,9 @@ window.onload = function()
 		}
 	}
 
-	var btn = null; // document.getElementById("addTimer");
-	/*
+	var btn = document.getElementById("addTimer");
 	btn.addEventListener('click', addTimer0);
+	/*
 	btn = document.getElementById("addTimer01");
 	btn.addEventListener('click', addTimer01);
 	btn = document.getElementById("addTimer05");
