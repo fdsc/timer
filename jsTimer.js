@@ -347,7 +347,7 @@ function formatDateMinimal(date)
 	var s = date.getUTCSeconds();
 	var str = addNull(s);
 
-	if (m > 0)
+	if (h > 0 || m > 0)
 	{
 		str = addNull(m) + ":" + str;
 	}
