@@ -492,22 +492,28 @@ function onClickToTimer(Element, text)
 	};
 };
 
-function onClickToSavedTimer(Element, timer, addImmideatly)
+function onClickToSavedTimer(Element, timer, addImmideatly, timerType)
 {
 	return function(mouseEvent)
 	{
+		var textElement = document.getElementById("text");
+		var val         = timer.name;
+
+		if (timerType == 2)
+		if (textElement.value)
+			val =  textElement.value;
+
 		if (addImmideatly || mouseEvent.shiftKey)
 		{
 			var id = getNewId(timersObject.timers);
-			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), timer.name);
+			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val);
 
 			// Контекстное меню не должно появится (здесь - от клика на таймер)
 			mouseEvent.preventDefault();
 			return true;
 		}
 
-		var textElement = document.getElementById("text");
-
+		if (timerType != 2)
 		if (timer.name)
 			textElement.value = timer.name;
 
@@ -786,8 +792,8 @@ function drawSavedInterval(timer)
 	te.type = "button";
 	div.appendChild(te);
 	te.value = timer.name;
-	te.addEventListener('click',       onClickToSavedTimer(te, timer, true ));
-	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, false));
+	te.addEventListener('click',       onClickToSavedTimer(te, timer, true , 2));
+	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, false, 2));
 	// te.style.marginLeft = '5%';
 
 	var tdel = document.createElement("input");
