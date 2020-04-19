@@ -481,6 +481,7 @@ function interval()
 	}
 
 	document.title = minText;
+	setIntervalsWidth();
 };
 
 function onClickToTimer(Element, text)
@@ -790,6 +791,7 @@ function drawSavedInterval(timer)
 
 	var div  = document.createElement("span");
 	div.id   = 'savedtimer-' + timer.id;
+	div.classList.add('nowrap');
 	main.appendChild(div);
 
 	var te   = document.createElement("input");
@@ -811,7 +813,14 @@ function drawSavedInterval(timer)
 
 	var hr = document.createElement("span");
 	hr.textContent = " ";
-	div.appendChild(hr);
+	main.appendChild(hr);
+}
+function setIntervalsWidth()
+{
+	var main      = document.getElementById("timersShort");
+	var intervals = document.getElementById("timersIntervalShort");
+
+	intervals.style.width = document.body.clientWidth - main.clientWidth;
 }
 
 function drawTimersShorts()
@@ -861,6 +870,8 @@ function drawTimersShorts()
 			timersObject.saved = [];
 		}
 	}
+
+	setTimeout(setIntervalsWidth, 0);
 };
 
 window.onload = function()
