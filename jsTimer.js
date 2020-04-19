@@ -1027,8 +1027,8 @@ if ('serviceWorker' in navigator)
 {
 	navigator.serviceWorker.register
 	(
-		'jsServiceWorker.js',
-		{ scope: '/' }
+		'/jsServiceWorker.js',
+		{ scope: document.location.pathname }	// Область регистрации ServiceWorker
 	)
 	.then
 	(
