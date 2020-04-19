@@ -700,6 +700,159 @@ function InitializeNotification()
 	{}
 }
 
+function addSavedTimer(h, m, s, timerName, savedInterval)
+{
+	if (!timersObject.saved)
+		timersObject.saved = [];
+
+	var seconds = h*3600 + m*60 + s;
+	var date = new Date(seconds*1000);
+	if (savedInterval)
+	{
+		timerName = formatDateMinimal(date);
+	}
+
+	var newTimer =
+		{
+			h:  h,
+			m:  m,
+			s:  s,
+			id: getNewId(timersObject.saved),
+
+			totalSeconds: seconds,
+			name:         timerName,
+			timeVal:      formatDate(date),
+			isInterval:   savedInterval
+		};
+
+	timersObject.saved.push(newTimer);
+
+	return newTimer;
+}
+
+function drawSavedTimer(timer)
+{
+	var main = document.getElementById("timersShort");
+
+	var div  = document.createElement("div");
+	div.id   = 'savedtimer-' + timer.id;
+	main.appendChild(div);
+
+	var te   = document.createElement("div");
+	div.appendChild(te);
+	te.textContent = timer.name;
+	te.addEventListener('click',       onClickToSavedTimer(te, timer, false));
+	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, true ));
+	// te.style.marginLeft = '5%';
+
+	var tc = document.createElement("div");
+	div.appendChild(tc);
+
+	var tt = document.createElement("span");
+	tc.appendChild(tt);
+	tt.id = 'timer-' + timer.id + "-t";
+
+	if (timer.totalSeconds > 0)
+	{
+		var tend = document.createElement("span");
+		tc.appendChild(tend);
+		tend.id = 'timer-' + timer.id + "-end";
+		tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
+		//tend.style.marginLeft = '10%';
+	}
+
+	var tdel = document.createElement("div");
+	div.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Удалить";
+	tdel.addEventListener('click', deleteSavedTimer);
+	tdel.style.marginBottom = '30px';
+	tdel.style.marginTop = '15px';
+	tdel.id = 'timer-' + timer.id + "-del";
+
+	var hr = document.createElement("hr");
+	div.appendChild(hr);
+}
+
+function drawSavedInterval(timer)
+{
+	var main = document.getElementById("timersIntervalShort");
+
+	var div  = document.createElement("span");
+	div.id   = 'savedtimer-' + timer.id;
+	main.appendChild(div);
+
+	var te   = document.createElement("input");
+	te.type = "button";
+	div.appendChild(te);
+	te.value = timer.name;
+	te.addEventListener('click',       onClickToSavedTimer(te, timer, true ));
+	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, false));
+	// te.style.marginLeft = '5%';
+
+	var tdel = document.createElement("input");
+	tdel.type = "button";
+	div.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.value = "X";
+	tdel.style["background-color"] = "red";
+	tdel.addEventListener('click', deleteSavedTimer);
+	tdel.id = 'timer-' + timer.id + "-del";
+
+	var hr = document.createElement("span");
+	hr.textContent = " ";
+	div.appendChild(hr);
+}
+
+function drawTimersShorts()
+{
+	var main = document.getElementById("timersShort");
+	main.textContent = "";
+	
+	var intervals = document.getElementById("timersIntervalShort");
+	intervals.textContent = "";
+
+	var timersFromStorage = localStorage.getItem(timerStorageName);
+	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
+	{
+		var t = JSON.parse(timersFromStorage);
+		if (t && t.saved)
+		{
+			t = t.saved;
+			if (t)
+			{
+				for (var i = 0; i < t.length; i++)
+				{
+					for (var j = i + 1; j < t.length; j++)
+					{
+						if (t[i].totalSeconds > t[j].totalSeconds)
+						{
+							var ai = t[i];
+							var aj = t[j];
+							t[i] = aj;
+							t[j] = ai;
+						}
+					}
+				}
+
+				timersObject.saved = [];
+				for (var cur of t)
+				{
+					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
+					if (newTimer.isInterval)
+						drawSavedInterval(newTimer);
+					else
+						drawSavedTimer(newTimer);
+				}
+			}
+		}
+		else
+		{
+			timersObject.saved = [];
+		}
+	}
+};
+
 window.onload = function()
 {
 	if (document.location.search)
@@ -868,155 +1021,46 @@ window.onload = function()
 	);
 };
 
-function addSavedTimer(h, m, s, timerName, savedInterval)
+
+// https://developer.mozilla.org/ru/docs/Web/API/Service_Worker_API/Using_Service_Workers
+if ('serviceWorker' in navigator)
 {
-	if (!timersObject.saved)
-		timersObject.saved = [];
-
-	var seconds = h*3600 + m*60 + s;
-	var date = new Date(seconds*1000);
-	if (savedInterval)
-	{
-		timerName = formatDateMinimal(date);
-	}
-
-	var newTimer =
+	navigator.serviceWorker.register
+	(
+		'jsServiceWorker.js',
+		{ scope: '/' }
+	)
+	.then
+	(
+		function(reg)
 		{
-			h:  h,
-			m:  m,
-			s:  s,
-			id: getNewId(timersObject.saved),
 
-			totalSeconds: seconds,
-			name:         timerName,
-			timeVal:      formatDate(date),
-			isInterval:   savedInterval
-		};
-
-	timersObject.saved.push(newTimer);
-
-	return newTimer;
-}
-
-function drawSavedTimer(timer)
-{
-	var main = document.getElementById("timersShort");
-
-	var div  = document.createElement("div");
-	div.id   = 'savedtimer-' + timer.id;
-	main.appendChild(div);
-
-	var te   = document.createElement("div");
-	div.appendChild(te);
-	te.textContent = timer.name;
-	te.addEventListener('click',       onClickToSavedTimer(te, timer, false));
-	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, true ));
-	// te.style.marginLeft = '5%';
-
-	var tc = document.createElement("div");
-	div.appendChild(tc);
-
-	var tt = document.createElement("span");
-	tc.appendChild(tt);
-	tt.id = 'timer-' + timer.id + "-t";
-
-	if (timer.totalSeconds > 0)
-	{
-		var tend = document.createElement("span");
-		tc.appendChild(tend);
-		tend.id = 'timer-' + timer.id + "-end";
-		tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
-		//tend.style.marginLeft = '10%';
-	}
-
-	var tdel = document.createElement("div");
-	div.appendChild(tdel);
-	tdel.tid = timer.id;
-	tdel.textContent = "Удалить";
-	tdel.addEventListener('click', deleteSavedTimer);
-	tdel.style.marginBottom = '30px';
-	tdel.style.marginTop = '15px';
-	tdel.id = 'timer-' + timer.id + "-del";
-
-	var hr = document.createElement("hr");
-	div.appendChild(hr);
-}
-
-function drawSavedInterval(timer)
-{
-	var main = document.getElementById("timersIntervalShort");
-
-	var div  = document.createElement("span");
-	div.id   = 'savedtimer-' + timer.id;
-	main.appendChild(div);
-
-	var te   = document.createElement("input");
-	te.type = "button";
-	div.appendChild(te);
-	te.value = timer.name;
-	te.addEventListener('click',       onClickToSavedTimer(te, timer, true ));
-	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, false));
-	// te.style.marginLeft = '5%';
-
-	var tdel = document.createElement("input");
-	tdel.type = "button";
-	div.appendChild(tdel);
-	tdel.tid = timer.id;
-	tdel.value = "X";
-	tdel.style["background-color"] = "red";
-	tdel.addEventListener('click', deleteSavedTimer);
-	tdel.id = 'timer-' + timer.id + "-del";
-
-	var hr = document.createElement("span");
-	hr.textContent = " ";
-	div.appendChild(hr);
-}
-
-function drawTimersShorts()
-{
-	var main = document.getElementById("timersShort");
-	main.textContent = "";
-	
-	var intervals = document.getElementById("timersIntervalShort");
-	intervals.textContent = "";
-
-	var timersFromStorage = localStorage.getItem(timerStorageName);
-	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
-	{
-		var t = JSON.parse(timersFromStorage);
-		if (t && t.saved)
-		{
-			t = t.saved;
-			if (t)
+			if (reg.installing)
 			{
-				for (var i = 0; i < t.length; i++)
-				{
-					for (var j = i + 1; j < t.length; j++)
-					{
-						if (t[i].totalSeconds > t[j].totalSeconds)
-						{
-							var ai = t[i];
-							var aj = t[j];
-							t[i] = aj;
-							t[j] = ai;
-						}
-					}
-				}
-
-				timersObject.saved = [];
-				for (var cur of t)
-				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
-					if (newTimer.isInterval)
-						drawSavedInterval(newTimer);
-					else
-						drawSavedTimer(newTimer);
-				}
+				console.log('Service worker installing');
 			}
+			else
+			if (reg.waiting)
+			{
+				console.log('Service worker installed');
+			}
+			else
+			if (reg.active)
+			{
+				console.log('Service worker active');
+			}
+
 		}
-		else
+	)
+	.catch
+	(
+		function(error)
 		{
-			timersObject.saved = [];
+			console.error('ServiceWorker registration failed with ' + error);
 		}
-	}
-};
+	);
+}
+else
+{
+	console.error('ServiceWorker support not found in your browser');
+}
