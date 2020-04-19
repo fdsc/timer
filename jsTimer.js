@@ -489,6 +489,8 @@ function onClickToTimer(Element, text)
 	{
 		var textElement = document.getElementById("text");
 		textElement.value = text;
+
+		hideAlert();
 	};
 };
 
@@ -496,6 +498,8 @@ function onClickToSavedTimer(Element, timer, addImmideatly, timerType)
 {
 	return function(mouseEvent)
 	{
+		hideAlert();
+
 		var textElement = document.getElementById("text");
 		var val         = timer.name;
 
