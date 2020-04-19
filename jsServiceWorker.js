@@ -38,50 +38,53 @@ self.addEventListener
 	{
 		event.respondWith
 		(
-			// Загружаем из сети
-			return fetch(event.request)
-			.then
-			(
-				function (response)
-				{
-					let responseClone = response.clone();
+			function()
+			{
+				// Загружаем из сети
+				return fetch(event.request)
+				.then
+				(
+					function (response)
+					{
+						let responseClone = response.clone();
 
-					// Кешируем заново
-					caches.open(version)
-					.then
-					(
-						function (cache)
-						{
-							cache.put(event.request, responseClone);
-						}
-					);
+						// Кешируем заново
+						caches.open(version)
+						.then
+						(
+							function (cache)
+							{
+								cache.put(event.request, responseClone);
+							}
+						);
 
-					return response;
-				}
-			)
-			.catch
-			(
-				function()
-				{
-					// Возвращаем запрошенный ресурс из кеша
-					return caches.match(event.request)
-					.then
-					(
-						function(response)
-						{
-							if (response !== undefined)
+						return response;
+					}
+				)
+				.catch
+				(
+					function()
+					{
+						// Возвращаем запрошенный ресурс из кеша
+						return caches.match(event.request)
+						.then
+						(
+							function(response)
 							{
-								return response;
+								if (response !== undefined)
+								{
+									return response;
+								}
+								else
+								{
+									// return caches.match('error.png');
+									new Response('Network is unreilable or error occured');
+								}
 							}
-							else
-							{
-								// return caches.match('error.png');
-								new Response('Network is unreilable or error occured');
-							}
-						}
-					);
-				}
-			);
+						);
+					}
+				);
+			}
 
 		);	// event.respondWith end
 	}
