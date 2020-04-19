@@ -74,7 +74,19 @@ self.addEventListener
 						else
 						{
 							// return caches.match('error.png');
-							new Response('Network is unreilable or error occured');
+							// https://developer.mozilla.org/en-US/docs/Web/API/Response
+							var r = new Response
+							(
+								'Network is unreilable or error occured',
+								{
+									// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+									// Request Timeout
+									"status" : 408,
+									"statusText": "Network is unreilable or error occured"
+								}
+							);
+
+							return r;
 						}
 					}
 				);
