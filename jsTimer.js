@@ -67,6 +67,9 @@ function deleteTimer(MouseEvent)
 		{
 			timers.splice(curI, 1);
 
+			if (cur.notification)
+				cur.notification.close();
+
 			saveTimers();
 			main.removeChild(toDel);
 			break;
@@ -656,6 +659,7 @@ function MakeNotification(timer, header, text)
 									}
 								);
 
+		timer.notification = notification;
 		notification.addEventListener
 		(
 			'click',
