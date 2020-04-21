@@ -75,9 +75,10 @@ function deleteTimer(MouseEvent)
 			timers.splice(curI, 1);
 
 			var notification = notificationObjects[cur.id];
-			if (notification instanceof Function)
+			if (notification instanceof Notification)
 			{
 				notification.close();
+				delete notificationObjects[cur.id];
 			}
 
 			saveTimers();
@@ -671,7 +672,6 @@ function MakeNotification(timer, header, text)
 								);
 
 		notificationObjects[timer.id] = notification;
-		timer.notification = notification;
 		notification.addEventListener
 		(
 			'click',
