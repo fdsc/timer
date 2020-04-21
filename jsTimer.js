@@ -16,6 +16,8 @@ var timersObject =
 	saved:  []
 };
 
+var notificationObjects = {};
+
 function addTimerObject(newTimer)
 {
 	timersObject.timers.push(newTimer);
@@ -72,8 +74,11 @@ function deleteTimer(MouseEvent)
 		{
 			timers.splice(curI, 1);
 
-			if (cur.notification && (cur.notification instanceof Function))
-				cur.notification.close();
+			var notification = notificationObjects[cur.id];
+			if (notification instanceof Function)
+			{
+				notification.close();
+			}
 
 			saveTimers();
 			main.removeChild(toDel);
@@ -665,6 +670,7 @@ function MakeNotification(timer, header, text)
 									}
 								);
 
+		notificationObjects[timer.id] = notification;
 		timer.notification = notification;
 		notification.addEventListener
 		(
