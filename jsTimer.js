@@ -72,7 +72,7 @@ function deleteTimer(MouseEvent)
 		{
 			timers.splice(curI, 1);
 
-			if (cur.notification)
+			if (cur.notification && (cur.notification instanceof Function))
 				cur.notification.close();
 
 			saveTimers();
