@@ -74,11 +74,18 @@ function deleteTimer(MouseEvent)
 		{
 			timers.splice(curI, 1);
 
-			var notification = notificationObjects[cur.id];
-			if (notification instanceof Notification)
+			try
 			{
-				notification.close();
-				delete notificationObjects[cur.id];
+				var notification = notificationObjects[cur.id];
+				if (notification instanceof Notification)
+				{
+					notification.close();
+					delete notificationObjects[cur.id];
+				}
+			}
+			catch (e)
+			{
+				console.error(e);
 			}
 
 			saveTimers();
