@@ -16,6 +16,11 @@ var timersObject =
 	saved:  []
 };
 
+function addTimerObject(newTimer)
+{
+	timersObject.timers.push(newTimer);
+}
+
 function addTimer(id, milliSeconds, text, isEnd, fromSave)
 {
 	var now = new Date();
@@ -26,7 +31,7 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	if (!text)
 		text = "Таймер " + new Date(end).toLocaleString();
 
-	timersObject.timers.push
+	addTimerObject
 	(
 		{
 			end:  end,
@@ -608,7 +613,8 @@ function drawTimers()
 			timersObject.timers = [];
 			for (var cur of t)
 			{
-				addTimer(cur.id, cur.end, cur.text, true, true);
+				//addTimer(cur.id, cur.end, cur.text, true, true);
+				addTimerObject(cur);
 				drawTimer(cur);
 			}
 		}
