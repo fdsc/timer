@@ -586,14 +586,14 @@ function drawTimer(timer)
 
 	var tdeldiv = document.createElement("div");
 	div.appendChild(tdeldiv);
+	tdeldiv.style.marginBottom = '30px';
+	tdeldiv.style.marginTop = '15px';
 
 	var tdel = document.createElement("span");
 	tdeldiv.appendChild(tdel);
 	tdel.tid = timer.id;
 	tdel.textContent = "Удалить";
 	tdel.addEventListener('click', deleteTimer);
-	tdel.style.marginBottom = '30px';
-	tdel.style.marginTop = '15px';
 	tdel.id = 'timer-' + timer.id + "-del";
 
 	var hr = document.createElement("hr");
@@ -800,15 +800,15 @@ function drawSavedTimer(timer)
 
 	var tdeldiv = document.createElement("div");
 	div.appendChild(tdeldiv);
-
+/*	tdeldiv.style.marginBottom = '30px';
+	tdeldiv.style.marginTop = '15px';
+*/
 	// span - чтобы "Удалить" не растягивалась на всю страницу по ширине
 	var tdel = document.createElement("span");
 	tdeldiv.appendChild(tdel);
 	tdel.tid = timer.id;
 	tdel.textContent = "Удалить";
 	tdel.addEventListener('click', deleteSavedTimer);
-	tdel.style.marginBottom = '30px';
-	tdel.style.marginTop = '15px';
 	tdel.id = 'timer-' + timer.id + "-del";
 
 	var hr = document.createElement("hr");
