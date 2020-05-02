@@ -584,8 +584,11 @@ function drawTimer(timer)
 	tend.textContent = new Date(timer.end).toLocaleString();
 	tend.style.marginLeft = '10%';
 
-	var tdel = document.createElement("div");
-	div.appendChild(tdel);
+	var tdeldiv = document.createElement("div");
+	div.appendChild(tdeldiv);
+
+	var tdel = document.createElement("span");
+	tdeldiv.appendChild(tdel);
 	tdel.tid = timer.id;
 	tdel.textContent = "Удалить";
 	tdel.addEventListener('click', deleteTimer);
