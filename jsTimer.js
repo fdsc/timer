@@ -648,7 +648,7 @@ function hideAlert()
 
 function playNull()
 {
-	play(440, 0.01, 0.01);
+	play(440, 0.1, 0.01);
 }
 
 var SoundRegimeText = 
