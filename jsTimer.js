@@ -366,7 +366,17 @@ function formatDateMinimal(date)
 	var h = date.getUTCHours();
 	var m = date.getUTCMinutes();
 	var s = date.getUTCSeconds();
-	var str = addNull(s);
+	var str = '';
+
+	if (h > 0 || m > 0 || s > 0)
+	{
+		str = addNull(s);
+	}
+	else
+	if (days == 0)
+	{
+		str = addNull(s);
+	}
 
 	if (h > 0 || m > 0)
 	{
