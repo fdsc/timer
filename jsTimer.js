@@ -795,8 +795,12 @@ function drawSavedTimer(timer)
 		//tend.style.marginLeft = '10%';
 	}
 
-	var tdel = document.createElement("div");
-	div.appendChild(tdel);
+	var tdeldiv = document.createElement("div");
+	div.appendChild(tdeldiv);
+
+	// span - чтобы "Удалить" не растягивалась на всю страницу по ширине
+	var tdel = document.createElement("span");
+	tdeldiv.appendChild(tdel);
 	tdel.tid = timer.id;
 	tdel.textContent = "Удалить";
 	tdel.addEventListener('click', deleteSavedTimer);
