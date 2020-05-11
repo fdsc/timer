@@ -1018,7 +1018,7 @@ window.onload = function()
 				gainNode.gain.value = this.value;
 				gv.textContent = this.value;
 
-				SetGainVal(this.value);
+				setGainVal(this.value);
 			}
 		}
 	);
