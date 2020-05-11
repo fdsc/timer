@@ -275,11 +275,16 @@ function play(freq, time, volume)
 
 function loadSoundRegime()
 {
-	var soundRegime = localStorage.getItem(timerStorageName + '.soundRegime');
-	if (typeof(soundRegime) != "undefined" && soundRegime)
+	try
 	{
-		soundRegimeObject = JSON.parse(soundRegime);
+		var soundRegime = localStorage.getItem(timerStorageName + '.soundRegime');
+		if (typeof(soundRegime) != "undefined" && soundRegime)
+		{
+			soundRegimeObject = JSON.parse(soundRegime);
+		}
 	}
+	catch
+	{}
 }
 
 function saveSoundRegime()
