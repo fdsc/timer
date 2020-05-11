@@ -284,7 +284,7 @@ function loadSoundRegime()
 
 function saveSoundRegime()
 {
-	localStorage.setItem(timerStorageName + '.soundRegime', soundRegimeObject);
+	localStorage.setItem(timerStorageName + '.soundRegime', JSON.stringify(soundRegimeObject));
 }
 
 
