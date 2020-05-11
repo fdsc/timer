@@ -283,8 +283,10 @@ function loadSoundRegime()
 			soundRegimeObject = JSON.parse(soundRegime);
 		}
 	}
-	catch
-	{}
+	catch (e)
+	{
+		console.error(e);
+	}
 }
 
 function saveSoundRegime()
