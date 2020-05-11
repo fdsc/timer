@@ -16,6 +16,12 @@ var timersObject =
 	saved:  []
 };
 
+var soundRegimeObject = 
+{
+	gainVal:     1.0,
+	soundRegime: 0,
+};
+
 var notificationObjects = {};
 
 function addTimerObject(newTimer)
@@ -267,6 +273,47 @@ function play(freq, time, volume)
 	noise.start();
 };
 
+function loadSoundRegime()
+{
+	var soundRegime = localStorage.getItem(timerStorageName + '.soundRegime');
+	if (typeof(soundRegime) != "undefined" && soundRegime)
+	{
+		soundRegimeObject = JSON.parse(soundRegime);
+	}
+}
+
+function saveSoundRegime()
+{
+	localStorage.setItem(timerStorageName + '.soundRegime', soundRegimeObject);
+}
+
+
+function getSoundRegime()
+{
+	loadSoundRegime();
+
+	return soundRegimeObject.soundRegime || 0;
+}
+
+function setSoundRegime(value)
+{
+	soundRegimeObject.soundRegime = value;
+	saveSoundRegime();
+}
+
+function getGainVal()
+{
+	loadSoundRegime();
+
+	return soundRegimeObject.gainVal ? soundRegimeObject.gainVal : 1.0;
+};
+
+function setGainVal(value)
+{
+	soundRegimeObject.gainVal = value;
+	saveSoundRegime();
+};
+
 function onAudioLoad()
 {
 	AC = new AudioContext();
@@ -274,8 +321,7 @@ function onAudioLoad()
 	if (AC == null)
 		return null;
 
-	var gainVal = localStorage.getItem('gainVal');
-	gainVal = gainVal ? gainVal : 1.0;
+	var gainVal = getGainVal();
 
 	gainNode = AC.createGain();
 	gainNode.gain.value = gainVal;
@@ -965,7 +1011,7 @@ window.onload = function()
 				gainNode.gain.value = this.value;
 				gv.textContent = this.value;
 
-				localStorage.setItem('gainVal', this.value);
+				SetGainVal(this.value);
 			}
 		}
 	);
@@ -983,7 +1029,7 @@ window.onload = function()
 		}
 	);
 
-	soundRegime  = localStorage.getItem('soundRegime') || 0;
+	soundRegime  = getSoundRegime();
 	soundSwither = document.getElementById("soundSwither");
 	soundSwither.textContent = getSoundRegimeText(soundRegime);
 	soundSwither.addEventListener
@@ -997,12 +1043,12 @@ window.onload = function()
 				soundRegime = 0;
 			}
 
-			localStorage.setItem('soundRegime', soundRegime)
+			setSoundRegime(soundRegime);
 			soundSwither.textContent = getSoundRegimeText(soundRegime);
 		}
 	);
 
-	var gainVal = localStorage.getItem('gainVal') || 1.0;
+	var gainVal = getGainVal();
 
 	var gv = document.getElementById("gainVal");
 	gv.textContent = gainVal;
