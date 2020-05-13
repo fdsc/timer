@@ -681,7 +681,18 @@ function MergeTimers(text)
 		{
 			try
 			{
-				addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+				var found = false;
+				for (var s of timersObject.timers)
+				{
+					if (s.name == cur.name && s.end == cur.end)
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
 			}
 			catch (e)
 			{
