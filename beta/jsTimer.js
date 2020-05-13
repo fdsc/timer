@@ -663,6 +663,46 @@ function saveTimers()
 	localStorage.setItem(timerStorageName, JSON.stringify(timersObject));
 };
 
+function MergeTimers(text)
+{
+	var success = true;
+	try
+	{
+		if (typeof(text) == "undefined" || !text)
+		{
+			return false;
+		}
+
+		var t = JSON.parse(text);
+		if (!t || !t.timers)
+			return false;
+
+		t = t.timers;
+		for (var cur of t)
+		{
+			try
+			{
+				addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+			}
+			catch (e)
+			{
+				success = false;
+				console.error(e);
+			}
+		}
+	}
+	catch (e)
+	{
+		console.error(e);
+		return false;
+	}
+
+	SaveTimers();
+	drawTimers();
+
+	return success;
+}
+
 function drawTimers()
 {
 	var main = document.getElementById("main");
@@ -1129,6 +1169,31 @@ window.onload = function()
 		'click',
 		function(me)
 		{
+			navigator.clipboard.writeText(JSON.stringify(timersObject))
+			.then
+			(
+				function()
+				{
+					// alert("Таймеры сохранены в буфер обмена");
+				}
+			)
+			.catch
+			(
+				function(e)
+				{
+					alert("Не удалось сохранить таймеры в буфер обмена");
+					console.error(e);
+				}
+			);
+		}
+	);
+
+	btn = document.getElementById("LoadFromClipboard");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
 			/*
 			
 function saveTimers()
@@ -1146,12 +1211,23 @@ function drawTimers()
 	{
 		var t = JSON.parse(timersFromStorage);
 			*/
-			navigator.clipboard.writeText(JSON.stringify(timersObject))
+			navigator.clipboard.readText()
 			.then
 			(
-				function()
+				function(text)
 				{
-					alert("Таймеры сохранены в буфер обмена. Скопируйте их из буфера обмена в текстовый файл и сохраните где вам удобно. (доступ к буферу обмена на Windows: сочетание клавиш ctrl+V)");
+					if (!MergeTimers(text))
+					{
+						alert("Кажется, формат копии таймеров не верен. Убедитесь, что вы загрузили резервную копию таймеров в буфер обмена из текстового файла");
+					}
+				}
+			)
+			.catch
+			(
+				function(e)
+				{
+					alert("Не удалось загрузить таймеры из буфера обмена");
+					console.error(e);
 				}
 			);
 		}
