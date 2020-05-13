@@ -1,0 +1,12 @@
+﻿@charset "UTF-8";
+
+*{FONT-WEIGHT: normal; FONT-SIZE: 18px; FONT-FAMILY: "Courier New", serif;}
+body {background-color: #DDDDDD}
+
+.prewrap {white-space: pre-wrap}
+.preline {white-space: pre-line}
+.nowrap  {white-space: nowrap}
+.normal  {white-space: normal}
+.red {color: red; font-weight: bold;}
+
+#timersShort {position: absolute; top: 50px; right: 0px; background-color: #DDDDDD}
