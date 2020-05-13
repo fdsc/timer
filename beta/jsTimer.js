@@ -697,10 +697,20 @@ function MergeTimers(text)
 				var found = false;
 				for (var s in timersObject.saved)
 				{
+					if (s.isInterval != cur.isInterval)
+						continue;
+
+					if (cur.isInterval)
+					{
+						if (s.totalSeconds == cur.totalSeconds)
+						{
+							found = true;
+							break;
+						}
+					}
+					else
 					if (s.name == cur.name)
-					{/*
-						if (s.h == cur.h && s.m == cur.m && s.s = cur.s)
-						{}*/
+					{
 						found = true;
 						break;
 					}
