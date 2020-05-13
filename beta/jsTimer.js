@@ -695,7 +695,7 @@ function MergeTimers(text)
 			try
 			{
 				var found = false;
-				for (var s in timersObject.saved)
+				for (var s of timersObject.saved)
 				{
 					if (s.isInterval != cur.isInterval)
 						continue;
