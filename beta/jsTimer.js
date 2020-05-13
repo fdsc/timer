@@ -697,7 +697,7 @@ function MergeTimers(text)
 		return false;
 	}
 
-	SaveTimers();
+	saveTimers();
 	drawTimers();
 
 	return success;
