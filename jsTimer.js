@@ -681,7 +681,18 @@ function MergeTimers(text)
 		{
 			try
 			{
-				addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+				var found = false;
+				for (var s of timersObject.timers)
+				{
+					if (s.name == cur.name && s.end == cur.end)
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
 			}
 			catch (e)
 			{
@@ -695,12 +706,22 @@ function MergeTimers(text)
 			try
 			{
 				var found = false;
-				for (var s in timersObject.saved)
+				for (var s of timersObject.saved)
 				{
+					if (s.isInterval != cur.isInterval)
+						continue;
+
+					if (cur.isInterval)
+					{
+						if (s.totalSeconds == cur.totalSeconds)
+						{
+							found = true;
+							break;
+						}
+					}
+					else
 					if (s.name == cur.name)
-					{/*
-						if (s.h == cur.h && s.m == cur.m && s.s = cur.s)
-						{}*/
+					{
 						found = true;
 						break;
 					}
