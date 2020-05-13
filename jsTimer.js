@@ -60,11 +60,6 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	playNull();
 };
 
-function saveTimers()
-{
-	localStorage.setItem(timerStorageName, JSON.stringify(timersObject));
-};
-
 function deleteTimer(MouseEvent)
 {
 	//console.error(this);
@@ -663,6 +658,76 @@ function drawTimer(timer)
 	div.appendChild(hr);
 }
 
+function saveTimers()
+{
+	localStorage.setItem(timerStorageName, JSON.stringify(timersObject));
+};
+
+function MergeTimers(text)
+{
+	var success = true;
+	try
+	{
+		if (typeof(text) == "undefined" || !text)
+		{
+			return false;
+		}
+
+		var t = JSON.parse(text);
+		if (!t || !t.timers || !t.saved)
+			return false;
+
+		for (var cur of t.timers)
+		{
+			try
+			{
+				addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+			}
+			catch (e)
+			{
+				success = false;
+				console.error(e);
+			}
+		}
+
+		for (var cur of t.saved)
+		{
+			try
+			{
+				var found = false;
+				for (var s in timersObject.saved)
+				{
+					if (s.name == cur.name)
+					{/*
+						if (s.h == cur.h && s.m == cur.m && s.s = cur.s)
+						{}*/
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
+			}
+			catch (e)
+			{
+				success = false;
+				console.error(e);
+			}
+		}
+	}
+	catch (e)
+	{
+		console.error(e);
+		return false;
+	}
+
+	saveTimers();
+	drawTimers();
+
+	return success;
+}
+
 function drawTimers()
 {
 	var main = document.getElementById("main");
@@ -1122,6 +1187,77 @@ window.onload = function()
 			drawTimersShorts();
 		}
 	);
+	
+	btn = document.getElementById("SaveToClipboard");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			navigator.clipboard.writeText(JSON.stringify(timersObject))
+			.then
+			(
+				function()
+				{
+					// alert("Таймеры сохранены в буфер обмена");
+				}
+			)
+			.catch
+			(
+				function(e)
+				{
+					alert("Не удалось сохранить таймеры в буфер обмена");
+					console.error(e);
+				}
+			);
+		}
+	);
+
+	btn = document.getElementById("LoadFromClipboard");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			/*
+			
+function saveTimers()
+{
+	localStorage.setItem(timerStorageName, JSON.stringify(timersObject));
+};
+
+function drawTimers()
+{
+	var main = document.getElementById("main");
+	main.textContent = "";
+
+	var timersFromStorage = localStorage.getItem(timerStorageName);
+	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
+	{
+		var t = JSON.parse(timersFromStorage);
+			*/
+			navigator.clipboard.readText()
+			.then
+			(
+				function(text)
+				{
+					if (!MergeTimers(text))
+					{
+						alert("Кажется, формат копии таймеров не верен. Убедитесь, что вы загрузили резервную копию таймеров в буфер обмена из текстового файла");
+					}
+				}
+			)
+			.catch
+			(
+				function(e)
+				{
+					alert("Не удалось загрузить таймеры из буфера обмена");
+					console.error(e);
+				}
+			);
+		}
+	);
+
 
 	// audio = document.getElementById("audio");
 

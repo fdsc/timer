@@ -674,15 +674,40 @@ function MergeTimers(text)
 		}
 
 		var t = JSON.parse(text);
-		if (!t || !t.timers)
+		if (!t || !t.timers || !t.saved)
 			return false;
 
-		t = t.timers;
-		for (var cur of t)
+		for (var cur of t.timers)
 		{
 			try
 			{
 				addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+			}
+			catch (e)
+			{
+				success = false;
+				console.error(e);
+			}
+		}
+
+		for (var cur of t.saved)
+		{
+			try
+			{
+				var found = false;
+				for (var s in timersObject.saved)
+				{
+					if (s.name == cur.name)
+					{/*
+						if (s.h == cur.h && s.m == cur.m && s.s = cur.s)
+						{}*/
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
 			}
 			catch (e)
 			{
