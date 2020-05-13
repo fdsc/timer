@@ -1146,8 +1146,14 @@ function drawTimers()
 	{
 		var t = JSON.parse(timersFromStorage);
 			*/
-			navigator.clipboard.writeText(JSON.stringify(timersObject));
-			alert("Таймеры сохранены в буфер обмена. Скопируйте их из буфера обмена в текстовый файл и сохраните где вам удобно. (доступ к буферу обмена на Windows: сочетание клавиш ctrl+V)");
+			navigator.clipboard.writeText(JSON.stringify(timersObject))
+			.then
+			(
+				function()
+				{
+					alert("Таймеры сохранены в буфер обмена. Скопируйте их из буфера обмена в текстовый файл и сохраните где вам удобно. (доступ к буферу обмена на Windows: сочетание клавиш ctrl+V)");
+				}
+			);
 		}
 	);
 
