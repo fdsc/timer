@@ -807,7 +807,7 @@ var SoundRegimeText =
 		[
 			'Звук включён',
 			'Два низких гудка',
-			'Звук выключен'
+			'Звук отключён'
 		];
 
 function getSoundRegimeText(soundRegime)
@@ -1125,6 +1125,7 @@ window.onload = function()
 	soundRegime  = getSoundRegime();
 	soundSwither = document.getElementById("soundSwither");
 	soundSwither.textContent = getSoundRegimeText(soundRegime);
+	soundSwither.style["font-weight"] = soundRegime == 2 ? "bold" : "normal";
 	soundSwither.addEventListener
 	(
 		'click',
@@ -1138,6 +1139,7 @@ window.onload = function()
 
 			setSoundRegime(soundRegime);
 			soundSwither.textContent = getSoundRegimeText(soundRegime);
+			soundSwither.style["font-weight"] = soundRegime == 2 ? "bold" : "normal";
 		}
 	);
 
@@ -1208,6 +1210,7 @@ window.onload = function()
 			drawTimersShorts();
 		}
 	);
+	
 	
 	btn = document.getElementById("SaveToClipboard");
 	btn.addEventListener
