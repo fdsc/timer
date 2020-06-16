@@ -458,10 +458,8 @@ function interval()
 	if (silentEndTime > now)
 	{
 		var dt = new Date(silentEndTime - now);
-		if (dt.getUTCMinutes() > 0)
-			btn.value = "отключено " + addNull(dt.getUTCMinutes()) + ":" + addNull(dt.getUTCSeconds());
-		else
-			btn.value = "отключено " + addNull(dt.getUTCSeconds());
+
+		btn.value = "отключено " + addNull(dt.getUTCMinutes()) + ":" + addNull(dt.getUTCSeconds());
 	}
 
 	for (var cur of timersObject.timers)
