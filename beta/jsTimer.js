@@ -453,11 +453,11 @@ function interval()
 	var minText = 'Таймер';
 
 	var btn = document.getElementById("silent");
-	btn.value = "выкл. 1 минута";
+	btn.value = "откл. 1 минута";
 
 	if (silentEndTime > now)
 	{
-		btn.value = "выключено " + addNull(new Date(silentEndTime - now).getUTCSeconds());
+		btn.value = "отключено " + addNull(new Date(silentEndTime - now).getUTCSeconds());
 	}
 
 	for (var cur of timersObject.timers)
@@ -1158,6 +1158,20 @@ window.onload = function()
 		{
 			if (silentEndTime > new Date().getTime())
 				silentEndTime = 0
+			else
+				silentEndTime = new Date().getTime() + 60*1000;
+		}
+	);
+
+	// Добавляет минуту к времени выключения звука таймера
+	btn = document.getElementById("silent1");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			if (silentEndTime > new Date().getTime())
+				silentEndTime = silentEndTime + 60*1000;
 			else
 				silentEndTime = new Date().getTime() + 60*1000;
 		}
