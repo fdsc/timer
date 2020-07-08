@@ -973,8 +973,7 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
 			isInterval:   savedInterval,
 			toDelete:     toDelete || false
 		};
-console.error(newTimer);
-console.error(toDelete);
+
 	timersObject.saved.push(newTimer);
 
 	return newTimer;
