@@ -74,7 +74,7 @@ function deleteTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
-			if (!isTimerToDelete(cur))
+			if (!cur.stopped && !isTimerToDelete(cur))
 			{
 				timers[curI].toDelete = new Date().getTime();
 
@@ -128,10 +128,15 @@ function deleteSavedTimer(MouseEvent)
 			{
 				cur.toDelete = new Date().getTime();
 
+				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
+				saveTimers();
 				drawTimersShorts();
 				hideAlert();
 				return;
 			}
+
+			if (new Date() - timers[curI].toDelete <= 500)
+				return;
 
 			timers.splice(curI, 1);
 
@@ -968,7 +973,8 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
 			isInterval:   savedInterval,
 			toDelete:     toDelete || false
 		};
-
+console.error(newTimer);
+console.error(toDelete);
 	timersObject.saved.push(newTimer);
 
 	return newTimer;
