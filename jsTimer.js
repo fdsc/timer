@@ -909,12 +909,14 @@ function MakeNotification(timer, header, text)
 			function(event)
 			{
 				notification.close();
+				window.focus();
+/*
 				deleteTimer.apply
 				(
 					{
 						tid: timer.id
 					}
-				);
+				);*/
 			},
 			false
 		);

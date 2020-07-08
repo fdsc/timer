@@ -910,12 +910,13 @@ function MakeNotification(timer, header, text)
 			{
 				notification.close();
 				window.focus();
+/*
 				deleteTimer.apply
 				(
 					{
 						tid: timer.id
 					}
-				);
+				);*/
 			},
 			false
 		);
