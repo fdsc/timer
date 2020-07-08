@@ -111,6 +111,7 @@ function deleteTimer(MouseEvent)
 	// hideAlert();
 }
 
+var lastToDeleteSavedTimer = false;
 function deleteSavedTimer(MouseEvent)
 {
 	//console.error(this);
@@ -127,6 +128,7 @@ function deleteSavedTimer(MouseEvent)
 			if (!isTimerToDelete(cur))
 			{
 				cur.toDelete = new Date().getTime();
+				lastToDeleteSavedTimer = cur.toDelete;
 
 				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
 				saveTimers();
@@ -606,6 +608,13 @@ function interval()
 
 	document.title = minText;
 	setIntervalsWidth();
+	
+	if (lastToDeleteSavedTimer !== false)
+	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
+	{
+		saveTimers();
+		drawTimersShorts();
+	}
 };
 
 function onClickToTimer(Element, text)
@@ -712,12 +721,13 @@ function drawTimer(timer)
 	div.appendChild(hr);
 }
 
+var timerToDeleteInterval = 10*1000;
 function isTimerToDelete(timer)
 {
 	if (!timer.toDelete)
 		return false;
 
-	return new Date().getTime() - timer.toDelete <= 10*1000;
+	return new Date().getTime() - timer.toDelete <= timerToDeleteInterval;
 }
 
 function saveTimers()

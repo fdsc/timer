@@ -42,10 +42,11 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	addTimerObject
 	(
 		{
-			end:  end,
-			endL: end,
-			id:   id,
-			text: text
+			end:  	  end,
+			endL: 	  end,
+			id:   	  id,
+			text: 	  text,
+			toDelete: false
 		}
 	);
 
@@ -73,6 +74,16 @@ function deleteTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
+			if (!cur.stopped && !isTimerToDelete(cur))
+			{
+				timers[curI].toDelete = new Date().getTime();
+
+				return;
+			}
+			
+			if (new Date() - timers[curI].toDelete <= 500)
+				return;
+
 			timers.splice(curI, 1);
 
 			try
@@ -100,6 +111,7 @@ function deleteTimer(MouseEvent)
 	// hideAlert();
 }
 
+var lastToDeleteSavedTimer = false;
 function deleteSavedTimer(MouseEvent)
 {
 	//console.error(this);
@@ -113,6 +125,21 @@ function deleteSavedTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
+			if (!isTimerToDelete(cur))
+			{
+				cur.toDelete = new Date().getTime();
+				lastToDeleteSavedTimer = cur.toDelete;
+
+				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
+				saveTimers();
+				drawTimersShorts();
+				hideAlert();
+				return;
+			}
+
+			if (new Date() - timers[curI].toDelete <= 500)
+				return;
+
 			timers.splice(curI, 1);
 
 			saveTimers();
@@ -544,7 +571,25 @@ function interval()
 
 		// Иначе это уже остановленный таймер
 		if (cur.stopped !== true)
-		tt.textContent = formatDate(end);
+		{
+			tt.textContent = formatDate(end);
+
+			if (isTimerToDelete(cur))
+			{
+				var tdel = document.getElementById('timer-' + tid + '-del');
+				tdel.textContent = "Точно удалить?";
+			}
+			else
+			{
+				if (cur.toDelete)
+				{
+					var tdel = document.getElementById('timer-' + tid + '-del');
+					tdel.textContent = "Удалить";
+				}
+
+				cur.toDelete = false;
+			}
+		}
 
 		if (dif < difMin || cur.stopped && difMin > 0)
 		{
@@ -563,6 +608,13 @@ function interval()
 
 	document.title = minText;
 	setIntervalsWidth();
+	
+	if (lastToDeleteSavedTimer !== false)
+	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
+	{
+		saveTimers();
+		drawTimersShorts();
+	}
 };
 
 function onClickToTimer(Element, text)
@@ -655,9 +707,27 @@ function drawTimer(timer)
 	tdel.textContent = "Удалить";
 	tdel.addEventListener('click', deleteTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
+	
+	if (isTimerToDelete(timer))
+	{
+		tdel.textContent = "Точно удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
+}
+
+var timerToDeleteInterval = 10*1000;
+function isTimerToDelete(timer)
+{
+	if (!timer.toDelete)
+		return false;
+
+	return new Date().getTime() - timer.toDelete <= timerToDeleteInterval;
 }
 
 function saveTimers()
@@ -888,7 +958,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(h, m, s, timerName, savedInterval)
+function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
@@ -910,7 +980,8 @@ function addSavedTimer(h, m, s, timerName, savedInterval)
 			totalSeconds: seconds,
 			name:         timerName,
 			timeVal:      formatDate(date),
-			isInterval:   savedInterval
+			isInterval:   savedInterval,
+			toDelete:     toDelete || false
 		};
 
 	timersObject.saved.push(newTimer);
@@ -962,6 +1033,15 @@ function drawSavedTimer(timer)
 	tdel.addEventListener('click', deleteSavedTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
 
+	if (isTimerToDelete(timer))
+	{
+		tdel.textContent = "Точно удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
+
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
 }
@@ -991,6 +1071,15 @@ function drawSavedInterval(timer)
 	tdel.style["background-color"] = "red";
 	tdel.addEventListener('click', deleteSavedTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
+
+	if (isTimerToDelete(timer))
+	{
+		tdel.value = "Удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
 
 	var hr = document.createElement("span");
 	hr.textContent = " ";
@@ -1038,7 +1127,7 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
+					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete);
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
 					else
