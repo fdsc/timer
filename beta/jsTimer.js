@@ -905,7 +905,7 @@ function MakeNotification(timer, header, text)
 		notificationObjects[timer.id] = notification;
 		notification.addEventListener
 		(
-			'notificationclick',
+			'click',
 			function(event)
 			{
 				notification.close();
