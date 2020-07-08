@@ -73,6 +73,12 @@ function deleteTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
+			if (!timers[curI].toDelete)
+			{
+				timers[curI].toDelete = new Date().getTime();
+				return;
+			}
+
 			timers.splice(curI, 1);
 
 			try
@@ -113,6 +119,12 @@ function deleteSavedTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
+			if (!timers[curI].toDelete)
+			{
+				timers[curI].toDelete = new Date().getTime();
+				return;
+			}
+
 			timers.splice(curI, 1);
 
 			saveTimers();
@@ -656,6 +668,15 @@ function drawTimer(timer)
 	tdel.addEventListener('click', deleteTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
 
+	if (timer.toDelete && new Date().getTime() - timer.toDelete <= 10*1000)
+	{
+		tdel.textContent = "Точно удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
+
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
 }
@@ -962,6 +983,15 @@ function drawSavedTimer(timer)
 	tdel.addEventListener('click', deleteSavedTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
 
+	if (timer.toDelete && new Date().getTime() - timer.toDelete <= 10*1000)
+	{
+		tdel.textContent = "Точно удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
+
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
 }
@@ -991,6 +1021,15 @@ function drawSavedInterval(timer)
 	tdel.style["background-color"] = "red";
 	tdel.addEventListener('click', deleteSavedTimer);
 	tdel.id = 'timer-' + timer.id + "-del";
+
+	if (timer.toDelete && new Date().getTime() - timer.toDelete <= 10*1000)
+	{
+		tdel.value = "Удалить?";
+	}
+	else
+	{
+		timer.toDelete = false;
+	}
 
 	var hr = document.createElement("span");
 	hr.textContent = " ";
