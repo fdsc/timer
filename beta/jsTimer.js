@@ -76,6 +76,8 @@ function deleteTimer(MouseEvent)
 			if (!timers[curI].toDelete)
 			{
 				timers[curI].toDelete = new Date().getTime();
+
+				drawTimers();
 				return;
 			}
 
@@ -122,6 +124,9 @@ function deleteSavedTimer(MouseEvent)
 			if (!timers[curI].toDelete)
 			{
 				timers[curI].toDelete = new Date().getTime();
+
+				drawTimersShorts();
+				hideAlert();
 				return;
 			}
 
