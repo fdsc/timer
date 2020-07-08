@@ -80,8 +80,8 @@ function deleteTimer(MouseEvent)
 
 				return;
 			}
-			
-			if (new Date() - timers[curI].toDelete <= 500)
+
+			if (new Date() - timers[curI].toDelete <= 350)
 				return;
 
 			timers.splice(curI, 1);
