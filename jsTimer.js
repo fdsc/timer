@@ -19,7 +19,7 @@ var timersObject =
 var soundRegimeObject = 
 {
 	gainVal:     1.0,
-	soundRegime: 0,
+	soundRegime: 0
 };
 
 var notificationObjects = {};
