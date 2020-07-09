@@ -628,7 +628,7 @@ function onClickToTimer(Element, text)
 	};
 };
 
-function onClickToSavedTimer(Element, timer, addImmideatly, timerType)
+function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 {
 	return function(mouseEvent)
 	{
@@ -639,9 +639,9 @@ function onClickToSavedTimer(Element, timer, addImmideatly, timerType)
 
 		if (timerType == 2)
 		if (textElement.value)
-			val =  textElement.value;
+			val = textElement.value;
 
-		if (addImmideatly || mouseEvent.shiftKey)
+		if (addImmediately || mouseEvent.shiftKey)
 		{
 			var id = getNewId(timersObject.timers);
 			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val);
