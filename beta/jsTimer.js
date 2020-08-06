@@ -274,7 +274,7 @@ function addTimer0()
 		}
 
 		if (!day)
-			month = now.getDay();
+			day = now.getDay();
 
 		if (!hours && parseInt(hours) != "0")
 			hours = now.getHours();
