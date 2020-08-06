@@ -208,7 +208,7 @@ function addTimer0()
 		var [hours, minutes] = s.split(":");
 
 		if (!month)
-			month = now.getMonth();
+			month = now.getMonth() + 1;
 		else
 		if (isNaN(parseInt(month)))
 		{
@@ -274,7 +274,7 @@ function addTimer0()
 		}
 
 		if (!day)
-			day = now.getDay();
+			day = now.getDate();
 
 		if (!hours && parseInt(hours) != "0")
 			hours = now.getHours();
