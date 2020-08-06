@@ -203,12 +203,77 @@ function addTimer0()
 		var h = parseInt(document.getElementById("hours")  .value || now.getFullYear());
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
-		
+
 		var [month, day]     = m.split(".");
 		var [hours, minutes] = s.split(":");
-		
+
 		if (!month)
 			month = now.getMonth();
+		if (isNaN(parseInt(month)))
+		{
+			if (month.startsWith("я"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("ф"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("мар"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("ап"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("май"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("июн"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("июл"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("ав"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("с"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("о"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("н"))
+			{
+				month = 1;
+			}
+			else
+			if (month.startsWith("д"))
+			{
+				month = 1;
+			}
+			else
+				month = "00";
+		}
+
 		if (!day)
 			month = now.getDay();
 
