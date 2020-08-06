@@ -29,7 +29,7 @@ function addTimerObject(newTimer)
 	timersObject.timers.push(newTimer);
 }
 
-function addTimer(id, milliSeconds, text, isEnd, fromSave)
+function addTimer(id, milliSeconds, text, isEnd, fromSave, isControlTask)
 {
 	var now = new Date();
 	var end = new Date(now.getTime() + milliSeconds).getTime();
@@ -46,7 +46,8 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 			endL: 	  end,
 			id:   	  id,
 			text: 	  text,
-			toDelete: false
+			toDelete: false,
+			isControlTask: isControlTask
 		}
 	);
 
@@ -65,7 +66,7 @@ function deleteTimer(MouseEvent)
 {
 	//console.error(this);
 	//console.error(arguments);
-	var main  = document.getElementById("main");
+	// var main  = document.getElementById("main");
 	var toDel = document.getElementById('timer-' + this.tid);
 
 	var timers = timersObject.timers;
@@ -81,7 +82,7 @@ function deleteTimer(MouseEvent)
 				return;
 			}
 
-			if (new Date() - timers[curI].toDelete <= 350)
+			if (new Date() - cur.toDelete <= 350)
 				return;
 
 			timers.splice(curI, 1);
@@ -101,7 +102,8 @@ function deleteTimer(MouseEvent)
 			}
 
 			saveTimers();
-			main.removeChild(toDel);
+			// main.removeChild(toDel);
+			toDel.parentNode.removeChild(toDel);
 			break;
 		}
 	}
@@ -153,6 +155,18 @@ function deleteSavedTimer(MouseEvent)
 	hideAlert();
 }
 
+function addControlTask()
+{
+	var te = document.getElementById("text");
+	var text = te.value;
+	te.value = '';
+
+	var id = getNewId(timersObject.timers);
+	addTimer(id, 0, text, false, false, true);
+
+	hideAlert();
+}
+
 function addTimer_Mil(milliSeconds)
 {
 	var te = document.getElementById("text");
@@ -168,7 +182,7 @@ function addTimer_Mil(milliSeconds)
 function addTimer0()
 {/*
 	Img[0]   = parseFloat(document.getElementById("Img1").value);*/
-	
+
 	// Аналогичный код внизу
 	var h = parseFloat(document.getElementById("hours")  .value || 0);
 	var m = parseFloat(document.getElementById("minutes").value || 0);
@@ -671,8 +685,8 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 function drawTimer(timer)
 {
-	var main = document.getElementById("main");
-	
+	var main = timer.isControlTask === true ? document.getElementById("ControlTasks") : document.getElementById("main");
+
 	var div  = document.createElement("div");
 	div.id   = 'timer-' + timer.id;
 	main.appendChild(div);
@@ -683,18 +697,21 @@ function drawTimer(timer)
 	te.addEventListener('click', onClickToTimer(te, timer.text));
 	// te.style.marginLeft = '5%';
 
-	var tc = document.createElement("div");
-	div.appendChild(tc);
+	if (timer.isControlTask !== true)
+	{
+		var tc = document.createElement("div");
+		div.appendChild(tc);
 
-	var tt = document.createElement("span");
-	tc.appendChild(tt);
-	tt.id = 'timer-' + timer.id + "-t";
+		var tt = document.createElement("span");
+		tc.appendChild(tt);
+		tt.id = 'timer-' + timer.id + "-t";
 
-	var tend = document.createElement("span");
-	tc.appendChild(tend);
-	tend.id = 'timer-' + timer.id + "-end";
-	tend.textContent = new Date(timer.end).toLocaleString();
-	tend.style.marginLeft = '10%';
+		var tend = document.createElement("span");
+		tc.appendChild(tend);
+		tend.id = 'timer-' + timer.id + "-end";
+		tend.textContent = new Date(timer.end).toLocaleString();
+		tend.style.marginLeft = '10%';
+	}
 
 	var tdeldiv = document.createElement("div");
 	div.appendChild(tdeldiv);
@@ -825,6 +842,8 @@ function drawTimers()
 {
 	var main = document.getElementById("main");
 	main.textContent = "";
+	var CT = document.getElementById("ControlTasks");
+	CT.textContent = "";
 
 	var timersFromStorage = localStorage.getItem(timerStorageName);
 	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
@@ -1166,6 +1185,10 @@ window.onload = function()
 
 	var btn = document.getElementById("addTimer");
 	btn.addEventListener('click', addTimer0);
+	
+	btn = document.getElementById("addControlTask");
+	btn.addEventListener('click', addControlTask);
+
 	/*
 	btn = document.getElementById("addTimer01");
 	btn.addEventListener('click', addTimer01);
