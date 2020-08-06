@@ -46,7 +46,8 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 			endL: 	  end,
 			id:   	  id,
 			text: 	  text,
-			toDelete: false
+			toDelete: false,
+			isControlTask: false
 		}
 	);
 
@@ -65,7 +66,7 @@ function deleteTimer(MouseEvent)
 {
 	//console.error(this);
 	//console.error(arguments);
-	var main  = document.getElementById("main");
+	// var main  = document.getElementById("main");
 	var toDel = document.getElementById('timer-' + this.tid);
 
 	var timers = timersObject.timers;
@@ -81,7 +82,7 @@ function deleteTimer(MouseEvent)
 				return;
 			}
 
-			if (new Date() - timers[curI].toDelete <= 350)
+			if (new Date() - cur.toDelete <= 350)
 				return;
 
 			timers.splice(curI, 1);
@@ -101,7 +102,12 @@ function deleteTimer(MouseEvent)
 			}
 
 			saveTimers();
-			main.removeChild(toDel);
+			// main.removeChild(toDel);
+			toDel.parentNode.removeChild(toDel);
+
+			// Вызов для того, чтобы можно было предупредить пользователя о том,
+			// что он удалил задачу, которая есть в контрольном списке
+			drawTimersShorts();
 			break;
 		}
 	}
@@ -137,7 +143,7 @@ function deleteSavedTimer(MouseEvent)
 				return;
 			}
 
-			if (new Date() - timers[curI].toDelete <= 500)
+			if (new Date() - cur.toDelete <= 500)
 				return;
 
 			timers.splice(curI, 1);
@@ -151,6 +157,25 @@ function deleteSavedTimer(MouseEvent)
 	}
 
 	hideAlert();
+}
+
+function addControlTask()
+{
+	var h = parseFloat(document.getElementById("hours")  .value || 0);
+	var m = parseFloat(document.getElementById("minutes").value || 0);
+	var s = parseFloat(document.getElementById("seconds").value || 0);
+
+	var te = document.getElementById("text");
+	var text = te.value;
+	te.value = '';
+
+	// addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
+	addSavedTimer(h, m, s, text, false, false, true);
+
+	hideAlert();
+
+	saveTimers();
+	drawTimers();
 }
 
 function addTimer_Mil(milliSeconds)
@@ -168,7 +193,7 @@ function addTimer_Mil(milliSeconds)
 function addTimer0()
 {/*
 	Img[0]   = parseFloat(document.getElementById("Img1").value);*/
-	
+
 	// Аналогичный код внизу
 	var h = parseFloat(document.getElementById("hours")  .value || 0);
 	var m = parseFloat(document.getElementById("minutes").value || 0);
@@ -672,7 +697,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 function drawTimer(timer)
 {
 	var main = document.getElementById("main");
-	
+
 	var div  = document.createElement("div");
 	div.id   = 'timer-' + timer.id;
 	main.appendChild(div);
@@ -800,7 +825,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval);
+					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
 			}
 			catch (e)
 			{
@@ -960,7 +985,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
+function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
@@ -979,11 +1004,12 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
 			s:  s,
 			id: getNewId(timersObject.saved),
 
-			totalSeconds: seconds,
-			name:         timerName,
-			timeVal:      formatDate(date),
-			isInterval:   savedInterval,
-			toDelete:     toDelete || false
+			totalSeconds:  seconds,
+			name:          timerName,
+			timeVal:       formatDate(date),
+			isInterval:    savedInterval,
+			toDelete:      toDelete || false,
+			isControlTask: isControlTask || false
 		};
 
 	timersObject.saved.push(newTimer);
@@ -991,9 +1017,11 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete)
 	return newTimer;
 }
 
+var nameOfControlTaskAlertNode = 'ControlTasks-NotRepresented';
 function drawSavedTimer(timer)
 {
-	var main = document.getElementById("timersShort");
+	// var main = document.getElementById("timersShort");
+	var main = timer.isControlTask === true ? document.getElementById("ControlTasks") : document.getElementById("timersShort");
 
 	var div  = document.createElement("div");
 	div.id   = 'savedtimer-' + timer.id;
@@ -1046,6 +1074,43 @@ function drawSavedTimer(timer)
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
+
+	if (timer.isControlTask === true)
+	{
+		var isNotRepresented = true;
+		var timers = timersObject.timers;
+		for (var curI = 0; curI < timers.length; curI++)
+		{
+			var cur = timers[curI];
+			if (cur.text == timer.name)
+			{
+				isNotRepresented = false;
+				break;
+			}
+		}
+
+		if (isNotRepresented)
+		{
+			div.style["background-color"] = "yellow";
+
+			var el = document.getElementById(nameOfControlTaskAlertNode);
+			var tn = document.getElementById("timersName");
+
+			if (!el)
+			{
+				el    = document.createElement("div");
+				el.id = nameOfControlTaskAlertNode;
+				el.style["background-color"] = "yellow";
+				el.textContent = "В списке таймеров не хватает задач из контрольного списка\r\n" + timer.name;
+
+				tn.parentNode.insertBefore(el, tn);
+			}
+			else
+			{
+				el.textContent += "\r\n" + timer.name;
+			}
+		}
+	}
 }
 
 function drawSavedInterval(timer)
@@ -1100,8 +1165,20 @@ function drawTimersShorts()
 	var main = document.getElementById("timersShort");
 	main.textContent = "";
 	
+	var CT = document.getElementById("ControlTasks");
+	CT.textContent = "";
+	
+	var CT_alert = document.getElementById(nameOfControlTaskAlertNode);
+
+	if (CT_alert)
+	{
+		CT_alert.parentNode.removeChild(CT_alert);
+	}
+
 	var intervals = document.getElementById("timersIntervalShort");
 	intervals.textContent = "";
+
+	var isControlTask = false;
 
 	var timersFromStorage = localStorage.getItem(timerStorageName);
 	if (typeof(timersFromStorage) != "undefined" && timersFromStorage)
@@ -1129,7 +1206,20 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete);
+					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
+
+					if (cur.isControlTask && !isControlTask)
+					{
+						isControlTask = true;
+						var div  = document.createElement("div");
+						div.id   = 'isControlTask-separator';
+						div.textContent = "Контрольные задачи";
+
+						CT.appendChild(document.createElement("hr"));
+						CT.appendChild(div);
+						CT.appendChild(document.createElement("hr"));
+					}
+					
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
 					else
@@ -1166,6 +1256,10 @@ window.onload = function()
 
 	var btn = document.getElementById("addTimer");
 	btn.addEventListener('click', addTimer0);
+	
+	btn = document.getElementById("addControlTask");
+	btn.addEventListener('click', addControlTask);
+
 	/*
 	btn = document.getElementById("addTimer01");
 	btn.addEventListener('click', addTimer01);

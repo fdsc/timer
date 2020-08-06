@@ -54,13 +54,18 @@ self.addEventListener
 					}
 				);
 
+				console.debug("TimerJS: service worker load from internet for url " + event.request.url);
+
 				return response;
 			}
 		)
 		.catch
 		(
-			function()
+			function(error)
 			{
+				console.log("TimerJS: service worker load from the cache for url " + event.request.url);
+				console.log(error);
+
 				// Возвращаем запрошенный ресурс из кеша
 				return caches.match(event.request)
 				.then
@@ -69,7 +74,7 @@ self.addEventListener
 					{
 						if (response !== undefined)
 						{
-							return response;
+							return response.clone();
 						}
 						else
 						{
@@ -86,6 +91,7 @@ self.addEventListener
 								}
 							);
 
+							console.error("TimerJS: service worker: network is unreilable or error occured");
 							return r;
 						}
 					}
