@@ -241,16 +241,19 @@ function addTimer0()
 
 function addAbsDateClicked()
 {
-	var addAbsDate = document.getElementById("addAbsDate");
+	var addAbsDate      = document.getElementById("addAbsDate");
+	var addAbsDateLabel = document.getElementById("addAbsDateLabel");
+
 	var h = document.getElementById("hours")  ;
 	var m = document.getElementById("minutes");
 	var s = document.getElementById("seconds");
 
 	if (addAbsDate.checked)
 	{
-		h.placeholder = "год";
-		m.placeholder = "месяц.день";
-		s.placeholder = "часы:минуты";
+		addAbsDateLabel.textContent = "Абсолютная дата: год    месяц.день    часы:минуты";
+		h.placeholder   = "год";
+		m.placeholder   = "месяц.день";
+		s.placeholder   = "часы:минуты";
 		
 		h.style["background-color"] = "yellow";
 		m.style["background-color"] = "yellow";
@@ -258,6 +261,7 @@ function addAbsDateClicked()
 	}
 	else
 	{
+		addAbsDateLabel.textContent = "Абсолютная дата";
 		h.placeholder = "часы";
 		m.placeholder = "минуты";
 		s.placeholder = "секунды";
