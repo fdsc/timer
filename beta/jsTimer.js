@@ -204,7 +204,7 @@ function addTimer0()
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
 
-		var [month, day]     = m.split(".");
+		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
 
 		if (!month)
@@ -314,9 +314,9 @@ function addAbsDateClicked()
 
 	if (addAbsDate.checked)
 	{
-		addAbsDateLabel.textContent = "Абсолютная дата: год    месяц.день        часы:минуты";
+		addAbsDateLabel.textContent = "Абсолютная дата: год    день.месяц        часы:минуты";
 		h.placeholder   = "год";
-		m.placeholder   = "месяц.день";
+		m.placeholder   = "день.месяц";
 		s.placeholder   = "часы:минуты";
 		
 		h.style["background-color"] = "yellow";
