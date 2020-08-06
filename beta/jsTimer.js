@@ -194,16 +194,78 @@ function addTimer0()
 {/*
 	Img[0]   = parseFloat(document.getElementById("Img1").value);*/
 
-	// Аналогичный код внизу
-	var h = parseFloat(document.getElementById("hours")  .value || 0);
-	var m = parseFloat(document.getElementById("minutes").value || 0);
-	var s = parseFloat(document.getElementById("seconds").value || 0);
-	
+	var addAbsDate = document.getElementById("addAbsDate");
+
+	if (addAbsDate.checked)
+	{
+		var now = new Date();
+
+		var h = parseInt(document.getElementById("hours")  .value || now.getFullYear());
+		var m = document.getElementById("minutes").value;
+		var s = document.getElementById("seconds").value;
+		
+		var [month, day]     = m.split(".");
+		var [hours, minutes] = s.split(":");
+		
+		if (!month)
+			month = now.getMonth();
+		if (!day)
+			month = now.getDay();
+
+		if (!hours && parseInt(hours) != "0")
+			hours = now.getHours();
+		if (!minutes && parseInt(minutes) != "0")
+			minutes = now.getMinutes();
+
+		var future = new Date(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
+
+		addTimer_Mil(future - now.getTime());
+
+		addAbsDate.checked = false;
+		addAbsDateClicked();
+	}
+	else
+	{
+		// Аналогичный код внизу в нескольких местах для сохранённых таймеров
+		var h = parseFloat(document.getElementById("hours")  .value || 0);
+		var m = parseFloat(document.getElementById("minutes").value || 0);
+		var s = parseFloat(document.getElementById("seconds").value || 0);
+
+		addTimer_Mil((h*3600 + m*60 + s)*1000);
+	}
+
 	document.getElementById("hours")  .value = '';
 	document.getElementById("minutes").value = '';
 	document.getElementById("seconds").value = '';
+};
 
-	addTimer_Mil((h*3600 + m*60 + s)*1000);
+function addAbsDateClicked()
+{
+	var addAbsDate = document.getElementById("addAbsDate");
+	var h = document.getElementById("hours")  ;
+	var m = document.getElementById("minutes");
+	var s = document.getElementById("seconds");
+
+	if (addAbsDate.checked)
+	{
+		h.placeholder = "год";
+		m.placeholder = "месяц.день";
+		s.placeholder = "часы:минуты";
+		
+		h.style["background-color"] = "yellow";
+		m.style["background-color"] = "yellow";
+		s.style["background-color"] = "yellow";
+	}
+	else
+	{
+		h.placeholder = "часы";
+		m.placeholder = "минуты";
+		s.placeholder = "секунды";
+
+		h.style["background-color"] = "";
+		m.style["background-color"] = "";
+		s.style["background-color"] = "";
+	}
 };
 
 function addTimer01()
@@ -1278,6 +1340,9 @@ window.onload = function()
 */
 	btn = document.getElementById("alert");
 	btn.addEventListener('click', hideAlert);
+
+	btn = document.getElementById("addAbsDate");
+	btn.addEventListener('click', addAbsDateClicked);
 
 	btn = document.getElementById("volume");
 	btn.addEventListener
