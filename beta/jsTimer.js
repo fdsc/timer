@@ -104,6 +104,10 @@ function deleteTimer(MouseEvent)
 			saveTimers();
 			// main.removeChild(toDel);
 			toDel.parentNode.removeChild(toDel);
+
+			// Вызов для того, чтобы можно было предупредить пользователя о том,
+			// что он удалил задачу, которая есть в контрольном списке
+			drawTimersShorts();
 			break;
 		}
 	}
@@ -1013,6 +1017,7 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTas
 	return newTimer;
 }
 
+var nameOfControlTaskAlertNode = 'ControlTasks-NotRepresented';
 function drawSavedTimer(timer)
 {
 	// var main = document.getElementById("timersShort");
@@ -1069,6 +1074,43 @@ function drawSavedTimer(timer)
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
+
+	if (timer.isControlTask === true)
+	{
+		var isNotRepresented = true;
+		var timers = timersObject.timers;
+		for (var curI = 0; curI < timers.length; curI++)
+		{
+			var cur = timers[curI];
+			if (cur.text == timer.name)
+			{
+				isNotRepresented = false;
+				break;
+			}
+		}
+
+		if (isNotRepresented)
+		{
+			div.style["background-color"] = "yellow";
+
+			var el = document.getElementById(nameOfControlTaskAlertNode);
+			var tn = document.getElementById("timersName");
+
+			if (!el)
+			{
+				el    = document.createElement("div");
+				el.id = nameOfControlTaskAlertNode;
+				el.style["background-color"] = "yellow";
+				el.textContent = "В списке таймеров не хватает задач из контрольного списка\r\n" + timer.name;
+
+				tn.parentNode.insertBefore(el, tn);
+			}
+			else
+			{
+				el.textContent += "\r\n" + timer.name;
+			}
+		}
+	}
 }
 
 function drawSavedInterval(timer)
@@ -1125,6 +1167,13 @@ function drawTimersShorts()
 	
 	var CT = document.getElementById("ControlTasks");
 	CT.textContent = "";
+	
+	var CT_alert = document.getElementById(nameOfControlTaskAlertNode);
+
+	if (CT_alert)
+	{
+		CT_alert.parentNode.removeChild(CT_alert);
+	}
 
 	var intervals = document.getElementById("timersIntervalShort");
 	intervals.textContent = "";
