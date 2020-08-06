@@ -209,6 +209,7 @@ function addTimer0()
 
 		if (!month)
 			month = now.getMonth();
+		else
 		if (isNaN(parseInt(month)))
 		{
 			if (month.startsWith("я"))
@@ -218,60 +219,58 @@ function addTimer0()
 			else
 			if (month.startsWith("ф"))
 			{
-				month = 1;
+				month = 2;
 			}
 			else
 			if (month.startsWith("мар"))
 			{
-				month = 1;
+				month = 3;
 			}
 			else
 			if (month.startsWith("ап"))
 			{
-				month = 1;
+				month = 4;
 			}
 			else
 			if (month.startsWith("май"))
 			{
-				month = 1;
+				month = 5;
 			}
 			else
 			if (month.startsWith("июн"))
 			{
-				month = 1;
+				month = 6;
 			}
 			else
 			if (month.startsWith("июл"))
 			{
-				month = 1;
+				month = 7;
 			}
 			else
 			if (month.startsWith("ав"))
 			{
-				month = 1;
+				month = 8;
 			}
 			else
 			if (month.startsWith("с"))
 			{
-				month = 1;
+				month = 9;
 			}
 			else
 			if (month.startsWith("о"))
 			{
-				month = 1;
+				month = 10;
 			}
 			else
 			if (month.startsWith("н"))
 			{
-				month = 1;
+				month = 11;
 			}
 			else
 			if (month.startsWith("д"))
 			{
-				month = 1;
+				month = 12;
 			}
-			else
-				month = "00";
 		}
 
 		if (!day)
