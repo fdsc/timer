@@ -10,3 +10,4 @@ body {background-color: #DDDDDD}
 .red {color: red; font-weight: bold;}
 
 #timersShort {position: absolute; top: 50px; right: 0px; background-color: #DDDDDD}
+#addControlTask {margin-left: 50px}
