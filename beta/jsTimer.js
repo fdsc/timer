@@ -250,7 +250,7 @@ function addAbsDateClicked()
 
 	if (addAbsDate.checked)
 	{
-		addAbsDateLabel.textContent = "Абсолютная дата: год    месяц.день    часы:минуты";
+		addAbsDateLabel.textContent = "Абсолютная дата: год    месяц.день        часы:минуты";
 		h.placeholder   = "год";
 		m.placeholder   = "месяц.день";
 		s.placeholder   = "часы:минуты";
