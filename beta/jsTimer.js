@@ -301,7 +301,7 @@ function addTimer0()
 		if (!minutes && parseInt(minutes) != "0")
 			minutes = now.getMinutes();
 
-		var future = new Date(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
+		var future = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
 
 		addTimer_Mil(future - now.getTime());
 
