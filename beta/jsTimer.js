@@ -301,7 +301,7 @@ function addTimer0()
 		if (!minutes && parseInt(minutes) != "0")
 			minutes = now.getMinutes();
 
-		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
+		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
 
 		if (isNaN(dtp))
 			dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);
