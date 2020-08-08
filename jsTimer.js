@@ -723,27 +723,7 @@ function interval()
 				tm.style.backgroundColor = 'red';
 				cur.color = 1;
 			}
-/*
-			if (soundRegime == 1)
-			{
-				if (cur.played == 0 || cur.played == 2)
-					play();
-			}
-			else
-			if (cur.playedA > 7)
-			{
-				if (cur.played == 0 || cur.played == 2)
-					play(cur.played == 0 ? 698.456 : 440);
-			}
-			else
-			if (cur.played <= cur.playedA || (cur.played % 2) == 0 && cur.played <= cur.playedA+2)
-			{
-				if ((cur.played % 2) == 0)
-					play();
-				else
-					play(cur.playedA > 4  ? 698.456 : 349.228);
-			}
-*/
+
 			cur.end = new Date(now + 1000).getTime();
 		}
 
@@ -1617,8 +1597,11 @@ window.onload = function()
 		'click',
 		function(me)
 		{
-			if (me.altKey)
+			if (me.ctrlKey)
 				play(660);
+			else
+			if (me.altKey)
+				play(130.813, 2.0, 1.0, 2);
 			else
 				play();
 		}
