@@ -304,9 +304,9 @@ function addTimer0()
 		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
 
 		if (isNaN(dtp))
-			dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes).getTime();
+			dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);
 
-		var future = new Date(dtp);
+		var future = new Date(dtp).getTime();
 
 		addTimer_Mil(future - now.getTime());
 
