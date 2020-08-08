@@ -301,9 +301,12 @@ function addTimer0()
 		if (!minutes && parseInt(minutes) != "0")
 			minutes = now.getMinutes();
 
-		var future = new Date(
-								Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime()
-								);
+		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes).getTime();
+
+		if (isNaN(dtp))
+			dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes).getTime();
+
+		var future = new Date(dtp);
 
 		addTimer_Mil(future - now.getTime());
 
