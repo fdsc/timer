@@ -1599,6 +1599,7 @@ window.onload = function()
 		{
 			if (me.ctrlKey && me.altKey)
 				play(0, 1.0, 1.0, 1);
+			else
 			if (me.ctrlKey)
 				play(660);
 			else
