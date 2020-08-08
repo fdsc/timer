@@ -287,6 +287,14 @@ function addTimer0()
 
 		if (!day)
 			day = now.getDate();
+		else
+		if (day.trim && day.trim() == "+")
+		{
+			var afterDay = new Date(now.getTime() + 1000*3600*24);
+			day = afterDay.getDate();
+
+			month = afterDay.getMonth() + 1;
+		}
 
 		if (!hours && parseInt(hours) != "0")
 			hours = now.getHours();
