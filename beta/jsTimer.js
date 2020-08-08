@@ -22,6 +22,17 @@ var soundRegimeObject =
 	soundRegime: 0
 };
 
+var SoundRegimeText = 
+		[
+			'Звук включён',
+			'Два низких гудка',
+			'Два низких гудка: чистый тон',
+			'Два гудка, потом без сигналов',
+			'Звук отключён'
+		];
+
+var SoundDisableRegime = SoundRegimeText.length - 1;
+
 var notificationObjects = {};
 
 function addTimerObject(newTimer)
@@ -43,6 +54,7 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	(
 		{
 			end:  	  end,
+			// end изменяется, когда таймеру нужно помигать. endL - не изменяется никогда
 			endL: 	  end,
 			id:   	  id,
 			text: 	  text,
@@ -392,7 +404,7 @@ function getNewId(timers)
 };
 
 var silentEndTime = 0;
-function play(freq, time, volume)
+function play(freq, time, volume, old)
 {
 	if (silentEndTime > new Date().getTime())
 		return;
@@ -400,7 +412,7 @@ function play(freq, time, volume)
 	if (!AC)
 		onAudioLoad();
 
-	if (!AC || soundRegime == 2)
+	if (!AC || soundRegime == SoundDisableRegime)
 		return;
 
 	/*
@@ -431,11 +443,34 @@ function play(freq, time, volume)
 	volume   = volume ? volume : 1.0;
 	var bufferSize = Math.round(Math.floor(AC.sampleRate/T*time)*T);
 
+	var min = function (val, constraint)
+	{
+		if (val > constraint)
+			return constraint;
+		if (val < -constraint)
+			return -constraint;
+
+		return val;
+	};
+
 	var buffer = AC.createBuffer(1, bufferSize, AC.sampleRate);
 	var data = buffer.getChannelData(0);
+	var CS   = 500.0;
+	var CS2  = 1.0;
 	for (var i = 0; i < bufferSize; i++)
 	{
-		data[i] = volume * Math.sin(i * qw);
+		if (old)
+		{
+			if (old == 1)
+				data[i] = volume * Math.sin(i * qw);
+			else
+			if (old == 2)
+				data[i] = volume * min(CS2*Math.sin(i * qw) + CS2/2.0*Math.sin(i * qw*2) + CS2*Math.sin(i * qw/2), 1.0);
+		}
+		else
+		{
+			data[i] = volume * min(CS*Math.sin(i * qw) + CS*Math.sin((i + 5) * qw/4) + CS*Math.sin((i + 500) * qw/2), 1.0);
+		}
 	}
 
 /*
@@ -628,6 +663,7 @@ function formatDateMinimal(date)
 	return str;
 }
 
+var lastDateOfPlay = false;
 function interval()
 {
 	var now = new Date().getTime();
@@ -644,6 +680,7 @@ function interval()
 		btn.value = "отключено " + addNull(dt.getUTCMinutes()) + ":" + addNull(dt.getUTCSeconds());
 	}
 
+	var isPlay = false;
 	for (var cur of timersObject.timers)
 	{
 		var tid = cur.id;
@@ -658,6 +695,7 @@ function interval()
 				cur.stopped = true;
 				cur.played  = 0;
 				cur.playedA = 0;
+
 				try
 				{
 					var textElement = document.getElementById("text");
@@ -685,7 +723,7 @@ function interval()
 				tm.style.backgroundColor = 'red';
 				cur.color = 1;
 			}
-
+/*
 			if (soundRegime == 1)
 			{
 				if (cur.played == 0 || cur.played == 2)
@@ -705,21 +743,8 @@ function interval()
 				else
 					play(cur.playedA > 4  ? 698.456 : 349.228);
 			}
-
+*/
 			cur.end = new Date(now + 1000).getTime();
-			cur.played++;
-			if (cur.played > 14)
-			{
-				cur.played = 0;
-				cur.playedA++;
-/*
-				if (cur.playedA > 7)
-					cur.end = new Date(now + 8000);*/
-/*
-				// После длительного игнорирования сигнала, делаем перерыв на минуту
-				if (cur.playedA > 7)
-					cur.end = new Date(now + 60*1000).getTime();*/
-			}
 		}
 
 		var end = new Date(dif);
@@ -759,18 +784,182 @@ function interval()
 				minText = (cur.color > 0 ? '! ' : '') + cur.text;
 			}
 		}
+
+		// Если есть хотя бы один остановленный таймер, нужно отметить, что есть звук
+		if (cur.stopped === true)
+		{
+			isPlay = true;
+
+			// Устанавливаем дату первого запроса именно здесь,
+			// т.к. выше после перезагрузки страницы уже может не сработать условие !stopped,
+			// т.к. таймер уже остановлен
+			if (lastDateOfPlay === false)
+				lastDateOfPlay = Date.now();
+		}
 	}
 
 	document.title = minText;
 	setIntervalsWidth();
-	
+
 	if (lastToDeleteSavedTimer !== false)
 	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
 	{
 		saveTimers();
 		drawTimersShorts();
 	}
+
+	if (!isPlay)
+		lastDateOfPlay = false;
+
+	playGeneral();
 };
+
+var lastPlaySound = 0;	// Это дата, когда звук заканчивается
+var playObject = 
+					{
+						state: 0,
+						pause: 0
+					};
+
+function playGeneral()
+{
+	var lastTime = Date.now() - lastPlaySound;
+
+	if (!lastDateOfPlay)
+	{
+		// Если звук уже прошёл, сбрасываем на ноль, чтобы в следующий раз снова начать с большого интервала
+		if (lastTime >= 0)
+		{
+			lastPlaySound = 0;
+		}
+		playObject.state = 0;
+		playObject.pause = 0;
+
+		return;
+	}
+
+	
+	var Urgent   = Date.now() - lastDateOfPlay;
+
+	// Звук ещё звучит
+	if (lastTime < 0)
+		return;
+
+	if (Date.now() < playObject.pause)
+		return;
+
+	// Обычный звук
+	if (soundRegime == 0)
+	{
+		if (Urgent < 30*1000)
+		{
+			if (playObject.state == 0)
+			{
+				play(undefined, undefined, 0.5);
+				playObject.state = 1;
+				lastPlaySound = Date.now() + 1000;
+
+				return;
+			}
+
+			if (lastTime > 9000)
+			{
+				play();
+
+				lastPlaySound = Date.now() + 1000;
+			}
+		}
+		else
+		if (Urgent > 1*60*1000)
+		{
+			var vol = 1.0;
+			if (playObject.state == 0)
+			{
+				vol = 2.0;
+			}
+			else
+			if (playObject.state > 5)
+			{
+				playObject.state = -1;
+			}
+
+			play(130.813, 2.0, vol, 2);
+			lastPlaySound    = Date.now() + 2000;
+			playObject.pause = Date.now() + 15*1000;
+
+			playObject.state++;
+		}
+		else
+		{
+			// https://soundprogramming.net/file-formats/midi-note-frequencies/
+			if (playObject.state <= 0)
+				play(415.305);
+			else
+			if (playObject.state == 1)
+				play(440);
+			else
+			if (playObject.state == 2)
+			{
+				playObject.pause = Date.now() + 7000;
+			}
+			else
+			if (playObject.state == 3)
+				play(329.628);
+			else
+			if (playObject.state == 4)
+				play(349.228);
+			else
+			if (playObject.state == 5)
+			{
+				playObject.pause = Date.now() + 30*1000;
+			}
+
+			playObject.state++;
+			if (playObject.state > 5)
+			{
+				playObject.state = 0;
+			}
+
+			lastPlaySound = Date.now() + 1000;
+			return true;
+		}
+	}
+	else
+	// Приглушённый звук
+	if (soundRegime == 1 || soundRegime == 2)
+	{
+		play(0, 1.0, 1.0, soundRegime == 2 ? 1 : 0);
+
+		if (playObject.state == 0)
+		{
+			playObject.pause = Date.now() + 2*1000;
+		}
+		else
+		if (playObject.state == 1)
+		{
+			playObject.pause = Date.now() + 15*1000;
+		}
+		else
+		{
+			playObject.state = -1;
+			if (Urgent > 2*60*1000)
+				playObject.pause = Date.now() + 60*1000;
+			else
+				playObject.pause = Date.now() + 30*1000;
+		}
+
+		playObject.state++;
+	}
+	else
+	if (soundRegime == 3)
+	{
+		if (Urgent < 60*1000)
+		{
+			play();
+			playObject.pause = Date.now() + 48*1000;
+		}
+	}
+}
 
 function onClickToTimer(Element, text)
 {
@@ -848,7 +1037,7 @@ function drawTimer(timer)
 	var tend = document.createElement("span");
 	tc.appendChild(tend);
 	tend.id = 'timer-' + timer.id + "-end";
-	tend.textContent = new Date(timer.end).toLocaleString();
+	tend.textContent = new Date(timer.endL).toLocaleString();
 	tend.style.marginLeft = '10%';
 
 	var tdeldiv = document.createElement("div");
@@ -1029,13 +1218,6 @@ function playNull()
 {
 	play(440, 0.1, 0.01);
 }
-
-var SoundRegimeText = 
-		[
-			'Звук включён',
-			'Два низких гудка',
-			'Звук отключён'
-		];
 
 function getSoundRegimeText(soundRegime)
 {
@@ -1445,7 +1627,7 @@ window.onload = function()
 	soundRegime  = getSoundRegime();
 	soundSwither = document.getElementById("soundSwither");
 	soundSwither.textContent = getSoundRegimeText(soundRegime);
-	soundSwither.style["font-weight"] = soundRegime == 2 ? "bold" : "normal";
+	soundSwither.style["font-weight"] = soundRegime == SoundDisableRegime ? "bold" : "normal";
 	soundSwither.addEventListener
 	(
 		'click',
@@ -1459,7 +1641,7 @@ window.onload = function()
 
 			setSoundRegime(soundRegime);
 			soundSwither.textContent = getSoundRegimeText(soundRegime);
-			soundSwither.style["font-weight"] = soundRegime == 2 ? "bold" : "normal";
+			soundSwither.style["font-weight"] = soundRegime == SoundDisableRegime ? "bold" : "normal";
 		}
 	);
 
