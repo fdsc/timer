@@ -725,7 +725,10 @@ function interval()
 				// Если третий режим, то сбрасываем таймер звуков,
 				// чтобы новый пользовательский таймер смог снова прозвучать
 				if (soundRegime == 3)
-					lastDateOfPlay = Date.now();
+				{
+					lastDateOfPlay   = Date.now();
+					playObject.pause = 0;
+				}
 			}
 
 			tt.textContent = '00:00:00';
