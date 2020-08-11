@@ -807,7 +807,7 @@ function interval()
 	document.title = minText;
 	setIntervalsWidth();
 
-	if (lastToDeleteSavedTimer !== false)
+	// if (lastToDeleteSavedTimer !== false)
 	// if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
 	{// console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
 		setTimeout
