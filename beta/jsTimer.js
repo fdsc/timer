@@ -804,7 +804,7 @@ function interval()
 
 	if (lastToDeleteSavedTimer !== false)
 	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
-	{
+	{console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
 		saveTimers();
 		drawTimersShorts();
 	}
@@ -1560,6 +1560,7 @@ console.log("drawTimersShorts start");
 		}
 	}
 
+	lastToDeleteSavedTimer = false;
 	setTimeout(setIntervalsWidth, 0);
 };
 
