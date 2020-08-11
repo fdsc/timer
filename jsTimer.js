@@ -147,10 +147,11 @@ function deleteSavedTimer(MouseEvent)
 			{
 				cur.toDelete = new Date().getTime();
 				lastToDeleteSavedTimer = cur.toDelete;
-
+ 
 				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
-				saveTimers();
-				drawTimersShorts();
+				/*saveTimers();
+				drawTimersShorts();*/
+				updateDeleteTextForTimersShorts();
 				hideAlert();
 				return;
 			}
@@ -181,8 +182,8 @@ function addControlTask()
 	var text = te.value;
 	te.value = '';
 
-	// addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
-	addSavedTimer(h, m, s, text, false, false, true);
+	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
+	addSavedTimer(0, h, m, s, text, false, false, true);
 
 	hideAlert();
 
@@ -802,11 +803,19 @@ function interval()
 	document.title = minText;
 	setIntervalsWidth();
 
+	// drawTimersShorts работает долго, если будет вызываться каждый раз
+	// то элементы могут перестать реагировать на клики пользователя
 	if (lastToDeleteSavedTimer !== false)
 	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
 	{
-		saveTimers();
-		drawTimersShorts();
+		setTimeout
+		(
+			function()
+			{
+				updateDeleteTextForTimersShorts();
+			},
+			0
+		);
 	}
 
 	if (!isPlay)
@@ -894,10 +903,10 @@ function playGeneral()
 		{
 			// https://soundprogramming.net/file-formats/midi-note-frequencies/
 			if (playObject.state <= 0)
-				play(415.305);
+				play(440);
 			else
 			if (playObject.state == 1)
-				play(440);
+				play(415.305);
 			else
 			if (playObject.state == 2)
 			{
@@ -905,10 +914,10 @@ function playGeneral()
 			}
 			else
 			if (playObject.state == 3)
-				play(329.628);
+				play(349.228);
 			else
 			if (playObject.state == 4)
-				play(349.228);
+				play(329.628);
 			else
 			if (playObject.state == 5)
 			{
@@ -1145,7 +1154,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
+					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
 			}
 			catch (e)
 			{
@@ -1166,7 +1175,7 @@ function MergeTimers(text)
 	return success;
 }
 
-function drawTimers()
+function drawTimersGeneral()
 {
 	var main = document.getElementById("main");
 	main.textContent = "";
@@ -1204,6 +1213,18 @@ function drawTimers()
 		{
 			timersObject.timers = [];
 		}
+	}
+}
+
+function drawTimers()
+{
+	try
+	{
+		drawTimersGeneral();
+	}
+	catch (e)
+	{
+		console.error(e);
 	}
 
 	drawTimersShorts();
@@ -1298,7 +1319,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
+function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
@@ -1315,7 +1336,7 @@ function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTas
 			h:  h,
 			m:  m,
 			s:  s,
-			id: getNewId(timersObject.saved),
+			id: id || getNewId(timersObject.saved),
 
 			totalSeconds:  seconds,
 			name:          timerName,
@@ -1465,12 +1486,52 @@ function drawSavedInterval(timer)
 	hr.textContent = " ";
 	main.appendChild(hr);
 }
+
 function setIntervalsWidth()
 {
 	var main      = document.getElementById("timersShort");
 	var intervals = document.getElementById("timersIntervalShort");
 
 	intervals.style.width = document.body.clientWidth - main.clientWidth;
+}
+
+// Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
+function updateDeleteTextForTimersShorts()
+{
+	lastToDeleteSavedTimer = false;	// см. drawTimersShorts
+	for (var cur of timersObject.saved)
+	{
+		var te = document.getElementById('timer-' + cur.id + "-del");
+		if (isTimerToDelete(cur))
+		{console.error(cur);
+			if (cur.isInterval)
+			{
+				te.value = "Удалить?";
+			}
+			else
+			{
+				te.textContent = "Точно удалить?";
+			}
+		}
+		else
+		{
+			cur.toDelete = false;
+
+			if (cur.isInterval)
+			{
+				te.value = "X";
+			}
+			else
+			{
+				te.textContent = "Удалить";
+			}
+		}
+
+		// Устанавливаем необходимость перерисовки таймеров, если это необходимо
+		if (cur.toDelete)
+			lastToDeleteSavedTimer = cur.toDelete;
+
+	}
 }
 
 function drawTimersShorts()
@@ -1490,6 +1551,9 @@ function drawTimersShorts()
 
 	var intervals = document.getElementById("timersIntervalShort");
 	intervals.textContent = "";
+
+	// Чтобы таймеры постоянно не перерисовывались, очищаем lastToDeleteSavedTimer
+	lastToDeleteSavedTimer = false;
 
 	var isControlTask = false;
 
@@ -1519,7 +1583,7 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
+					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
 
 					if (cur.isControlTask && !isControlTask)
 					{
@@ -1532,11 +1596,18 @@ function drawTimersShorts()
 						CT.appendChild(div);
 						CT.appendChild(document.createElement("hr"));
 					}
-					
+
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
 					else
 						drawSavedTimer(newTimer);
+
+					// Устанавливаем необходимость перерисовки таймеров, если это необходимо
+					// Делаем это после прорисовки,
+					// потому что при прорисовке устаревшие значения toDelete удаляются
+					if (newTimer.toDelete)
+						lastToDeleteSavedTimer = newTimer.toDelete;
+
 				}
 			}
 		}
@@ -1709,7 +1780,7 @@ window.onload = function()
 
 			var timerName = document.getElementById("text").value;
 
-			addSavedTimer(h, m, s, timerName, false);
+			addSavedTimer(0, h, m, s, timerName, false);
 			saveTimers();
 			drawTimersShorts();
 		}
@@ -1728,7 +1799,7 @@ window.onload = function()
 
 			var timerName = ""; // document.getElementById("text").value;
 
-			addSavedTimer(h, m, s, timerName, true);
+			addSavedTimer(0, h, m, s, timerName, true);
 			saveTimers();
 			drawTimersShorts();
 		}

@@ -114,9 +114,8 @@ function deleteTimer(MouseEvent)
 			}
 
 			saveTimers();
-			// Это не нужно, ведь сейчас таймеры всё равно перерисуются
 			// main.removeChild(toDel);
-			// toDel.parentNode.removeChild(toDel);
+			toDel.parentNode.removeChild(toDel);
 
 			// Вызов для того, чтобы можно было предупредить пользователя о том,
 			// что он удалил задачу, которая есть в контрольном списке
@@ -137,7 +136,7 @@ function deleteSavedTimer(MouseEvent)
 	//console.error(arguments);
 	var main  = document.getElementById("timersShort");
 	var toDel = document.getElementById('savedtimer-' + this.tid);
-console.error("deleteSavedTimer " + this.tid); // TODO
+
 	var timers = timersObject.saved;
 	for (var curI = 0; curI < timers.length; curI++)
 	{
@@ -148,12 +147,11 @@ console.error("deleteSavedTimer " + this.tid); // TODO
 			{
 				cur.toDelete = new Date().getTime();
 				lastToDeleteSavedTimer = cur.toDelete;
- // TODO
-console.error("toDelete " + cur.id);
-console.error(cur.toDelete);
+ 
 				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
-				saveTimers();
-				drawTimersShorts();
+				/*saveTimers();
+				drawTimersShorts();*/
+				updateDeleteTextForTimersShorts();
 				hideAlert();
 				return;
 			}
@@ -166,8 +164,6 @@ console.error(cur.toDelete);
 			saveTimers();
 			// main.removeChild(toDel);
 			drawTimersShorts();
- // TODO
-console.error("deleted " + cur.id);
 
 			break;
 		}
@@ -807,15 +803,16 @@ function interval()
 	document.title = minText;
 	setIntervalsWidth();
 
-	// if (lastToDeleteSavedTimer !== false)
-	// if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
-	{// console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
+	// drawTimersShorts работает долго, если будет вызываться каждый раз
+	// то элементы могут перестать реагировать на клики пользователя
+	if (lastToDeleteSavedTimer !== false)
+	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
+	{
 		setTimeout
 		(
 			function()
 			{
-				saveTimers();
-				drawTimersShorts(); // TODO
+				updateDeleteTextForTimersShorts();
 			},
 			0
 		);
@@ -1489,12 +1486,52 @@ function drawSavedInterval(timer)
 	hr.textContent = " ";
 	main.appendChild(hr);
 }
+
 function setIntervalsWidth()
 {
 	var main      = document.getElementById("timersShort");
 	var intervals = document.getElementById("timersIntervalShort");
 
 	intervals.style.width = document.body.clientWidth - main.clientWidth;
+}
+
+// Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
+function updateDeleteTextForTimersShorts()
+{
+	lastToDeleteSavedTimer = false;	// см. drawTimersShorts
+	for (var cur of timersObject.saved)
+	{
+		var te = document.getElementById('timer-' + cur.id + "-del");
+		if (isTimerToDelete(cur))
+		{console.error(cur);
+			if (cur.isInterval)
+			{
+				te.value = "Удалить?";
+			}
+			else
+			{
+				te.textContent = "Точно удалить?";
+			}
+		}
+		else
+		{
+			cur.toDelete = false;
+
+			if (cur.isInterval)
+			{
+				te.value = "X";
+			}
+			else
+			{
+				te.textContent = "Удалить";
+			}
+		}
+
+		// Устанавливаем необходимость перерисовки таймеров, если это необходимо
+		if (cur.toDelete)
+			lastToDeleteSavedTimer = cur.toDelete;
+
+	}
 }
 
 function drawTimersShorts()
@@ -1559,15 +1596,18 @@ function drawTimersShorts()
 						CT.appendChild(div);
 						CT.appendChild(document.createElement("hr"));
 					}
-					
-					// Устанавливаем необходимость перерисовки таймеров, если это необходимо
-					if (newTimer.toDelete)
-						lastToDeleteSavedTimer = newTimer.toDelete;
 
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
 					else
 						drawSavedTimer(newTimer);
+
+					// Устанавливаем необходимость перерисовки таймеров, если это необходимо
+					// Делаем это после прорисовки,
+					// потому что при прорисовке устаревшие значения toDelete удаляются
+					if (newTimer.toDelete)
+						lastToDeleteSavedTimer = newTimer.toDelete;
+
 				}
 			}
 		}
