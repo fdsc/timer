@@ -114,8 +114,9 @@ function deleteTimer(MouseEvent)
 			}
 
 			saveTimers();
+			// Это не нужно, ведь сейчас таймеры всё равно перерисуются
 			// main.removeChild(toDel);
-			toDel.parentNode.removeChild(toDel);
+			// toDel.parentNode.removeChild(toDel);
 
 			// Вызов для того, чтобы можно было предупредить пользователя о том,
 			// что он удалил задачу, которая есть в контрольном списке
@@ -1562,7 +1563,7 @@ function drawTimersShorts()
 					// Устанавливаем необходимость перерисовки таймеров, если это необходимо
 					if (newTimer.toDelete)
 						lastToDeleteSavedTimer = newTimer.toDelete;
-					
+
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
 					else
@@ -1844,7 +1845,7 @@ function drawTimers()
 	setInterval
 	(
 		interval,
-		1000
+		100
 	);
 };
 
