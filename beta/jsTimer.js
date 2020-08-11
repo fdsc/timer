@@ -136,7 +136,7 @@ function deleteSavedTimer(MouseEvent)
 	//console.error(arguments);
 	var main  = document.getElementById("timersShort");
 	var toDel = document.getElementById('savedtimer-' + this.tid);
-
+console.error("deleteSavedTimer " + this.tid); // TODO
 	var timers = timersObject.saved;
 	for (var curI = 0; curI < timers.length; curI++)
 	{
