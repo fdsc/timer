@@ -1166,7 +1166,7 @@ function MergeTimers(text)
 	return success;
 }
 
-function drawTimers()
+function drawTimersGeneral()
 {
 	var main = document.getElementById("main");
 	main.textContent = "";
@@ -1204,6 +1204,18 @@ function drawTimers()
 		{
 			timersObject.timers = [];
 		}
+	}
+}
+
+function drawTimers()
+{
+	try
+	{
+		drawTimersGeneral();
+	}
+	catch (e)
+	{
+		console.error(e);
 	}
 
 	drawTimersShorts();
@@ -1299,7 +1311,8 @@ function InitializeNotification()
 }
 
 function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
-{
+{ // TODO
+console.log("addSavedTimer");
 	if (!timersObject.saved)
 		timersObject.saved = [];
 
@@ -1474,7 +1487,8 @@ function setIntervalsWidth()
 }
 
 function drawTimersShorts()
-{
+{// TODO
+console.log("drawTimersShorts start");
 	var main = document.getElementById("timersShort");
 	main.textContent = "";
 	
