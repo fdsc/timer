@@ -181,8 +181,8 @@ function addControlTask()
 	var text = te.value;
 	te.value = '';
 
-	// addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
-	addSavedTimer(h, m, s, text, false, false, true);
+	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
+	addSavedTimer(0, h, m, s, text, false, false, true);
 
 	hideAlert();
 
@@ -806,8 +806,9 @@ function interval()
 	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
 	{console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
 		saveTimers();
-		drawTimersShorts();
+		// drawTimersShorts(); // TODO
 	}
+	drawTimersShorts();
 
 	if (!isPlay)
 		lastDateOfPlay = false;
@@ -1145,7 +1146,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
+					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
 			}
 			catch (e)
 			{
@@ -1310,7 +1311,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(h, m, s, timerName, savedInterval, toDelete, isControlTask)
+function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
 { // TODO
 console.log("addSavedTimer");
 	if (!timersObject.saved)
@@ -1328,7 +1329,7 @@ console.log("addSavedTimer");
 			h:  h,
 			m:  m,
 			s:  s,
-			id: getNewId(timersObject.saved),
+			id: id || getNewId(timersObject.saved),
 
 			totalSeconds:  seconds,
 			name:          timerName,
@@ -1505,6 +1506,9 @@ console.log("drawTimersShorts start");
 	var intervals = document.getElementById("timersIntervalShort");
 	intervals.textContent = "";
 
+	// Чтобы таймеры постоянно не перерисовывались, очищаем lastToDeleteSavedTimer
+	lastToDeleteSavedTimer = false;
+
 	var isControlTask = false;
 
 	var timersFromStorage = localStorage.getItem(timerStorageName);
@@ -1533,7 +1537,7 @@ console.log("drawTimersShorts start");
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
+					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
 
 					if (cur.isControlTask && !isControlTask)
 					{
@@ -1546,6 +1550,10 @@ console.log("drawTimersShorts start");
 						CT.appendChild(div);
 						CT.appendChild(document.createElement("hr"));
 					}
+					
+					// Устанавливаем необходимость перерисовки таймеров, если это необходимо
+					if (newTimer.toDelete)
+						lastToDeleteSavedTimer = newTimer.toDelete;
 					
 					if (newTimer.isInterval)
 						drawSavedInterval(newTimer);
@@ -1560,7 +1568,6 @@ console.log("drawTimersShorts start");
 		}
 	}
 
-	lastToDeleteSavedTimer = false;
 	setTimeout(setIntervalsWidth, 0);
 };
 
@@ -1724,7 +1731,7 @@ window.onload = function()
 
 			var timerName = document.getElementById("text").value;
 
-			addSavedTimer(h, m, s, timerName, false);
+			addSavedTimer(0, h, m, s, timerName, false);
 			saveTimers();
 			drawTimersShorts();
 		}
@@ -1743,7 +1750,7 @@ window.onload = function()
 
 			var timerName = ""; // document.getElementById("text").value;
 
-			addSavedTimer(h, m, s, timerName, true);
+			addSavedTimer(0, h, m, s, timerName, true);
 			saveTimers();
 			drawTimersShorts();
 		}
