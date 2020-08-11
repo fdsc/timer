@@ -1844,7 +1844,7 @@ function drawTimers()
 	setInterval
 	(
 		interval,
-		100
+		1000
 	);
 };
 
