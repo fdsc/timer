@@ -1313,8 +1313,7 @@ function InitializeNotification()
 }
 
 function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
-{ // TODO
-console.log("addSavedTimer");
+{
 	if (!timersObject.saved)
 		timersObject.saved = [];
 
@@ -1489,8 +1488,7 @@ function setIntervalsWidth()
 }
 
 function drawTimersShorts()
-{// TODO
-console.log("drawTimersShorts start");
+{
 	var main = document.getElementById("timersShort");
 	main.textContent = "";
 	
