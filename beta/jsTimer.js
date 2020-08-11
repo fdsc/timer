@@ -805,9 +805,10 @@ function interval()
 	if (lastToDeleteSavedTimer !== false)
 	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
 	{console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
-		saveTimers();
+		// saveTimers();
 		// drawTimersShorts(); // TODO
 	}
+	saveTimers();
 	drawTimersShorts();
 
 	if (!isPlay)
