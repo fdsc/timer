@@ -147,7 +147,9 @@ function deleteSavedTimer(MouseEvent)
 			{
 				cur.toDelete = new Date().getTime();
 				lastToDeleteSavedTimer = cur.toDelete;
-
+ // TODO
+console.error("toDelete " + cur.id);
+console.error(cur.toDelete);
 				// Нужно сохранить, т.к. drawTimersShorts восстанавливает данные из сохранения
 				saveTimers();
 				drawTimersShorts();
@@ -163,6 +165,8 @@ function deleteSavedTimer(MouseEvent)
 			saveTimers();
 			// main.removeChild(toDel);
 			drawTimersShorts();
+ // TODO
+console.error("deleted " + cur.id);
 
 			break;
 		}
