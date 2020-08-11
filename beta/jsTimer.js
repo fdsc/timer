@@ -807,13 +807,18 @@ function interval()
 	setIntervalsWidth();
 
 	if (lastToDeleteSavedTimer !== false)
-	if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
-	{console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
-		// saveTimers();
-		// drawTimersShorts(); // TODO
+	// if (new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval)
+	{// console.error("new Date().getTime() - lastToDeleteSavedTimer >= timerToDeleteInterval"); // TODO
+		setTimeout
+		(
+			function()
+			{
+				saveTimers();
+				drawTimersShorts(); // TODO
+			},
+			0
+		);
 	}
-	saveTimers();
-	drawTimersShorts();
 
 	if (!isPlay)
 		lastDateOfPlay = false;
@@ -900,10 +905,10 @@ function playGeneral()
 		{
 			// https://soundprogramming.net/file-formats/midi-note-frequencies/
 			if (playObject.state <= 0)
-				play(415.305);
+				play(440);
 			else
 			if (playObject.state == 1)
-				play(440);
+				play(415.305);
 			else
 			if (playObject.state == 2)
 			{
@@ -911,10 +916,10 @@ function playGeneral()
 			}
 			else
 			if (playObject.state == 3)
-				play(329.628);
+				play(349.228);
 			else
 			if (playObject.state == 4)
-				play(349.228);
+				play(329.628);
 			else
 			if (playObject.state == 5)
 			{
