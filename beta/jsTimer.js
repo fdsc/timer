@@ -323,7 +323,7 @@ function addTimer0()
 			day = afterDay.getDate();
 
 			month = afterDay.getMonth() + 1;
-			h     = afterDay.getYear();
+			h     = afterDay.getFullYear();
 		}
 
 		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
