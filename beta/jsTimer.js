@@ -287,11 +287,34 @@ function addTimer0()
 		}
 
 		if (!day)
-			day = now.getDate();
-		else
-		if (day.trim && day.trim() == "+")
 		{
-			var afterDay = new Date(now.getTime() + 1000*3600*24);
+			day = now.getDate();
+		}
+		else
+		if (day.trim && day.trim().startsWith("+"))
+		{
+			var str = day.trim();
+			var N = 0;
+			if (str == "+")
+				N = 1;
+			else
+			if (str == "++")
+				N = 2;
+			else
+			if (str == "+++")
+				N = 3;
+			else
+			if (str == "++++")
+				N = 4;
+			else
+			{
+				str = str.substr(1);	// Убираем "+"
+				N   = parseInt(str);
+				if (isNaN(N))
+					N = 0;
+			}
+
+			var afterDay = new Date(now.getTime() + N * 1000*3600*24);
 			day = afterDay.getDate();
 
 			month = afterDay.getMonth() + 1;
@@ -309,7 +332,13 @@ function addTimer0()
 
 		var future = new Date(dtp).getTime();
 
-		addTimer_Mil(future - now.getTime());
+		var mil = future - now.getTime();
+		if (mil < 0 && !h && !m)
+		{
+			mil += 1000*3600*24;
+		}
+
+		addTimer_Mil(mil);
 
 		addAbsDate.checked = false;
 		addAbsDateClicked();
