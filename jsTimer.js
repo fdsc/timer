@@ -220,6 +220,11 @@ function addTimer0()
 		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
 
+		if (!hours && parseInt(hours) != "0")
+			hours = now.getHours();
+		if (!minutes && parseInt(minutes) != "0")
+			minutes = now.getMinutes();
+
 		if (!month)
 			month = now.getMonth() + 1;
 		else
@@ -318,12 +323,8 @@ function addTimer0()
 			day = afterDay.getDate();
 
 			month = afterDay.getMonth() + 1;
+			h     = afterDay.getFullYear();
 		}
-
-		if (!hours && parseInt(hours) != "0")
-			hours = now.getHours();
-		if (!minutes && parseInt(minutes) != "0")
-			minutes = now.getMinutes();
 
 		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
 
