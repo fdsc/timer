@@ -68,6 +68,8 @@ function timerToStop(cur)
 		stopElement.textContent = "Стоп";
 		cur.times.push(getNewTimeObject());
 		cur.stopped  = false;
+
+		stopElement.style.backgroundColor = "";
 	}
 	else	// Останавливаем старый таймер
 	{
@@ -81,6 +83,7 @@ function timerToStop(cur)
 		cur.allToText  = formatDate(new Date(cur.all));
 
 		time.allForAll = cur.all;
+		stopElement.style.backgroundColor = "red";
 	}
 }
 
@@ -454,9 +457,11 @@ function drawTimer(timer)
 	if (timer.stopped)
 	{
 		tdel.textContent = "Старт";
+		tdel.style.backgroundColor = "";
 	}
 	else
 	{
+		tdel.style.backgroundColor = "red";
 	}
 
 	tdel = document.createElement("span");
