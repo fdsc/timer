@@ -139,6 +139,24 @@ function markTimer()
 	drawTimers();
 }
 
+function shortTableTimer()
+{
+	var timers = timersObject.timers;
+	for (var curI = 0; curI < timers.length; curI++)
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			cur.short = !cur.short;
+
+			break;
+		}
+	}
+
+	saveTimers();
+	drawTimers();
+}
+
 function deleteTimer(MouseEvent)
 {
 	//console.error(this);
@@ -413,6 +431,7 @@ function drawTimer(timer)
 	tdeldiv.appendChild(tb);
 	tb.style.width = "100%";
 
+	if (!timer.short)
 	for (var i = 0; i < timer.times.length; i++)
 	{
 		var time = timer.times[i];
@@ -488,6 +507,14 @@ function drawTimer(timer)
 	{
 		timer.toDelete = false;
 	}
+
+	tdel = document.createElement("span");
+	tdeldiv.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Скрыть/Показать";
+	tdel.addEventListener('click', shortTableTimer);
+	tdel.id = 'timer-' + timer.id + "-short";
+	tdel.style.marginLeft = '10%';
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
