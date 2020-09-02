@@ -1,0 +1,87 @@
+﻿// chrome://inspect/#service-workers
+// about:debugging
+
+// https://developer.mozilla.org/ru/docs/Web/API/Service_Worker_API/Using_Service_Workers
+// https://developer.mozilla.org/en-US/docs/Web/API/Cache
+
+const version = 'PZdxfpUpEDL';
+
+self.addEventListener
+(
+	'install',
+	function(event)
+	{
+	}
+);
+
+self.addEventListener
+(
+	'fetch',
+	function(event)
+	{
+		// Загружаем из сети
+		var request = fetch(event.request)
+		.then
+		(
+			function (response)
+			{
+				let responseClone = response.clone();
+
+				// Кешируем заново
+				caches.open(version)
+				.then
+				(
+					function (cache)
+					{
+						cache.put(event.request, responseClone);
+					}
+				);
+
+				console.debug("TimerJS: service worker load from internet for url " + event.request.url);
+
+				return response;
+			}
+		)
+		.catch
+		(
+			function(error)
+			{
+				console.log("TimerJS: service worker load from the cache for url " + event.request.url);
+				console.log(error);
+
+				// Возвращаем запрошенный ресурс из кеша
+				return caches.match(event.request)
+				.then
+				(
+					function(response)
+					{
+						if (response !== undefined)
+						{
+							return response.clone();
+						}
+						else
+						{
+							// return caches.match('error.png');
+							// https://developer.mozilla.org/en-US/docs/Web/API/Response
+							var r = new Response
+							(
+								'Network is unreilable or error occured',
+								{
+									// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+									// Request Timeout
+									"status" : 408,
+									"statusText": "Network is unreilable or error occured"
+								}
+							);
+
+							console.error("TimerJS: service worker: network is unreilable or error occured");
+							return r;
+						}
+					}
+				);
+			}
+		);
+
+		event.respondWith(request);
+	}
+);
