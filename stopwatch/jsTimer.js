@@ -159,6 +159,46 @@ function timerToUp()
 	drawTimers();
 }
 
+function timerToFullUp()
+{
+	var timers = timersObject.timers;
+	// 1 - не ошибка, т.к. верхний таймер вверх поднять уже нельзя
+	for (var curI = 1; curI < timers.length; curI++)
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			timers[curI]   = timers[0];
+			timers[0] = cur;
+
+			break;
+		}
+	}
+
+	saveTimers();
+	drawTimers();
+}
+
+function timerToFullDown()
+{
+	var timers = timersObject.timers;
+	// -1 - не ошибка, ведь самый последний таймер невозможно ещё опустить
+	for (var curI = 0; curI < timers.length - 1; curI++)
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			timers[curI]              = timers[timers.length - 1];
+			timers[timers.length - 1] = cur;
+
+			break;
+		}
+	}
+
+	saveTimers();
+	drawTimers();
+}
+
 function timerToDown()
 {
 	var timers = timersObject.timers;
@@ -564,7 +604,7 @@ function drawTimer(timer)
 	tdel = document.createElement("span");
 	ke.appendChild(tdel);
 	tdel.tid = timer.id;
-	tdel.textContent = "Вверх";
+	tdel.textContent = "Выше";
 	tdel.addEventListener('click', timerToUp);
 	tdel.id = 'timer-' + timer.id + "-up";
 	tdel.style.marginLeft = '2%';
@@ -572,11 +612,27 @@ function drawTimer(timer)
 	tdel = document.createElement("span");
 	ke.appendChild(tdel);
 	tdel.tid = timer.id;
-	tdel.textContent = "Вниз";
+	tdel.textContent = "Ниже";
 	tdel.addEventListener('click', timerToDown);
 	tdel.id = 'timer-' + timer.id + "-down";
 	tdel.style.marginLeft = '2%';
+	
+	tdel = document.createElement("span");
+	ke.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Вверх";
+	tdel.addEventListener('click', timerToFullUp);
+	tdel.id = 'timer-' + timer.id + "-fullup";
+	tdel.style.marginLeft = '2%';
 
+	tdel = document.createElement("span");
+	ke.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Вниз";
+	tdel.addEventListener('click', timerToFullDown);
+	tdel.id = 'timer-' + timer.id + "-fulldown";
+	tdel.style.marginLeft = '2%';
+	
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
 }
