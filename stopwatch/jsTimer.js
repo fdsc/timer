@@ -15,9 +15,12 @@ var timersObject =
 	timers: []
 };
 
-function addTimerObject(newTimer)
+function addTimerObject(newTimer, toStart)
 {
-	timersObject.timers.push(newTimer);
+	if (toStart === true)
+		timersObject.timers.unshift(newTimer);
+	else
+		timersObject.timers.push(newTimer);
 }
 
 function getNewTimeObject(stopped)
@@ -29,7 +32,7 @@ function getNewTimeObject(stopped)
 			};
 }
 
-function addTimer({id, times, text, stopped, fromSave})
+function addTimer({id, times, text, stopped, fromSave, toStart})
 {
 	if (!times)
 	{
@@ -46,7 +49,8 @@ function addTimer({id, times, text, stopped, fromSave})
 			stopped:  stopped || false,
 			times:    times   || [],
 			all:      0
-		}
+		},
+		toStart
 	);
 
 	document.getElementById("text").value = "";
@@ -285,7 +289,7 @@ function addTimer0()
 	te.value = '';
 
 	var id = getNewId(timersObject.timers);
-	addTimer({id: id, text: text});
+	addTimer({id: id, text: text, toStart: true});
 };
 
 var ID = 1;
@@ -712,7 +716,7 @@ function drawTimersGeneral()
 		var t = JSON.parse(timersFromStorage);
 		if (t && t.timers)
 		{
-			t = t.timers;
+			t = t.timers;/*
 			for (var i = 0; i < t.length; i++)
 			{
 				for (var j = i + 1; j < t.length; j++)
@@ -725,7 +729,7 @@ function drawTimersGeneral()
 						t[j] = ai;
 					}
 				}
-			}
+			}*/
 
 			timersObject.timers = [];
 			for (var cur of t)
