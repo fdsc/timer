@@ -168,8 +168,8 @@ function timerToFullUp()
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
-			timers[curI]   = timers[0];
-			timers[0] = cur;
+			var a = timers.splice(curI, 1);
+			timers.unshift(cur);
 
 			break;
 		}
@@ -188,8 +188,8 @@ function timerToFullDown()
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
-			timers[curI]              = timers[timers.length - 1];
-			timers[timers.length - 1] = cur;
+			var a = timers.splice(curI, 1);
+			timers.push(cur);
 
 			break;
 		}
