@@ -716,20 +716,7 @@ function drawTimersGeneral()
 		var t = JSON.parse(timersFromStorage);
 		if (t && t.timers)
 		{
-			t = t.timers;/*
-			for (var i = 0; i < t.length; i++)
-			{
-				for (var j = i + 1; j < t.length; j++)
-				{
-					if (t[i].end > t[j].end)
-					{
-						var ai = t[i];
-						var aj = t[j];
-						t[i] = aj;
-						t[j] = ai;
-					}
-				}
-			}*/
+			t = t.timers;
 
 			timersObject.timers = [];
 			for (var cur of t)
@@ -758,53 +745,7 @@ function drawTimers()
 
 	// drawTimersShorts();
 };
-/*
-function hideAlert()
-{
-	document.getElementById("alert").style.display = 'none';
-	playNull();
-};
-*/
-// Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
-/*
-function updateDeleteTextForTimersShorts()
-{
-	lastToDeleteSavedTimer = false;	// см. drawTimersShorts
-	for (var cur of timersObject.saved)
-	{
-		var te = document.getElementById('timer-' + cur.id + "-del");
-		if (isTimerToDelete(cur))
-		{
-			if (cur.isInterval)
-			{
-				te.value = "Удалить?";
-			}
-			else
-			{
-				te.textContent = "Точно удалить?";
-			}
-		}
-		else
-		{
-			cur.toDelete = false;
 
-			if (cur.isInterval)
-			{
-				te.value = "X";
-			}
-			else
-			{
-				te.textContent = "Удалить";
-			}
-		}
-
-		// Устанавливаем необходимость перерисовки таймеров, если это необходимо
-		if (cur.toDelete)
-			lastToDeleteSavedTimer = cur.toDelete;
-
-	}
-}
-*/
 window.onload = function()
 {
 	if (document.location.search)
@@ -836,61 +777,6 @@ window.onload = function()
 			timerNameElement.value = '';
 		}
 	);
-/*
-	btn = document.getElementById("SaveToClipboard");
-	btn.addEventListener
-	(
-		'click',
-		function(me)
-		{
-			navigator.clipboard.writeText(JSON.stringify(timersObject))
-			.then
-			(
-				function()
-				{
-					// alert("Таймеры сохранены в буфер обмена");
-				}
-			)
-			.catch
-			(
-				function(e)
-				{
-					alert("Не удалось сохранить таймеры в буфер обмена");
-					console.error(e);
-				}
-			);
-		}
-	);
-
-	btn = document.getElementById("LoadFromClipboard");
-	btn.addEventListener
-	(
-		'click',
-		function(me)
-		{
-			navigator.clipboard.readText()
-			.then
-			(
-				function(text)
-				{
-					if (!MergeTimers(text))
-					{
-						alert("Кажется, формат копии таймеров не верен. Убедитесь, что вы загрузили резервную копию таймеров в буфер обмена из текстового файла");
-					}
-				}
-			)
-			.catch
-			(
-				function(e)
-				{
-					alert("Не удалось загрузить таймеры из буфера обмена");
-					console.error(e);
-				}
-			);
-		}
-	);
-*/
-	// audio = document.getElementById("audio");
 
 	drawTimers();
 // 	InitializeNotification();
