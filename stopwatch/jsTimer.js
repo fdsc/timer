@@ -139,6 +139,46 @@ function markTimer()
 	drawTimers();
 }
 
+function timerToUp()
+{
+	var timers = timersObject.timers;
+	// 1 - не ошибка, т.к. верхний таймер вверх поднять уже нельзя
+	for (var curI = 1; curI < timers.length; curI++)
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			timers[curI]   = timers[curI-1];
+			timers[curI-1] = cur;
+
+			break;
+		}
+	}
+
+	saveTimers();
+	drawTimers();
+}
+
+function timerToDown()
+{
+	var timers = timersObject.timers;
+	// -1 - не ошибка, ведь самый последний таймер невозможно ещё опустить
+	for (var curI = 0; curI < timers.length - 1; curI++)	
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			timers[curI]   = timers[curI+1];
+			timers[curI+1] = cur;
+
+			break;
+		}
+	}
+
+	saveTimers();
+	drawTimers();
+}
+
 function shortTableTimer()
 {
 	var timers = timersObject.timers;
@@ -515,6 +555,27 @@ function drawTimer(timer)
 	tdel.addEventListener('click', shortTableTimer);
 	tdel.id = 'timer-' + timer.id + "-short";
 	tdel.style.marginLeft = '10%';
+	
+	
+	ke   = document.createElement("span");
+	tdeldiv.appendChild(ke);
+	ke.style.marginLeft = '10%';
+
+	tdel = document.createElement("span");
+	ke.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Вверх";
+	tdel.addEventListener('click', timerToUp);
+	tdel.id = 'timer-' + timer.id + "-up";
+	tdel.style.marginLeft = '2%';
+	
+	tdel = document.createElement("span");
+	ke.appendChild(tdel);
+	tdel.tid = timer.id;
+	tdel.textContent = "Вниз";
+	tdel.addEventListener('click', timerToDown);
+	tdel.id = 'timer-' + timer.id + "-down";
+	tdel.style.marginLeft = '2%';
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
@@ -777,7 +838,7 @@ window.onload = function()
 	setInterval
 	(
 		interval,
-		33
+		89
 	);
 };
 

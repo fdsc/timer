@@ -1468,14 +1468,23 @@ function drawSavedTimer(timer)
 				el    = document.createElement("div");
 				el.id = nameOfControlTaskAlertNode;
 				el.style["background-color"] = "yellow";
-				el.textContent = "В списке таймеров не хватает задач из контрольного списка\r\n" + timer.name;
+				el.textContent = "В списке таймеров не хватает задач из контрольного списка";
 
 				tn.parentNode.insertBefore(el, tn);
 			}
-			else
-			{
-				el.textContent += "\r\n" + timer.name;
-			}
+
+			// el.textContent += "\r\n" + timer.name;
+			var ctel = document.createElement("div");
+			el.appendChild(ctel);
+			ctel.textContent = timer.name;
+			ctel.addEventListener
+			(
+				'click',
+				function()
+				{
+					document.getElementById("text").value = this.textContent;
+				}
+			);
 		}
 	}
 }
