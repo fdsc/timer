@@ -322,6 +322,18 @@ function loadSoundRegime()
 	}
 }
 
+function addNull3(str)
+{
+	str = '' + str;
+
+	if (str.length == 1)
+		str = '0' + str;
+	if (str.length == 2)
+		str = '0' + str;
+
+	return str;
+}
+
 function addNull(str)
 {
 	str = '' + str;
@@ -334,9 +346,9 @@ function addNull(str)
 
 function formatDate(date)
 {
-	var str =   addNull(date.getUTCMinutes())
-		+ ':' + addNull(date.getUTCSeconds())
-		+ '.' + addNull(date.getUTCMilliseconds());
+	var str =   addNull (date.getUTCMinutes())
+		+ ':' + addNull (date.getUTCSeconds())
+		+ '.' + addNull3(date.getUTCMilliseconds());
 
 	if (date.getUTCHours() >= 1.0)
 	{
