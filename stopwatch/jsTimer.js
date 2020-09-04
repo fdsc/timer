@@ -796,7 +796,7 @@ window.onload = function()
 	setInterval
 	(
 		interval,
-		89
+		200
 	);
 };
 
