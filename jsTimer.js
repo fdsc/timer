@@ -1809,6 +1809,18 @@ window.onload = function()
 			timerNameElement.value = '';
 		}
 	);
+	
+	btn = document.getElementById("resetTime");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			document.getElementById("hours")  .value = '';
+			document.getElementById("minutes").value = '';
+			document.getElementById("seconds").value = '';
+		}
+	);
 
 	btn = document.getElementById("saveTimer");
 	btn.addEventListener
