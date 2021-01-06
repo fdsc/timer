@@ -2,7 +2,8 @@
 
 *{FONT-WEIGHT: normal; FONT-SIZE: 18px; FONT-FAMILY: "Courier New", serif;}
 body {background-color: #DDDDDD}
-table {border-spacing: 0px}
+
+
 
 .prewrap {white-space: pre-wrap}
 .preline {white-space: pre-line}
@@ -12,3 +13,8 @@ table {border-spacing: 0px}
 
 #timersShort {position: absolute; top: 50px; right: 0px; background-color: #DDDDDD}
 
+table {border-spacing: 0px}
+#addTimer		{width: 100%}
+#addControlTask	{width: 100%}
+#saveTimer		{width: 100%}
+#saveInterval	{width: 100%}
