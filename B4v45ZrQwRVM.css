@@ -2,6 +2,7 @@
 
 *{FONT-WEIGHT: normal; FONT-SIZE: 18px; FONT-FAMILY: "Courier New", serif;}
 body {background-color: #DDDDDD}
+table {border-spacing: 0px}
 
 .prewrap {white-space: pre-wrap}
 .preline {white-space: pre-line}
@@ -10,4 +11,4 @@ body {background-color: #DDDDDD}
 .red {color: red; font-weight: bold;}
 
 #timersShort {position: absolute; top: 50px; right: 0px; background-color: #DDDDDD}
-#addControlTask {margin-left: 55px}
+
