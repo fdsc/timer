@@ -197,7 +197,7 @@ function addTimer_Mil(milliSeconds)
 	var text = te.value;
 	te.value = '';
 
-	var id = getNewId(timersObject.timers);
+	var id = getNewId();
 	addTimer(id, milliSeconds, text);
 
 	hideAlert();
@@ -439,11 +439,35 @@ function addTimer24()
 var ID = 1;
 function getNewId(timers)
 {
-	var id = ID;
-	for (var cur of timers)
+	var id;
+	if (!timers)
 	{
-		if (cur.id >= id)
-			id = cur.id + 1;
+		var ids = [];
+		ids.push
+		(
+			{id: ID}
+		);
+
+		ids.push
+		(
+			{id: getNewId(timersObject.saved)}
+		);
+
+		ids.push
+		(
+			{ id: getNewId(timersObject.timers)}
+		);
+
+		id = getNewId(ids)
+	}
+	else
+	{
+		id = ID;
+		for (var cur of timers)
+		{
+			if (cur.id >= id)
+				id = cur.id + 1;
+		}
 	}
 
 	ID = id + 1;
@@ -1030,7 +1054,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 		if (addImmediately || mouseEvent.shiftKey)
 		{
-			var id = getNewId(timersObject.timers);
+			var id = getNewId();
 			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val);
 
 			// Контекстное меню не должно появится (здесь - от клика на таймер)
@@ -1151,7 +1175,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addTimer(getNewId(timersObject.timers), cur.end, cur.text, true, true);
+					addTimer(getNewId(), cur.end, cur.text, true, true);
 			}
 			catch (e)
 			{
@@ -1369,7 +1393,7 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 			h:  h,
 			m:  m,
 			s:  s,
-			id: id || getNewId(timersObject.saved),
+			id: id || getNewId(),
 
 			totalSeconds:  seconds,
 			name:          timerName,
