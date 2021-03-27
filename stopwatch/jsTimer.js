@@ -449,10 +449,12 @@ function interval()
 				{
 					cur.all        = AllTimesCalculate(cur);
 					cur.allToText  = formatDate(new Date(cur.all));
-					var lastRTime  = new Date().getTime() - cur.times[cur.times.length - 1].start;
-					var timeToText = formatDate(new Date(lastRTime));
 					if (cur.times.length > 1)
+					{
+						var lastRTime  = new Date().getTime() - cur.times[cur.times.length - 1].start;
+						var timeToText = formatDate(new Date(lastRTime));
 						tt.textContent = cur.allToText + "    " + timeToText;
+					}
 					else
 						tt.textContent = cur.allToText;
 
