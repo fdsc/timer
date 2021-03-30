@@ -734,6 +734,15 @@ function formatDateMinimal(date)
 	return str;
 }
 
+function formatTime(date)
+{
+	var str = 	addNull(date.getUTCHours())
+		+ ':' + addNull(date.getUTCMinutes())
+		+ ':' + addNull(date.getUTCSeconds());
+
+	return str;
+}
+
 var lastDateOfPlay = false;
 function interval()
 {
@@ -859,6 +868,10 @@ function interval()
 
 	document.title = minText;
 	setIntervalsWidth();
+	
+	var timeBox = document.getElementById("silent");
+	timeBox.textContent = formatTime(new Date());
+
 
 	// drawTimersShorts работает долго, если будет вызываться каждый раз
 	// то элементы могут перестать реагировать на клики пользователя
