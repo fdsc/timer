@@ -4,13 +4,30 @@
 // https://developer.mozilla.org/ru/docs/Web/API/Service_Worker_API/Using_Service_Workers
 // https://developer.mozilla.org/en-US/docs/Web/API/Cache
 
-const version = 'PZdxfpUpEDL';
+const version = 'eKupghRhOQ9A';
 
 self.addEventListener
 (
 	'install',
 	function(event)
 	{
+		// Событие будет считаться незавершённым, пока воркер успешно не проинициализируется
+		event.waitUntil
+		(
+			caches.open(version)
+			.then
+			(
+				function(cache)
+				{
+					return cache.addAll
+					([
+						'index.html',
+						'jsTimer.js',
+						'B4v45ZrQwRVM.css'
+					]);
+				}
+			)
+		);
 	}
 );
 
