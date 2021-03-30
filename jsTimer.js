@@ -869,7 +869,7 @@ function interval()
 	document.title = minText;
 	setIntervalsWidth();
 	
-	var timeBox = document.getElementById("silent");
+	var timeBox = document.getElementById("timeBox");
 	timeBox.textContent = formatTime(new Date());
 
 
