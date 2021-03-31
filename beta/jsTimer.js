@@ -736,9 +736,9 @@ function formatDateMinimal(date)
 
 function formatTime(date)
 {
-	var str = 	addNull(date.getUTCHours())
-		+ ':' + addNull(date.getUTCMinutes())
-		+ ':' + addNull(date.getUTCSeconds());
+	var str = 	addNull(date.getHours())
+		+ ':' + addNull(date.getMinutes())
+		+ ':' + addNull(date.getSeconds());
 
 	return str;
 }
