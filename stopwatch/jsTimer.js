@@ -538,12 +538,20 @@ function drawTimer(timer)
 	for (var i = 0; i < timer.times.length; i++)
 	{
 		var time = timer.times[i];
-		if (!time.stopped)
-			break;
 
 		var etime = document.createElement("tr");
 		etime.id = 'timer-' + timer.id + "-time-" + i;
 		tb.appendChild(etime);
+
+		if (!time.stopped)
+		{
+			tm = document.createElement("td");
+			tm.textContent = new Date(time.start).toLocaleString();
+			etime.appendChild(tm);
+			tm.style.marginLeft = '10%';
+			tm.style.paddingLeft = '10%';
+			break;
+		}
 
 		var stopTime = time.stopped || Date.now();
 
