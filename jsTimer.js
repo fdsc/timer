@@ -218,6 +218,11 @@ function addTimer0()
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
 
+		// На всякий случай, исправляем ошибки, типа 12,00. Исправляется только первое вхождение
+		s = s.replace(/[^0-9]/, ":");		// Первый неправильный символ в двоеточие
+		s = s.replaceAll(/[^0-9\:]/g, "");	// Все оставшиеся символы удаляем
+		s = s.replaceAll(/\:+/g, ":");		// Множественные повторения двоеточий - в одно двоеточие
+
 		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
 
@@ -364,10 +369,17 @@ function addTimer0()
 				dtp = Date.parse(h + "-" + month + "-" + tmpDay + " " + hours + ":" + minutes);
 
 			dtp = new Date(dtp);
+			var cntForError = 368;
 
 			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
 			{
 				dtp = new Date(dtp.getTime() + 24*3600*1000);
+				cntForError--;
+				if (cntForError < 0)
+				{
+					dtp = null;
+					break;
+				}
 			}
 		}
 
