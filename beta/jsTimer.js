@@ -351,13 +351,16 @@ function addTimer0()
 			}
 
 			dtp = Date.parse(h + "." + month + "." + now.getDate() + " " + hours + ":" + minutes);
+			if (isNaN(dtp))
+				dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);
+
 			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
 			{
 				dtp = new Date(dtp.getTime() + 24*3600*1000);
 			}
 		}
 
-		if (dtp != null && !isNaN(dtp))
+		if (dtp == null || isNaN(dtp))
 			dtp  = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
 
 		if (isNaN(dtp))
