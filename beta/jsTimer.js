@@ -354,6 +354,9 @@ function addTimer0()
 			if (isNaN(dtp))
 				dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);
 
+			if (isNaN(dtp))
+				console.error(dtp);
+
 			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
 			{
 				dtp = new Date(dtp.getTime() + 24*3600*1000);
