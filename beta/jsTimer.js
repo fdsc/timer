@@ -219,7 +219,9 @@ function addTimer0()
 		var s = document.getElementById("seconds").value;
 
 		// На всякий случай, исправляем ошибки, типа 12,00. Исправляется только первое вхождение
-		    s = s.replace(/[^0-9]/, ":");
+		s = s.replace(/[^0-9]/, ":");		// Первый неправильный символ в двоеточие
+		s = s.replaceAll(/[^0-9\:]/g, "");	// Все оставшиеся символы удаляем
+		s = s.replaceAll(/\:+/g, ":");		// Множественные повторения двоеточий - в одно двоеточие
 
 		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
