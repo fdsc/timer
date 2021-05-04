@@ -203,6 +203,7 @@ function addTimer_Mil(milliSeconds)
 	hideAlert();
 };
 
+var daysOfWeek = [['по', 'пн'], ['вт'], ['ср'], ['чт', 'че'], ['пя', 'пт'], ['сб', 'су'], ['вс', 'во']];
 function addTimer0()
 {/*
 	Img[0]   = parseFloat(document.getElementById("Img1").value);*/
@@ -213,7 +214,7 @@ function addTimer0()
 	{
 		var now = new Date();
 
-		var h = parseInt(document.getElementById("hours")  .value || now.getFullYear());
+		var h = parseInt(document.getElementById("hours").value || now.getFullYear());
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
 
@@ -226,7 +227,9 @@ function addTimer0()
 			minutes = now.getMinutes();
 
 		if (!month)
+		{
 			month = now.getMonth() + 1;
+		}
 		else
 		if (isNaN(parseInt(month)))
 		{
@@ -240,7 +243,7 @@ function addTimer0()
 				month = 2;
 			}
 			else
-			if (month.startsWith("мар"))
+			if (month.startsWith("мар") || month.startsWith("мат") || month.startsWith("мап"))	// мат - ошибка при написании марта
 			{
 				month = 3;
 			}
@@ -250,7 +253,7 @@ function addTimer0()
 				month = 4;
 			}
 			else
-			if (month.startsWith("май"))
+			if (month.startsWith("май") || month.startsWith("мая"))
 			{
 				month = 5;
 			}
@@ -291,6 +294,7 @@ function addTimer0()
 			}
 		}
 
+		var dtp = null;
 		if (!day)
 		{
 			day = now.getDate();
@@ -325,8 +329,50 @@ function addTimer0()
 			month = afterDay.getMonth() + 1;
 			h     = afterDay.getFullYear();
 		}
+		else
+		// Если мы хотим, чтобы можно было ввести "пятница" и т.п.
+		if (day.trim && isNaN(parseInt(day.trim())))
+		{
+			day = day.trim();
+			var selectedDayOfWeek = now.getDay();
 
-		var dtp = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
+			breakDayLabel:
+			for (var i = 0; i < daysOfWeek.length; i++)
+			{
+				var dayNameStarts = daysOfWeek[i];
+				for (var j = 0; j < daysOfWeek.length; j++)
+				{
+					if (day.startsWith(dayNameStarts[j]))
+					{
+						// i - это день недели, начиная с 0, j - это представление этого дня недели
+						// Т.к. день недели, начиная с нуля, то мы прибавляем к нему 1
+						// Потому что getDay() даёт числа, начиная с 0, но воскресенье - это 0
+						selectedDayOfWeek = i + 1;
+						if (selectedDayOfWeek >= 7)
+							selectedDayOfWeek = 0;
+
+						break breakDayLabel;
+					}
+				}
+			}
+
+			// Первое число, т.к. чтобы сработало "пят.октября"
+			// нужно начинать сразу с первого числа этого месяца, а не с текущего
+			var tmpDay = 1; // now.getDate()
+			dtp = Date.parse(h + "." + month + "." + tmpDay + " " + hours + ":" + minutes);
+			if (isNaN(dtp))
+				dtp = Date.parse(h + "-" + month + "-" + tmpDay + " " + hours + ":" + minutes);
+
+			dtp = new Date(dtp);
+
+			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
+			{
+				dtp = new Date(dtp.getTime() + 24*3600*1000);
+			}
+		}
+
+		if (dtp == null || isNaN(dtp))
+			dtp  = Date.parse(h + "." + month + "." + day + " " + hours + ":" + minutes);
 
 		if (isNaN(dtp))
 			dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);

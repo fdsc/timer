@@ -342,20 +342,28 @@ function addTimer0()
 				var dayNameStarts = daysOfWeek[i];
 				for (var j = 0; j < daysOfWeek.length; j++)
 				{
-					if (day.startsWith(daysOfWeek[j]))
+					if (day.startsWith(dayNameStarts[j]))
 					{
-						selectedDayOfWeek = j;
+						// i - это день недели, начиная с 0, j - это представление этого дня недели
+						// Т.к. день недели, начиная с нуля, то мы прибавляем к нему 1
+						// Потому что getDay() даёт числа, начиная с 0, но воскресенье - это 0
+						selectedDayOfWeek = i + 1;
+						if (selectedDayOfWeek >= 7)
+							selectedDayOfWeek = 0;
+
 						break breakDayLabel;
 					}
 				}
 			}
 
-			dtp = Date.parse(h + "." + month + "." + now.getDate() + " " + hours + ":" + minutes);
+			// Первое число, т.к. чтобы сработало "пят.октября"
+			// нужно начинать сразу с первого числа этого месяца, а не с текущего
+			var tmpDay = 1; // now.getDate()
+			dtp = Date.parse(h + "." + month + "." + tmpDay + " " + hours + ":" + minutes);
 			if (isNaN(dtp))
-				dtp = Date.parse(h + "-" + month + "-" + day + " " + hours + ":" + minutes);
+				dtp = Date.parse(h + "-" + month + "-" + tmpDay + " " + hours + ":" + minutes);
 
-			if (isNaN(dtp))
-				console.error(dtp);
+			dtp = new Date(dtp);
 
 			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
 			{
