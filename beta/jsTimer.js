@@ -364,10 +364,17 @@ function addTimer0()
 				dtp = Date.parse(h + "-" + month + "-" + tmpDay + " " + hours + ":" + minutes);
 
 			dtp = new Date(dtp);
+			var cntForError = 368;
 
 			while (dtp.getDay() != selectedDayOfWeek || dtp.getTime() < now.getTime())
 			{
 				dtp = new Date(dtp.getTime() + 24*3600*1000);
+				cntForError--;
+				if (cntForError < 0)
+				{
+					dtp = null;
+					break;
+				}
 			}
 		}
 
