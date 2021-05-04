@@ -218,6 +218,9 @@ function addTimer0()
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
 
+		// На всякий случай, исправляем ошибки, типа 12,00. Исправляется только первое вхождение
+		    s = s.replace(/[^0-9]/, ":");
+
 		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
 
