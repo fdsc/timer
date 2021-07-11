@@ -54,12 +54,13 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	(
 		{
 			end:  	  end,
-			// end изменяется, когда таймеру нужно помигать. endL - не изменяется никогда
+			// end изменяется, когда таймеру нужно помигать. endL - не изменяется никогда (если только таймер не отложен)
 			endL: 	  end,
 			id:   	  id,
 			text: 	  text,
 			toDelete: false,
-			isControlTask: false
+			isControlTask: false,
+			deferred: false
 		}
 	);
 
@@ -532,10 +533,18 @@ function getNewId(timers)
 	return id;
 };
 
+function isSilent()
+{
+	if (silentEndTime > new Date().getTime())
+		return true;
+
+	return false;
+}
+
 var silentEndTime = 0;
 function play(freq, time, volume, old)
 {
-	if (silentEndTime > new Date().getTime())
+	if (isSilent())
 		return;
 
 	if (!AC)
@@ -729,6 +738,40 @@ function onAudioLoad()
 	return !!AC;
 };
 
+function makeDefer()
+{
+	var minute = 1000 * 60; // Одна минута
+	var now    = new Date().getTime();
+	var first  = now + minute;
+	for (var cur of timersObject.timers)
+	{
+		if (cur.stopped || cur.endL < first)
+		{
+			cur.endL     = first;
+			cur.deferred = true;
+			cur.stopped  = false;
+
+			first += minute;
+
+			// Удаляем уведомления
+			try
+			{
+				var notification = notificationObjects[cur.id];
+				if (notification instanceof Notification)
+				{
+					notification.close();
+					delete notificationObjects[cur.id];
+				}
+			}
+			catch (e)
+			{
+				console.error(e);
+			}
+		}
+	}
+}
+
+
 function addNull(str)
 {
 	str = '' + str;
@@ -826,13 +869,14 @@ function interval()
 		var tt = document.getElementById('timer-' + tid + '-t');
 		var dif = cur.end - now;
 
-		if (dif <= 0)
+		if (dif <= 0 || cur.deferred)
 		{
-			if (cur.stopped !== true)
+			if (cur.stopped !== true && cur.endL < now)
 			{
-				cur.stopped = true;
-				cur.played  = 0;
-				cur.playedA = 0;
+				cur.deferred = false;
+				cur.stopped  = true;
+				cur.played   = 0;
+				cur.playedA  = 0;
 
 				try
 				{
@@ -845,7 +889,8 @@ function interval()
 					console.error(e);
 				}
 
-				MakeNotification(cur, cur.text);
+				if (cur.deferred != true)
+					MakeNotification(cur, cur.text);
 
 				// Если третий режим, то сбрасываем таймер звуков,
 				// чтобы новый пользовательский таймер смог снова прозвучать
@@ -859,6 +904,12 @@ function interval()
 			tt.textContent = '00:00:00';
 
 			var tm = document.getElementById('timer-' + tid + '-del');
+
+			if (cur.deferred)
+			{
+				tm.style.backgroundColor = '#8888FF';
+			}
+			else
 			if (cur.color && cur.color > 0)
 			{
 				tm.style.backgroundColor = 'yellow';
@@ -878,7 +929,7 @@ function interval()
 		// Иначе это уже остановленный таймер
 		if (cur.stopped !== true)
 		{
-			tt.textContent = formatDate(end);
+			tt.textContent = formatDate(new Date(cur.endL - now));
 
 			if (isTimerToDelete(cur))
 			{
@@ -1640,7 +1691,7 @@ function updateDeleteTextForTimersShorts()
 	{
 		var te = document.getElementById('timer-' + cur.id + "-del");
 		if (isTimerToDelete(cur))
-		{console.error(cur);
+		{
 			if (cur.isInterval)
 			{
 				te.value = "Удалить?";
@@ -1894,6 +1945,16 @@ window.onload = function()
 		}
 	);
 	
+	btn = document.getElementById("defer");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			makeDefer();
+		}
+	);
+
 	btn = document.getElementById("resetText");
 	btn.addEventListener
 	(
