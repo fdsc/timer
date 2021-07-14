@@ -651,6 +651,8 @@ function loadSoundRegime()
 		if (typeof(soundRegime) != "undefined" && soundRegime)
 		{
 			soundRegimeObject = JSON.parse(soundRegime);
+			var btn = document.getElementById("defer1");
+			btn.value = soundRegimeObject.DeferTime + " мин.";
 		}
 	}
 	catch (e)
