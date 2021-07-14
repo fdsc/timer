@@ -19,7 +19,8 @@ var timersObject =
 var soundRegimeObject = 
 {
 	gainVal:     1.0,
-	soundRegime: 0
+	soundRegime: 0,
+	DeferTime:   1
 };
 
 var SoundRegimeText = 
@@ -741,18 +742,21 @@ function onAudioLoad()
 
 function makeDeferChangeInterval()
 {
-	DeferTime++;
-	if (DeferTime > 7)
-		DeferTime = 1;
+	if (isNaN(soundRegimeObject.DeferTime))
+		soundRegimeObject.DeferTime = 1;
+
+	soundRegimeObject.DeferTime++;
+	if (soundRegimeObject.DeferTime > 7)
+		soundRegimeObject.DeferTime = 1;
 	
 	var btn = document.getElementById("defer1");
-	btn.value = DeferTime + " мин.";
+	btn.value = soundRegimeObject.DeferTime + " мин.";
 }
 
-
-var DeferTime = 1;
 function makeDefer()
 {
+	var DeferTime = soundRegimeObject.DeferTime;
+
 	var minute = 1000 * 60; // Одна минута
 	var now    = new Date().getTime();
 	var first  = now + minute * DeferTime;
