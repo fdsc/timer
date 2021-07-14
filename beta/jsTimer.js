@@ -1432,7 +1432,7 @@ function isHighestPriority(a, b)
 			return false;
 	}
 
-	if (a.endS ? (a.endS > b.endS) : (a.endL > b.endL)
+	if (a.endS ? (a.endS > b.endS) : (a.endL > b.endL))
 		return true;
 
 	return false;
