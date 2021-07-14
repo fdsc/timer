@@ -1464,6 +1464,7 @@ function MakeNotification(timer, header, text)
 			function(event)
 			{
 				notification.close();
+				delete notificationObjects[cur.id];
 				window.focus();
 /*
 				deleteTimer.apply
