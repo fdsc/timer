@@ -738,11 +738,24 @@ function onAudioLoad()
 	return !!AC;
 };
 
+
+function makeDeferChangeInterval()
+{
+	DeferTime++;
+	if (DeferTime > 7)
+		DeferTime = 1;
+	
+	var btn = document.getElementById("defer1");
+	btn.value = DeferTime + " мин.";
+}
+
+
+var DeferTime = 1;
 function makeDefer()
 {
 	var minute = 1000 * 60; // Одна минута
 	var now    = new Date().getTime();
-	var first  = now + minute;
+	var first  = now + minute * DeferTime;
 	for (var cur of timersObject.timers)
 	{
 		if (cur.stopped || cur.endL < first)
@@ -751,7 +764,7 @@ function makeDefer()
 			cur.deferred = true;
 			cur.stopped  = false;
 
-			first += minute;
+			first += minute * DeferTime;
 
 			// Удаляем уведомления
 			try
@@ -1952,6 +1965,16 @@ window.onload = function()
 		function(me)
 		{
 			makeDefer();
+		}
+	);
+	
+	btn = document.getElementById("defer1");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			makeDeferChangeInterval();
 		}
 	);
 
