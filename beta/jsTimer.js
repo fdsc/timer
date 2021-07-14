@@ -1457,7 +1457,7 @@ function drawTimersGeneral()
 			{
 				for (var j = i + 1; j < t.length; j++)
 				{
-					if (isHighestPriority([i], t[j]))
+					if (isHighestPriority(t[i], t[j]))
 					{
 						var ai = t[i];
 						var aj = t[j];
