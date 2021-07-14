@@ -1536,6 +1536,16 @@ function MakeNotification(timer, header, text)
 			},
 			false
 		);
+
+		notification.addEventListener
+		(
+			'close',
+			function(event)
+			{
+				delete notificationObjects[cur.id];
+			},
+			false
+		);
 	}
 	catch
 	{}
