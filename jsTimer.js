@@ -80,8 +80,6 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 
 function importantTimer(MouseEvent)
 {
-	var toDel = document.getElementById('timer-' + this.tid);
-	
 	var timers = timersObject.timers;
 	for (var curI = 0; curI < timers.length; curI++)
 	{
@@ -1510,6 +1508,19 @@ function MakeNotification(timer, header, text)
 			'click',
 			function(event)
 			{
+				var timers = timersObject.timers;
+				for (var curI = 0; curI < timers.length; curI++)
+				{
+					var cur = timers[curI];
+					if (cur.id == timer.id)
+					{
+						window.focus();
+
+						if (cur.Important)
+							return;
+					}
+				}
+
 				notification.close();
 				delete notificationObjects[cur.id];
 				window.focus();
