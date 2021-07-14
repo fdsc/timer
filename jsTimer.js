@@ -944,6 +944,7 @@ function interval()
 					playObject.pause = 0;
 				}
 
+				saveTimers();
 				drawTimers();
 			}
 
