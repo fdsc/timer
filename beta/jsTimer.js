@@ -1418,6 +1418,26 @@ function MergeTimers(text)
 	return success;
 }
 
+function isHighestPriority(a, b)
+{
+	if (!a.stopped && b.stopped)
+		return true;
+
+	if (a.stopped && b.stopped)
+	{
+		if (!a.Important && b.Important)
+			return true;
+
+		if (a.Important && !b.Important)
+			return false;
+	}
+
+	if (a.endS ? (a.endS > b.endS) : (a.endL > b.endL)
+		return true;
+
+	return false;
+}
+
 function drawTimersGeneral()
 {
 	var main = document.getElementById("main");
@@ -1434,7 +1454,7 @@ function drawTimersGeneral()
 			{
 				for (var j = i + 1; j < t.length; j++)
 				{
-					if (t[i].end > t[j].end)
+					if (isHighestPriority([i], t[j]))
 					{
 						var ai = t[i];
 						var aj = t[j];
