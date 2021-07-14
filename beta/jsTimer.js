@@ -943,6 +943,8 @@ function interval()
 					lastDateOfPlay   = Date.now();
 					playObject.pause = 0;
 				}
+
+				drawTimers();
 			}
 
 			tt.textContent = '00:00:00';
@@ -1311,7 +1313,7 @@ function drawTimer(timer)
 	tImportant.style.color = timer.Important ? "#000000" : "#558855";
 	tImportant.addEventListener('click', importantTimer);
 	tImportant.id = 'timer-' + timer.id + "-imp";
-	tImportant.style.marginLeft = '1%';
+	tImportant.style.marginLeft = '2%';
 
 
 	var hr = document.createElement("hr");
