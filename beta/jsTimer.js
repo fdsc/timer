@@ -1512,7 +1512,7 @@ function MakeNotification(timer, header, text)
 				for (var curI = 0; curI < timers.length; curI++)
 				{
 					var cur = timers[curI];
-					if (cur.id == timer.tid)
+					if (cur.id == timer.id)
 					{
 						window.focus();
 
