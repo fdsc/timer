@@ -770,6 +770,8 @@ function makeDeferChangeInterval()
 	
 	var btn = document.getElementById("defer1");
 	btn.value = soundRegimeObject.DeferTime + " мин.";
+
+	saveSoundRegime();
 }
 
 function makeDefer()
