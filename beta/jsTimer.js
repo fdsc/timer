@@ -1308,9 +1308,11 @@ function drawTimer(timer)
 	tdeldiv.appendChild(tImportant);
 	tImportant.tid = timer.id;
 	tImportant.textContent = timer.Important ? "Важная" : "Не важная";
+	tImportant.style.color = timer.Important ? "#000000" : "#558855";
 	tImportant.addEventListener('click', importantTimer);
 	tImportant.id = 'timer-' + timer.id + "-imp";
 	tImportant.style.marginLeft = '1%';
+
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
