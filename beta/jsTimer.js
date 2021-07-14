@@ -54,14 +54,16 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 	addTimerObject
 	(
 		{
-			end:  	  end,
+			end:  	       end,
 			// end изменяется, когда таймеру нужно помигать. endL - не изменяется никогда (если только таймер не отложен)
-			endL: 	  end,
-			id:   	  id,
-			text: 	  text,
-			toDelete: false,
+			endL: 	       end,
+			endS:          end,	// Не изменяется вообще никогда
+			id:   	       id,
+			text: 	       text,
+			toDelete:      false,
 			isControlTask: false,
-			deferred: false
+			deferred:      false,
+			Important:     false
 		}
 	);
 
@@ -75,6 +77,23 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 
 	playNull();
 };
+
+function importantTimer(MouseEvent)
+{
+	var timers = timersObject.timers;
+	for (var curI = 0; curI < timers.length; curI++)
+	{
+		var cur = timers[curI];
+		if (cur.id == this.tid)
+		{
+			cur.Important = !cur.Important;
+			saveTimers();
+			drawTimers();
+
+			return;
+		}
+	}
+}
 
 function deleteTimer(MouseEvent)
 {
@@ -762,6 +781,9 @@ function makeDefer()
 	var first  = now + minute * DeferTime;
 	for (var cur of timersObject.timers)
 	{
+		if (cur.Important)
+			continue;
+
 		if (cur.stopped || cur.endL < first)
 		{
 			cur.endL     = first;
@@ -786,6 +808,9 @@ function makeDefer()
 			}
 		}
 	}
+
+	saveTimers();
+	drawTimers();
 }
 
 
@@ -862,6 +887,7 @@ function formatTime(date)
 }
 
 var lastDateOfPlay = false;
+var ImportantPlay  = false;
 function interval()
 {
 	var now = new Date().getTime();
@@ -878,7 +904,8 @@ function interval()
 		btn.value = "отключено " + addNull(dt.getUTCMinutes()) + ":" + addNull(dt.getUTCSeconds());
 	}
 
-	var isPlay = false;
+	var isPlay    = false;
+	ImportantPlay = false;
 	for (var cur of timersObject.timers)
 	{
 		var tid = cur.id;
@@ -983,6 +1010,8 @@ function interval()
 		if (cur.stopped === true)
 		{
 			isPlay = true;
+			if (cur.Important)
+				ImportantPlay = true;
 
 			// Устанавливаем дату первого запроса именно здесь,
 			// т.к. выше после перезагрузки страницы уже может не сработать условие !stopped,
@@ -1159,7 +1188,7 @@ function playGeneral()
 	else
 	if (soundRegime == 3)
 	{
-		if (Urgent < 60*1000)
+		if (Urgent < 60*1000 || ImportantPlay)
 		{
 			play();
 			playObject.pause = Date.now() + 48*1000;
@@ -1222,6 +1251,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 function drawTimer(timer)
 {
 	var main = document.getElementById("main");
+	var now  = new Date();
 
 	var div  = document.createElement("div");
 	div.id   = 'timer-' + timer.id;
@@ -1245,6 +1275,13 @@ function drawTimer(timer)
 	tend.id = 'timer-' + timer.id + "-end";
 	tend.textContent = new Date(timer.endL).toLocaleString();
 	tend.style.marginLeft = '10%';
+	if (timer.endS && timer.endS != timer.endL)
+	{
+		tend.textContent = new Date(timer.endS).toLocaleString() + "\t" + tend.textContent;
+
+		if (now.getTime() > timer.endS)
+			tend.style.backgroundColor = "#FF8888";
+	}
 
 	var tdeldiv = document.createElement("div");
 	div.appendChild(tdeldiv);
@@ -1266,6 +1303,14 @@ function drawTimer(timer)
 	{
 		timer.toDelete = false;
 	}
+
+	var tImportant = document.createElement("span");
+	tdeldiv.appendChild(tImportant);
+	tImportant.tid = timer.id;
+	tImportant.textContent = timer.Important ? "Важная" : "Не важная";
+	tImportant.addEventListener('click', importantTimer);
+	tImportant.id = 'timer-' + timer.id + "-imp";
+	tImportant.style.marginLeft = '1%';
 
 	var hr = document.createElement("hr");
 	div.appendChild(hr);
@@ -1463,6 +1508,19 @@ function MakeNotification(timer, header, text)
 			'click',
 			function(event)
 			{
+				var timers = timersObject.timers;
+				for (var curI = 0; curI < timers.length; curI++)
+				{
+					var cur = timers[curI];
+					if (cur.id == timer.tid)
+					{
+						window.focus();
+
+						if (cur.Important)
+							return;
+					}
+				}
+
 				notification.close();
 				delete notificationObjects[cur.id];
 				window.focus();
