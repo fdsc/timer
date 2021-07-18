@@ -1555,7 +1555,7 @@ function MakeNotification(timer, header, text)
 				}
 
 				notification.close();
-				delete notificationObjects[cur.id];
+				delete notificationObjects[timer.id];
 				window.focus();
 /*
 				deleteTimer.apply
@@ -1573,7 +1573,7 @@ function MakeNotification(timer, header, text)
 			'close',
 			function(event)
 			{
-				delete notificationObjects[cur.id];
+				delete notificationObjects[timer.id];
 			},
 			false
 		);
