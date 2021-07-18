@@ -2193,6 +2193,30 @@ function drawTimers()
 	{
 		var t = JSON.parse(timersFromStorage);
 			*/
+
+            try
+            {
+                navigator.permissions.query
+                ({name: 'clipboard-read'})
+                .then
+                (
+                    function(result)
+                    {
+                        if (result.state == 'granted' || result.state == 'prompt')
+                        {
+                        }
+                        else
+                        {
+                            console.error("clipboard-read permission not granted: " + result.state);
+                        }
+                    }
+                );
+            }
+            catch (e)
+            {
+                console.error(e);
+            }
+
 			navigator.clipboard.readText()
 			.then
 			(
