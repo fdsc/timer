@@ -1199,10 +1199,10 @@ function playGeneral()
 	else
 	if (soundRegime == 3)
 	{
-		if (Urgent < 60*1000 || ImportantPlay)
+		if (Urgent <= 90*1000 || ImportantPlay)
 		{
 			play();
-			playObject.pause = Date.now() + 48*1000;
+			playObject.pause = Date.now() + 60*1000;
 		}
 	}
 }
