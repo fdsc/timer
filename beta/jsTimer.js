@@ -1604,8 +1604,7 @@ console.error(oldNotification);
 				}
 
 				notification.deleted = true;
-				// notification.close();
-				console.error("to close by click " + timer.id);
+				notification.close();
 				// Не будем удалять, просто закроем таймер
 				// Это нужно, чтобы он заново не открывался, если по нему именно кликнули
 				// delete notificationObjects[timer.id];
@@ -1619,11 +1618,20 @@ console.error(oldNotification);
 			'close',
 			function(event)
 			{
-				if (!notification.deleted)
+				// Удаляем все старые таймеры
+				// На всякий случай, удаляем только те, что держатся более часа
+				// Остальные оставляем, чтобы можно было понять,
+				// что они отображались, но были закрыты
+				var timers = timersObject.timers;
+				for (var curI = 0; curI < timers.length; curI++)
 				{
-					console.error("delete on close " + timer.id);
-					console.error(notification);
-					delete notificationObjects[timer.id];
+					var oldNotification = notificationObjects[timers[curI].id];
+
+					if (oldNotification.deleted)
+					if (new Date().getTime() - oldNotification.timestamp < 3600 * 1000)
+					{
+						delete notificationObjects[timer.id];
+					}
 				}
 			},
 			false
