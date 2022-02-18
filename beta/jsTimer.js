@@ -1608,13 +1608,6 @@ function MakeNotification(timer, header, text)
 				// Это нужно, чтобы он заново не открывался, если по нему именно кликнули
 				// delete notificationObjects[timer.id];
 				window.focus();
-/*
-				deleteTimer.apply
-				(
-					{
-						tid: timer.id
-					}
-				);*/
 			},
 			false
 		);
