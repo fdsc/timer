@@ -1038,6 +1038,14 @@ function interval()
 				// Делаем дополнительное сообщение, если таймер важный
 				MakeNotification(cur, cur.text);
 			}
+			else
+			{
+				var notification = notificationObjects[cur.id];
+				if (  !(notification instanceof Notification)  )
+				{
+					MakeNotification(cur, cur.text);
+				}
+			}
 
 			// Устанавливаем дату первого запроса именно здесь,
 			// т.к. выше после перезагрузки страницы уже может не сработать условие !stopped,
@@ -1536,7 +1544,7 @@ function getSoundRegimeText(soundRegime)
 }
 
 function MakeNotification(timer, header, text)
-{console.error("MakeNotification"); // TODO
+{
 	try
 	{
 		// На всякий случай проверяем, что нет другого уведомления
@@ -1547,7 +1555,6 @@ function MakeNotification(timer, header, text)
 			// то ничего не делаем
 			if (new Date().getTime() - oldNotification.timestamp < 6 * 1000)
 			{
-console.error("NO TIME"); // TODO
 				return;
 			}
 
