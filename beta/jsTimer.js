@@ -1628,11 +1628,16 @@ console.error(oldNotification);
 				{
 					var oldNotification = notificationObjects[  timers[curI].id  ];
 
-					if (oldNotification.deleted)
-					if (now - oldNotification.timestamp > 3600 * 1000)
+					try
 					{
-						delete notificationObjects[timer.id];
+						if (oldNotification.deleted)
+						if (now - oldNotification.timestamp > 3600 * 1000)
+						{
+							delete notificationObjects[timer.id];
+						}
 					}
+					catch
+					{}
 				}
 			},
 			false
