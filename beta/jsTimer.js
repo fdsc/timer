@@ -1625,10 +1625,10 @@ console.error(oldNotification);
 				var timers = timersObject.timers;
 				for (var curI = 0; curI < timers.length; curI++)
 				{
-					var oldNotification = notificationObjects[timers[curI].id];
+					var oldNotification = notificationObjects[  timers[curI].id  ];
 
 					if (oldNotification.deleted)
-					if (new Date().getTime() - oldNotification.timestamp < 3600 * 1000)
+					if (new Date().getTime() - oldNotification.timestamp > 3600 * 1000)
 					{
 						delete notificationObjects[timer.id];
 					}
