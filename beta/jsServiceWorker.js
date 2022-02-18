@@ -1,4 +1,4 @@
-﻿// Виноградов С.В.
+﻿// Виноградов С.В. https://github.com/fdsc/timer
 // chrome://inspect/#service-workers
 // about:debugging
 

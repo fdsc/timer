@@ -1,4 +1,4 @@
-﻿// Виноградов С.В.
+﻿// Виноградов С.В. https://github.com/fdsc/timer
 
 var AC = null;
 var audioSource = null;
@@ -1546,7 +1546,10 @@ function MakeNotification(timer, header, text)
 			// Если не прошло минуты со времени последнего появления уведомления,
 			// то ничего не делаем
 			if (new Date().getTime() - n.timestamp < 60 * 1000)
+			{
+console.log("NO TIME"); // TODO
 				return;
+			}
 
 			try
 			{
