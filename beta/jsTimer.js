@@ -1623,12 +1623,13 @@ console.error(oldNotification);
 				// Остальные оставляем, чтобы можно было понять,
 				// что они отображались, но были закрыты
 				var timers = timersObject.timers;
+				var now    = new Date().getTime();
 				for (var curI = 0; curI < timers.length; curI++)
 				{
 					var oldNotification = notificationObjects[  timers[curI].id  ];
 
 					if (oldNotification.deleted)
-					if (new Date().getTime() - oldNotification.timestamp > 3600 * 1000)
+					if (now - oldNotification.timestamp > 3600 * 1000)
 					{
 						delete notificationObjects[timer.id];
 					}
