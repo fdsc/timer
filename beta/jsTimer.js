@@ -1,4 +1,6 @@
-﻿var AC = null;
+﻿// Виноградов С.В.
+
+var AC = null;
 var audioSource = null;
 var audio = null;
 var gainNode = null;
@@ -125,6 +127,7 @@ function deleteTimer(MouseEvent)
 				var notification = notificationObjects[cur.id];
 				if (notification instanceof Notification)
 				{
+					notification.deleted = true;
 					notification.close();
 					delete notificationObjects[cur.id];
 				}
@@ -813,6 +816,7 @@ function makeDefer()
 				var notification = notificationObjects[cur.id];
 				if (notification instanceof Notification)
 				{
+					notification.deleted = true;
 					notification.close();
 					delete notificationObjects[cur.id];
 				}
@@ -1045,7 +1049,7 @@ function interval()
 
 	document.title = minText;
 	setIntervalsWidth();
-	
+
 	var timeBox = document.getElementById("timeBox");
 	timeBox.textContent = formatTime(new Date());
 
@@ -1536,12 +1540,20 @@ function MakeNotification(timer, header, text)
 	try
 	{
 		// На всякий случай проверяем, что нет другого уведомления
-		var notification = notificationObjects[timer.id];
-		if (notification instanceof Notification)
+		var oldNotification = notificationObjects[timer.id];
+		if (oldNotification instanceof Notification)
 		{
+			// Если не прошло минуты со времени последнего появления уведомления,
+			// то ничего не делаем
+			if (new Date().getTime() - n.timestamp < 60 * 1000)
+				return;
+
 			try
 			{
-				notification.close();
+				// Устанавливаем флаг того, что удаление будет произведено вручную
+				// Чтобы не удалять ещё раз в событии close
+				oldNotification.deleted = true;
+				oldNotification.close();
 			}
 			catch (e)
 			{
@@ -1580,6 +1592,7 @@ function MakeNotification(timer, header, text)
 					}
 				}
 
+				notification.deleted = true;
 				notification.close();
 				delete notificationObjects[timer.id];
 				window.focus();
@@ -1599,7 +1612,8 @@ function MakeNotification(timer, header, text)
 			'close',
 			function(event)
 			{
-				delete notificationObjects[timer.id];
+				if (!notification.deleted)
+					delete notificationObjects[timer.id];
 			},
 			false
 		);

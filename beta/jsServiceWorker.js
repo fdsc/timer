@@ -1,4 +1,5 @@
-﻿// chrome://inspect/#service-workers
+﻿// Виноградов С.В.
+// chrome://inspect/#service-workers
 // about:debugging
 
 // https://developer.mozilla.org/ru/docs/Web/API/Service_Worker_API/Using_Service_Workers
