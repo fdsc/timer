@@ -1549,12 +1549,12 @@ function MakeNotification(timer, header, text)
 	{
 		// На всякий случай проверяем, что нет другого уведомления
 		var oldNotification = notificationObjects[timer.id];
-console.error(oldNotification);
+
 		if (oldNotification instanceof Notification)
 		{
 			// Если не прошло минуты со времени последнего появления уведомления,
 			// то ничего не делаем
-			if (new Date().getTime() - oldNotification.timestamp < 6 * 1000)
+			if (new Date().getTime() - oldNotification.timestamp < 60 * 1000)
 			{
 				return;
 			}

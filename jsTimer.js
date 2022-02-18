@@ -1,4 +1,6 @@
-﻿var AC = null;
+﻿// Виноградов С.В. https://github.com/fdsc/timer
+
+var AC = null;
 var audioSource = null;
 var audio = null;
 var gainNode = null;
@@ -125,6 +127,7 @@ function deleteTimer(MouseEvent)
 				var notification = notificationObjects[cur.id];
 				if (notification instanceof Notification)
 				{
+					notification.deleted = true;
 					notification.close();
 					delete notificationObjects[cur.id];
 				}
@@ -813,6 +816,7 @@ function makeDefer()
 				var notification = notificationObjects[cur.id];
 				if (notification instanceof Notification)
 				{
+					notification.deleted = true;
 					notification.close();
 					delete notificationObjects[cur.id];
 				}
@@ -1029,7 +1033,19 @@ function interval()
 		{
 			isPlay = true;
 			if (cur.Important)
+			{
 				ImportantPlay = true;
+				// Делаем дополнительное сообщение, если таймер важный
+				MakeNotification(cur, cur.text);
+			}
+			else
+			{
+				var notification = notificationObjects[cur.id];
+				if (  !(notification instanceof Notification)  )
+				{
+					MakeNotification(cur, cur.text);
+				}
+			}
 
 			// Устанавливаем дату первого запроса именно здесь,
 			// т.к. выше после перезагрузки страницы уже может не сработать условие !stopped,
@@ -1041,7 +1057,7 @@ function interval()
 
 	document.title = minText;
 	setIntervalsWidth();
-	
+
 	var timeBox = document.getElementById("timeBox");
 	timeBox.textContent = formatTime(new Date());
 
@@ -1531,6 +1547,32 @@ function MakeNotification(timer, header, text)
 {
 	try
 	{
+		// На всякий случай проверяем, что нет другого уведомления
+		var oldNotification = notificationObjects[timer.id];
+
+		if (oldNotification instanceof Notification)
+		{
+			// Если не прошло минуты со времени последнего появления уведомления,
+			// то ничего не делаем
+			if (new Date().getTime() - oldNotification.timestamp < 60 * 1000)
+			{
+				return;
+			}
+
+			try
+			{
+				// Устанавливаем флаг того, что удаление будет произведено вручную
+				// Чтобы не удалять ещё раз в событии close
+				oldNotification.deleted = true;
+				oldNotification.close();
+			}
+			catch (e)
+			{
+				console.error(e);
+			}
+			delete notificationObjects[timer.id];
+		}
+
 		// var notification = new Notification('To do list', { body: text, icon: img });
 		var notification = new Notification
 								(
@@ -1561,16 +1603,12 @@ function MakeNotification(timer, header, text)
 					}
 				}
 
+				notification.deleted = true;
 				notification.close();
-				delete notificationObjects[timer.id];
+				// Не будем удалять, просто закроем таймер
+				// Это нужно, чтобы он заново не открывался, если по нему именно кликнули
+				// delete notificationObjects[timer.id];
 				window.focus();
-/*
-				deleteTimer.apply
-				(
-					{
-						tid: timer.id
-					}
-				);*/
 			},
 			false
 		);
@@ -1580,7 +1618,27 @@ function MakeNotification(timer, header, text)
 			'close',
 			function(event)
 			{
-				delete notificationObjects[timer.id];
+				// Удаляем все старые таймеры
+				// На всякий случай, удаляем только те, что держатся более часа
+				// Остальные оставляем, чтобы можно было понять,
+				// что они отображались, но были закрыты
+				var timers = timersObject.timers;
+				var now    = new Date().getTime();
+				for (var curI = 0; curI < timers.length; curI++)
+				{
+					var oldNotification = notificationObjects[  timers[curI].id  ];
+
+					try
+					{
+						if (oldNotification.deleted)
+						if (now - oldNotification.timestamp > 3600 * 1000)
+						{
+							delete notificationObjects[timer.id];
+						}
+					}
+					catch
+					{}
+				}
 			},
 			false
 		);
