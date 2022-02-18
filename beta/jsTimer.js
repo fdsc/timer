@@ -1619,7 +1619,10 @@ console.error(oldNotification);
 			function(event)
 			{
 				if (!notification.deleted)
+				{
+					console.error("delete on close");
 					delete notificationObjects[timer.id];
+				}
 			},
 			false
 		);
