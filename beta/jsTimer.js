@@ -1604,7 +1604,9 @@ function MakeNotification(timer, header, text)
 
 				notification.deleted = true;
 				notification.close();
-				delete notificationObjects[timer.id];
+				// Не будем удалять, просто закроем таймер
+				// Это нужно, чтобы он заново не открывался, если по нему именно кликнули
+				// delete notificationObjects[timer.id];
 				window.focus();
 /*
 				deleteTimer.apply
