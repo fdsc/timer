@@ -1033,7 +1033,7 @@ function interval()
 		{
 			isPlay = true;
 			if (cur.Important)
-			{
+			{console.error("Important"); // TODO
 				ImportantPlay = true;
 				// Делаем дополнительное сообщение, если таймер важный
 				MakeNotification(cur, cur.text);
