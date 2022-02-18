@@ -1536,7 +1536,7 @@ function getSoundRegimeText(soundRegime)
 }
 
 function MakeNotification(timer, header, text)
-{
+{console.log("MakeNotification"); // TODO
 	try
 	{
 		// На всякий случай проверяем, что нет другого уведомления
