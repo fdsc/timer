@@ -1604,7 +1604,7 @@ console.error(oldNotification);
 				}
 
 				notification.deleted = true;
-				notification.close();
+				// notification.close();
 				console.error("to close by click " + timer.id);
 				// Не будем удалять, просто закроем таймер
 				// Это нужно, чтобы он заново не открывался, если по нему именно кликнули
