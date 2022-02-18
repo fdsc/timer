@@ -771,8 +771,15 @@ function makeDeferChangeInterval()
 		soundRegimeObject.DeferTime = 1;
 
 	soundRegimeObject.DeferTime++;
-	if (soundRegimeObject.DeferTime > 7)
+	if (soundRegimeObject.DeferTime > 6)
+	{
+		soundRegimeObject.DeferTime++;
+	}
+
+	if (soundRegimeObject.DeferTime > 11)
+	{
 		soundRegimeObject.DeferTime = 1;
+	}
 	
 	var btn = document.getElementById("defer1");
 	btn.value = soundRegimeObject.DeferTime + " мин.";
@@ -1022,7 +1029,11 @@ function interval()
 		{
 			isPlay = true;
 			if (cur.Important)
+			{
 				ImportantPlay = true;
+				// Делаем дополнительное сообщение, если таймер важный
+				MakeNotification(cur, cur.text);
+			}
 
 			// Устанавливаем дату первого запроса именно здесь,
 			// т.к. выше после перезагрузки страницы уже может не сработать условие !stopped,
@@ -1524,6 +1535,21 @@ function MakeNotification(timer, header, text)
 {
 	try
 	{
+		// На всякий случай проверяем, что нет другого уведомления
+		var notification = notificationObjects[timer.id];
+		if (notification instanceof Notification)
+		{
+			try
+			{
+				notification.close();
+			}
+			catch (e)
+			{
+				console.error(e);
+			}
+			delete notificationObjects[timer.id];
+		}
+
 		// var notification = new Notification('To do list', { body: text, icon: img });
 		var notification = new Notification
 								(
