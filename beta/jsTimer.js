@@ -1545,7 +1545,7 @@ function MakeNotification(timer, header, text)
 		{
 			// Если не прошло минуты со времени последнего появления уведомления,
 			// то ничего не делаем
-			if (new Date().getTime() - n.timestamp < 6 * 1000)
+			if (new Date().getTime() - oldNotification.timestamp < 6 * 1000)
 			{
 console.error("NO TIME"); // TODO
 				return;
