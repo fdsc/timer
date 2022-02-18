@@ -1033,7 +1033,7 @@ function interval()
 		{
 			isPlay = true;
 			if (cur.Important)
-			{console.error("Important"); // TODO
+			{
 				ImportantPlay = true;
 				// Делаем дополнительное сообщение, если таймер важный
 				MakeNotification(cur, cur.text);
@@ -1536,7 +1536,7 @@ function getSoundRegimeText(soundRegime)
 }
 
 function MakeNotification(timer, header, text)
-{console.log("MakeNotification"); // TODO
+{console.error("MakeNotification"); // TODO
 	try
 	{
 		// На всякий случай проверяем, что нет другого уведомления
@@ -1547,7 +1547,7 @@ function MakeNotification(timer, header, text)
 			// то ничего не делаем
 			if (new Date().getTime() - n.timestamp < 6 * 1000)
 			{
-console.log("NO TIME"); // TODO
+console.error("NO TIME"); // TODO
 				return;
 			}
 
