@@ -1241,12 +1241,16 @@ function playGeneral()
 	}
 }
 
-function onClickToTimer(Element, text)
+function onClickToTimer(Element, text, timer)
 {
 	return function()
 	{
 		var textElement = document.getElementById("text");
 		textElement.value = text;
+
+		var IE = document.getElementById("important");
+		if (!IE.checked)
+			IE.checked = timer.Important;
 
 		hideAlert();
 	};
@@ -1295,7 +1299,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 		var IE = document.getElementById("important");
 		if (!IE.checked)
-			document.getElementById("important").checked = timer.Important;
+			IE.checked = timer.Important;
 
 		// Контекстное меню не должно появится (здесь - от интервала)
 		mouseEvent.preventDefault();
@@ -1314,7 +1318,7 @@ function drawTimer(timer)
 	var te   = document.createElement("div");
 	div.appendChild(te);
 	te.textContent = timer.text;
-	te.addEventListener('click', onClickToTimer(te, timer.text));
+	te.addEventListener('click', onClickToTimer(te, timer.text, timer));
 	// te.style.marginLeft = '5%';
 
 	var tc = document.createElement("div");
