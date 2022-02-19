@@ -1267,7 +1267,9 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 		if (addImmediately || mouseEvent.shiftKey)
 		{
-			var isImportant = document.getElementById("important").checked;
+			var isImportant = timer.Important;
+			if (timer.isInterval || !isImportant)
+				isImportant = document.getElementById("important").checked;
 
 			// addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 			var id = getNewId();
@@ -1745,6 +1747,10 @@ function drawSavedTimer(timer)
 	te.addEventListener('click',       onClickToSavedTimer(te, timer, false));
 	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, true ));
 	// te.style.marginLeft = '5%';
+	if (timer.Important)
+	{
+		te.style['background-color'] = '#FFAA88';
+	}
 
 	var tc = document.createElement("div");
 	div.appendChild(tc);

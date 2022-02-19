@@ -206,9 +206,11 @@ function addControlTask()
 	var te = document.getElementById("text");
 	var text = te.value;
 	te.value = '';
+	
+	var isImportant = document.getElementById("important").checked;
 
-	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
-	addSavedTimer(0, h, m, s, text, false, false, true);
+	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
+	addSavedTimer(0, h, m, s, text, false, false, true, isImportant);
 
 	hideAlert();
 
@@ -221,12 +223,12 @@ function addTimer_Mil(milliSeconds)
 	var te = document.getElementById("text");
 	var text = te.value;
 	te.value = '';
-	
-	var isImportant = document.getElementById("important");
+
+	var isImportant = document.getElementById("important").checked;
 
 	// , isEnd, fromSave, ImportantTimer
 	var id = getNewId();
-	addTimer(id, milliSeconds, text, undefined, undefined, isImportant.checked);
+	addTimer(id, milliSeconds, text, undefined, undefined, isImportant);
 
 	hideAlert();
 };
@@ -1265,8 +1267,13 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 		if (addImmediately || mouseEvent.shiftKey)
 		{
+			var isImportant = timer.Important;
+			if (timer.isInterval || !isImportant)
+				isImportant = document.getElementById("important").checked;
+
+			// addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 			var id = getNewId();
-			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val);
+			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val, false, false, isImportant);
 
 			// Контекстное меню не должно появится (здесь - от клика на таймер)
 			mouseEvent.preventDefault();
@@ -1440,7 +1447,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask);
+					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask, cur.Important);
 			}
 			catch (e)
 			{
@@ -1691,7 +1698,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask)
+function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
@@ -1715,7 +1722,8 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 			timeVal:       formatDate(date),
 			isInterval:    savedInterval,
 			toDelete:      toDelete || false,
-			isControlTask: isControlTask || false
+			isControlTask: isControlTask || false,
+			Important:     isImportant
 		};
 
 	timersObject.saved.push(newTimer);
@@ -1739,6 +1747,10 @@ function drawSavedTimer(timer)
 	te.addEventListener('click',       onClickToSavedTimer(te, timer, false));
 	te.addEventListener('contextmenu', onClickToSavedTimer(te, timer, true ));
 	// te.style.marginLeft = '5%';
+	if (timer.Important)
+	{
+		te.style['background-color'] = '#FFAA88';
+	}
 
 	var tc = document.createElement("div");
 	div.appendChild(tc);
@@ -1964,7 +1976,7 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask);
+					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask, cur.Important);
 
 					if (cur.isControlTask && !isControlTask)
 					{
@@ -2191,9 +2203,11 @@ window.onload = function()
 			var m = parseFloat(document.getElementById("minutes").value || 0);
 			var s = parseFloat(document.getElementById("seconds").value || 0);
 
-			var timerName = document.getElementById("text").value;
+			var timerName   = document.getElementById("text").value;
+			var isImportant = document.getElementById("important").checked;
 
-			addSavedTimer(0, h, m, s, timerName, false);
+			// // addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
+			addSavedTimer(0, h, m, s, timerName, false, false, false, isImportant);
 			saveTimers();
 			drawTimersShorts();
 		}
@@ -2210,7 +2224,9 @@ window.onload = function()
 			var m = parseFloat(document.getElementById("minutes").value || 0);
 			var s = parseFloat(document.getElementById("seconds").value || 0);
 
-			var timerName = ""; // document.getElementById("text").value;
+			var timerName   = ""; // document.getElementById("text").value;
+			// Интервал никогда не бывает важным
+			// var isImportant = document.getElementById("important").checked;
 
 			addSavedTimer(0, h, m, s, timerName, true);
 			saveTimers();
