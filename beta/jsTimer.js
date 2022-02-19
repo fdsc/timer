@@ -110,7 +110,8 @@ function deleteTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
-			if (!cur.stopped && !isTimerToDelete(cur))
+			if (!cur.stopped || cur.Important)
+			if (!isTimerToDelete(cur))
 			{
 				timers[curI].toDelete = new Date().getTime();
 
