@@ -43,7 +43,7 @@ function addTimerObject(newTimer)
 	timersObject.timers.push(newTimer);
 }
 
-function addTimer(id, milliSeconds, text, isEnd, fromSave)
+function addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 {
 	var now = new Date();
 	var end = new Date(now.getTime() + milliSeconds).getTime();
@@ -65,7 +65,7 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave)
 			toDelete:      false,
 			isControlTask: false,
 			deferred:      false,
-			Important:     false
+			Important:     !!ImportantTimer
 		}
 	);
 
@@ -110,7 +110,8 @@ function deleteTimer(MouseEvent)
 		var cur = timers[curI];
 		if (cur.id == this.tid)
 		{
-			if (!cur.stopped && !isTimerToDelete(cur))
+			if (!cur.stopped || cur.Important)
+			if (!isTimerToDelete(cur))
 			{
 				timers[curI].toDelete = new Date().getTime();
 
@@ -220,9 +221,12 @@ function addTimer_Mil(milliSeconds)
 	var te = document.getElementById("text");
 	var text = te.value;
 	te.value = '';
+	
+	var isImportant = document.getElementById("important");
 
+	// , isEnd, fromSave, ImportantTimer
 	var id = getNewId();
-	addTimer(id, milliSeconds, text);
+	addTimer(id, milliSeconds, text, undefined, undefined, isImportant.checked);
 
 	hideAlert();
 };
@@ -945,7 +949,11 @@ function interval()
 				{
 					var textElement = document.getElementById("text");
 					if (!textElement.value)
+					{
 						textElement.value = cur.text;
+						var importantElement = document.getElementById("important");
+						importantElement.checked = cur.Important;
+					}
 				}
 				catch (e)
 				{
@@ -993,9 +1001,10 @@ function interval()
 		var end = new Date(dif);
 
 		// Иначе это уже остановленный таймер
-		if (cur.stopped !== true)
+		if (cur.stopped !== true || cur.Important)
 		{
-			tt.textContent = formatDate(new Date(cur.endL - now));
+			if (cur.stopped !== true)
+				tt.textContent = formatDate(new Date(cur.endL - now));
 
 			if (isTimerToDelete(cur))
 			{
