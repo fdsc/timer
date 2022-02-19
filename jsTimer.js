@@ -1293,6 +1293,10 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 		if (timer.s)
 			document.getElementById("seconds").value = timer.s || "";
 
+		var IE = document.getElementById("important");
+		if (!IE.checked)
+			document.getElementById("important").checked = timer.Important;
+
 		// Контекстное меню не должно появится (здесь - от интервала)
 		mouseEvent.preventDefault();
 	};
