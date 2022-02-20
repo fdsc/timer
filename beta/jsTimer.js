@@ -697,14 +697,34 @@ function getGainVal()
 {
 	loadSoundRegime();
 
+	return getGainVal1() * getGainVal2();
+};
+
+function getGainVal1()
+{
 	return soundRegimeObject.gainVal ? soundRegimeObject.gainVal : 1.0;
 };
 
-function setGainVal(value)
+function getGainVal2()
 {
-	soundRegimeObject.gainVal = value;
+	return soundRegimeObject.gainVal2 ? soundRegimeObject.gainVal2 : 1.0;
+};
+
+function setGainVal(value, val2)
+{
+	soundRegimeObject.gainVal  = value;
+	soundRegimeObject.gainVal2 = val2;
+
 	saveSoundRegime();
 };
+
+function setGainValToHtml(gainVal)
+{
+	gv  = document.getElementById("volume1");
+	gv2 = document.getElementById("volume2");
+	gv2.value = getGainVal2();
+	gv .value = gainVal / getGainVal2();
+}
 
 function onAudioLoad()
 {
@@ -720,9 +740,8 @@ function onAudioLoad()
 
 	var gv = document.getElementById("gainVal");
 	gv.textContent = gainVal;
-	gv  = document.getElementById("volume1");
-	gv2 = document.getElementById("volume2");
-	gv.value = gainVal / gv2.value;
+
+	setGainValToHtml(gainVal);
 
 	wavetable =
 	{
@@ -2086,7 +2105,7 @@ window.onload = function()
 			// gv.textContent = this.value;
 			gv.textContent = gainNode.gain.value;
 
-			setGainVal(gainNode.gain.value);
+			setGainVal(gainNode.gain.value, v2.value);
 		}
 	};
 
@@ -2095,6 +2114,8 @@ window.onload = function()
 
 	btn = document.getElementById("volume2");
 	btn.addEventListener('input', gainChange);
+
+	setGainValToHtml(  getGainVal()  );
 
 
 	btn = document.getElementById("gainVal");
