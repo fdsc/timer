@@ -1893,7 +1893,7 @@ function setIntervalsWidth()
 	var main      = document.getElementById("timersShort");
 	var intervals = document.getElementById("timersIntervalShort");
 
-	intervals.style.width = document.body.clientWidth - main.clientWidth;
+	intervals.style.width = (document.body.clientWidth - main.clientWidth) + 'px';
 }
 
 // Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
