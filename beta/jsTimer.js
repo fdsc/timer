@@ -720,6 +720,9 @@ function setGainVal(value, val2)
 
 function setGainValToHtml(gainVal)
 {
+	var gv = document.getElementById("gainVal");
+	gv.textContent = gainVal.toFixed(4);
+
 	gv  = document.getElementById("volume1");
 	gv2 = document.getElementById("volume2");
 
@@ -738,9 +741,6 @@ function onAudioLoad()
 
 	gainNode = AC.createGain();
 	gainNode.gain.value = gainVal;
-
-	var gv = document.getElementById("gainVal");
-	gv.textContent = gainVal;
 
 	setGainValToHtml(gainVal);
 
@@ -2101,12 +2101,13 @@ window.onload = function()
 			var v1 = document.getElementById("volume1");
 			var v2 = document.getElementById("volume2");
 
-			var gv = document.getElementById("gainVal");
+			// var gv = document.getElementById("gainVal");
 			gainNode.gain.value = v1.value * v2.value; // this.value;
 			// gv.textContent = this.value;
-			gv.textContent = gainNode.gain.value;
+			//gv.textContent = gainNode.gain.value;
 
 			setGainVal(v1.value, v2.value);
+			setGainValToHtml(  getGainVal()  );
 		}
 	};
 
