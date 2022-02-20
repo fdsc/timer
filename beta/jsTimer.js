@@ -2070,10 +2070,16 @@ window.onload = function()
 
 	var gainChange = function()
 	{
+		if (!gainNode)
+		{
+			onAudioLoad();
+			hideAlert();
+		}
+
 		if (gainNode)
 		{
 			var v1 = document.getElementById("volume1");
-			var v2 = document.getElementById("volume1");
+			var v2 = document.getElementById("volume2");
 
 			var gv = document.getElementById("gainVal");
 			gainNode.gain.value = v1.value * v2.value; // this.value;
