@@ -19,16 +19,14 @@
 <input type=checkbox id=addAbsDate><span id="addAbsDateLabel">Абсолютная дата</span>
 <input type=text id=hours placeholder='часы' autocomplete=off><input type=text id=minutes placeholder='минуты' autocomplete=off><input type=text id=seconds placeholder='секунды' autocomplete=off><input type=button id=resetTime value="X" style="background-color: gray">
 <input type=text id=text value="" placeholder='Наименование таймера' autocomplete=off><input type=button id=resetText value="X" style="background-color: gray">     <span id=timeBox></span>       <input type=checkbox id=important value=false title="Задача будет выдавать напоминания повторно, пока её не удалят из списка задач вручную. Не может быть отложена кнопкой 'Отложить'"><span id="importantLabel" title="Задача будет выдавать напоминания повторно, пока её не удалят из списка задач вручную. Не может быть отложена кнопкой 'Отложить'">Важная задача</span>
-<table><tr><td><input type=button id=addTimer value="Добавить таймер"></td><td><input type=button id=addControlTask value="Добавить контрольную задачу"></td></tr><tr><td><input type=button id=saveTimer value="Сохранить типовой таймер"></td><td><input type=button id=saveInterval value="Сохранить типовой интервал"></td></tr></table>
+<table><tr><td><input type=button id=addTimer value="Добавить таймер" title="Добавляет задачу в список"></td><td><input type=button id=addControlTask value="Добавить контрольную задачу" title="Добавляет задачу в нижний список для контроля за её присутствием в списке задач"></td></tr><tr><td><input type=button id=saveTimer value="Сохранить типовой таймер" title="Добавляет задачу в правый список для быстрой установки типовой задачи"></td><td><input type=button id=saveInterval value="Сохранить типовой интервал" title="Добавляет типовой интервал времени"></td></tr></table>
 
 <div id=timersIntervalShort class='normal'>
 
 </div>
-<!-- input type=button id=addTimer1 value="1 час">  <input type=button id=addTimer4 value="4 часа">  <input type=button id=addTimer8 value="8 часов">  <input type=button id=addTimer24 value="24 часа">
 
-<input type=button id=addTimer01 value="1 минута">  <input type=button id=addTimer05 value="5 минут">  <input type=button id=addTimer15 value="15 минут" -->
-
-<input type="range" id="volume" min="0" max="2" value="1" step="0.01" style="width: 300px"><span id=gainVal></span>  <span id=soundSwither></span>  <input type=button id=silent value="откл. 1 минута"><input type=button id=silent1 value="+1"> <input type=button id=defer value="отложить"><input type=button id=defer1 value="1 мин.">
+<input type="range" id="volume" min="0" max="2" value="1" step="0.001" style="width: 800px"><span id=gainVal></span>  <span id=soundSwither></span>  
+<input type=button id=silent value="откл. 1 минута"><input type=button id=silent1 value="+1"><input type=button id=silent5 value="+5"> <input type=button id=defer value="отложить"><input type=button id=defer1 value="1 мин.">
 
 <div id=main>
 </div>
