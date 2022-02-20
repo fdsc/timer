@@ -2157,6 +2157,19 @@ window.onload = function()
 				silentEndTime = new Date().getTime() + 60*1000;
 		}
 	);
+
+	btn = document.getElementById("silent5");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			if (silentEndTime > new Date().getTime())
+				silentEndTime = silentEndTime + 5*60*1000;
+			else
+				silentEndTime = new Date().getTime() + 5*60*1000;
+		}
+	);
 	
 	btn = document.getElementById("defer");
 	btn.addEventListener
