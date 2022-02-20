@@ -720,8 +720,9 @@ function onAudioLoad()
 
 	var gv = document.getElementById("gainVal");
 	gv.textContent = gainVal;
-	gv = document.getElementById("volume");
-	gv.value = gainVal;
+	gv  = document.getElementById("volume1");
+	gv2 = document.getElementById("volume2");
+	gv.value = gainVal / gv2.value;
 
 	wavetable =
 	{
@@ -2067,22 +2068,28 @@ window.onload = function()
 	btn = document.getElementById("addAbsDate");
 	btn.addEventListener('click', addAbsDateClicked);
 
-	btn = document.getElementById("volume");
-	btn.addEventListener
-	(
-		'input', 
-		function()
+	var gainChange = function()
+	{
+		if (gainNode)
 		{
-			if (gainNode)
-			{
-				var gv = document.getElementById("gainVal");
-				gainNode.gain.value = this.value;
-				gv.textContent = this.value;
+			var v1 = document.getElementById("volume1");
+			var v2 = document.getElementById("volume1");
 
-				setGainVal(this.value);
-			}
+			var gv = document.getElementById("gainVal");
+			gainNode.gain.value = v1.value * v2.value; // this.value;
+			// gv.textContent = this.value;
+			gv.textContent = gainNode.gain.value;
+
+			setGainVal(gainNode.gain.value);
 		}
-	);
+	};
+
+	btn = document.getElementById("volume1");
+	btn.addEventListener('input', gainChange);
+
+	btn = document.getElementById("volume2");
+	btn.addEventListener('input', gainChange);
+
 
 	btn = document.getElementById("gainVal");
 	btn.addEventListener
