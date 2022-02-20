@@ -722,6 +722,7 @@ function setGainValToHtml(gainVal)
 {
 	gv  = document.getElementById("volume1");
 	gv2 = document.getElementById("volume2");
+
 	gv2.value = getGainVal2();
 	gv .value = gainVal / getGainVal2();
 }
@@ -2105,7 +2106,7 @@ window.onload = function()
 			// gv.textContent = this.value;
 			gv.textContent = gainNode.gain.value;
 
-			setGainVal(gainNode.gain.value, v2.value);
+			setGainVal(v1.value, v2.value);
 		}
 	};
 
