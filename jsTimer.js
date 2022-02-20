@@ -720,8 +720,9 @@ function onAudioLoad()
 
 	var gv = document.getElementById("gainVal");
 	gv.textContent = gainVal;
-	gv = document.getElementById("volume");
-	gv.value = gainVal;
+	gv  = document.getElementById("volume1");
+	gv2 = document.getElementById("volume2");
+	gv.value = gainVal / gv2.value;
 
 	wavetable =
 	{
@@ -1893,7 +1894,7 @@ function setIntervalsWidth()
 	var main      = document.getElementById("timersShort");
 	var intervals = document.getElementById("timersIntervalShort");
 
-	intervals.style.width = document.body.clientWidth - main.clientWidth;
+	intervals.style.width = (document.body.clientWidth - main.clientWidth) + 'px';
 }
 
 // Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
@@ -2067,22 +2068,34 @@ window.onload = function()
 	btn = document.getElementById("addAbsDate");
 	btn.addEventListener('click', addAbsDateClicked);
 
-	btn = document.getElementById("volume");
-	btn.addEventListener
-	(
-		'input', 
-		function()
+	var gainChange = function()
+	{
+		if (!gainNode)
 		{
-			if (gainNode)
-			{
-				var gv = document.getElementById("gainVal");
-				gainNode.gain.value = this.value;
-				gv.textContent = this.value;
-
-				setGainVal(this.value);
-			}
+			onAudioLoad();
+			hideAlert();
 		}
-	);
+
+		if (gainNode)
+		{
+			var v1 = document.getElementById("volume1");
+			var v2 = document.getElementById("volume2");
+
+			var gv = document.getElementById("gainVal");
+			gainNode.gain.value = v1.value * v2.value; // this.value;
+			// gv.textContent = this.value;
+			gv.textContent = gainNode.gain.value;
+
+			setGainVal(gainNode.gain.value);
+		}
+	};
+
+	btn = document.getElementById("volume1");
+	btn.addEventListener('input', gainChange);
+
+	btn = document.getElementById("volume2");
+	btn.addEventListener('input', gainChange);
+
 
 	btn = document.getElementById("gainVal");
 	btn.addEventListener
@@ -2155,6 +2168,19 @@ window.onload = function()
 				silentEndTime = silentEndTime + 60*1000;
 			else
 				silentEndTime = new Date().getTime() + 60*1000;
+		}
+	);
+
+	btn = document.getElementById("silent5");
+	btn.addEventListener
+	(
+		'click',
+		function(me)
+		{
+			if (silentEndTime > new Date().getTime())
+				silentEndTime = silentEndTime + 5*60*1000;
+			else
+				silentEndTime = new Date().getTime() + 5*60*1000;
 		}
 	);
 	
