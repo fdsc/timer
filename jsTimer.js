@@ -2158,13 +2158,6 @@ window.onload = function()
 		}
 	);
 
-	var gainVal = getGainVal();
-
-	var gv = document.getElementById("gainVal");
-	gv.textContent = gainVal;
-	gv = document.getElementById("volume");
-	gv.value = gainVal;
-
 	btn = document.getElementById("silent");
 	btn.addEventListener
 	(
