@@ -1841,7 +1841,7 @@ function drawSavedTimer(timer)
 		tc.appendChild(tend);
 		tend.id = 'timer-' + timer.id + "-end";
 
-		if (options.isExactlyTime)
+		if (timer.isExactlyTime)
 		{
 			tend.textContent = addNull(timer.h) + ":" + addNull(timer.m);
 		}
