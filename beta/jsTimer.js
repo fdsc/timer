@@ -1356,6 +1356,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 			if (timer.s)
 				document.getElementById("seconds").value = timer.s || "";
 		}
+		addAbsDateClicked();
 
 		var IE = document.getElementById("important");
 		if (!IE.checked)
