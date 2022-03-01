@@ -1337,6 +1337,9 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 				var now = new Date();
 				var dtp = new Date(getDateWithoutTime(now) + mil);
 
+				if (now.getTime() > dtp.getTime())
+					dtp = new Date(dtp.getTime() + 24*3600*1000);
+
 				addTimer(id, dtp.getTime(), val, true, false, isImportant);
 			}
 			else
