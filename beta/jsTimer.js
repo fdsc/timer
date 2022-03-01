@@ -2356,7 +2356,7 @@ window.onload = function()
 		}
 	);
 	
-	
+
 	btn = document.getElementById("saveInterval");
 	btn.addEventListener
 	(
@@ -2373,15 +2373,17 @@ window.onload = function()
 
 			var isExactlyTime = document.getElementById("addAbsDate").checked;
 
-
 			if (isExactlyTime)
 			{
+				return;
+				/*
 				var s = document.getElementById("seconds").value;
 					s = replaceNonColonSymbols(s);
 
 				var [hours, minutes] = s.split(":");
 
 				addSavedTimer(0, hours, minutes, 0, timerName, true, false, false, false, { isExactlyTime: isExactlyTime });
+				*/
 			}
 			else
 			{
