@@ -1515,7 +1515,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask, cur.Important, cur.options);
+					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask, cur.Important, { isExactlyTime: cur.isExactlyTime } );
 			}
 			catch (e)
 			{
@@ -2060,7 +2060,7 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask, cur.Important, cur.options);
+					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask, cur.Important, { isExactlyTime: cur.isExactlyTime });
 
 					if (cur.isControlTask && !isControlTask)
 					{
