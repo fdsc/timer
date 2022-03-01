@@ -1840,7 +1840,15 @@ function drawSavedTimer(timer)
 		var tend = document.createElement("span");
 		tc.appendChild(tend);
 		tend.id = 'timer-' + timer.id + "-end";
-		tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
+
+		if (options.isExactlyTime)
+		{
+			tend.textContent = addNull(timer.h) + ":" + addNull(timer.m);
+		}
+		else
+		{
+			tend.textContent = formatDate(new Date(timer.totalSeconds*1000));
+		}
 		//tend.style.marginLeft = '10%';
 	}
 
