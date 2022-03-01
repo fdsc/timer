@@ -2335,8 +2335,21 @@ window.onload = function()
 			var isImportant   = document.getElementById("important").checked;
 			var isExactlyTime = document.getElementById("addAbsDate").checked;
 
-			// // addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
-			addSavedTimer(0, h, m, s, timerName, false, false, false, isImportant, {isExactlyTime : isExactlyTime});
+			if (isExactlyTime)
+			{
+				var s = document.getElementById("seconds").value;
+					s = replaceNonColonSymbols(s);
+
+				var [hours, minutes] = s.split(":");
+
+				addSavedTimer(0, hours, minutes, 0, timerName, false, false, false, isImportant, {isExactlyTime : isExactlyTime});
+			}
+			else
+			{
+				addSavedTimer(0, h, m, s, timerName, false, false, false, isImportant, {isExactlyTime : isExactlyTime});
+			}
+
+			// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
 
 			saveTimers();
 			drawTimersShorts();
@@ -2368,8 +2381,7 @@ window.onload = function()
 
 				var [hours, minutes] = s.split(":");
 
-			// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
-				addSavedTimer(0, h, m, s, timerName, true, false, false, false, { isExactlyTime: isExactlyTime });
+				addSavedTimer(0, hours, minutes, 0, timerName, true, false, false, false, { isExactlyTime: isExactlyTime });
 			}
 			else
 			{
