@@ -2358,7 +2358,24 @@ window.onload = function()
 			// Интервал никогда не бывает важным
 			// var isImportant = document.getElementById("important").checked;
 
-			addSavedTimer(0, h, m, s, timerName, true);
+			var isExactlyTime = document.getElementById("addAbsDate").checked;
+
+
+			if (isExactlyTime)
+			{
+				var s = document.getElementById("seconds").value;
+					s = replaceNonColonSymbols(s);
+
+				var [hours, minutes] = s.split(":");
+
+			// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
+				addSavedTimer(0, h, m, s, timerName, true, false, false, false, { isExactlyTime: isExactlyTime });
+			}
+			else
+			{
+				addSavedTimer(0, h, m, s, timerName, true);
+			}
+
 			saveTimers();
 			drawTimersShorts();
 		}
