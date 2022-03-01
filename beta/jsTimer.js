@@ -206,11 +206,12 @@ function addControlTask()
 	var te = document.getElementById("text");
 	var text = te.value;
 	te.value = '';
-	
-	var isImportant = document.getElementById("important").checked;
+
+	var isImportant   = document.getElementById("important").checked;
+	var isExactlyTime = document.getElementById("addAbsDate").checked;
 
 	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
-	addSavedTimer(0, h, m, s, text, false, false, true, isImportant);
+	addSavedTimer(0, h, m, s, text, false, false, true, isImportant, {isExactlyTime: isExactlyTime});
 
 	hideAlert();
 
@@ -391,7 +392,7 @@ function addTimer0()
 				}
 			}
 
-			// Первое число, т.к. чтобы сработало "пят.октября"
+			// Первое число (день месяца), т.к. чтобы сработало "пят.октября"
 			// нужно начинать сразу с первого числа этого месяца, а не с текущего
 			var tmpDay = 1; // now.getDate()
 			dtp = Date.parse(h + "." + month + "." + tmpDay + " " + hours + ":" + minutes);
@@ -1277,6 +1278,16 @@ function onClickToTimer(Element, text, timer)
 	};
 };
 
+function getDateWithoutTime(date)
+{
+	var dtp = Date.parse(date.getFullYear() + "." + (date.getMonth() + 1) + "." + date.getDate() + " 00:00");
+
+	if (isNaN(dtp))
+		dtp = Date.parse(date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " 00:00");
+
+	return dtp;
+}
+
 function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 {
 	return function(mouseEvent)
@@ -1298,7 +1309,18 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 			// addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 			var id = getNewId();
-			addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val, false, false, isImportant);
+			if (timer.isExactlyTime)
+			{
+				var mil = 1000*(timer.h*3600 + timer.m*60 + timer.s);
+				var now = new Date();
+				var dtp = new Date(getDateWithoutTime(now).getTime() + mil);
+
+				addTimer(id, dtp.getTime(), val, true, false, isImportant);
+			}
+			else
+			{
+				addTimer(id, 1000*(timer.h*3600 + timer.m*60 + timer.s), val, false, false, isImportant);
+			}
 
 			// Контекстное меню не должно появится (здесь - от клика на таймер)
 			mouseEvent.preventDefault();
@@ -1476,7 +1498,7 @@ function MergeTimers(text)
 				}
 
 				if (!found)
-					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask, cur.Important);
+					addSavedTimer(0, cur.h, cur.m, cur.s, cur.name, cur.isInterval, false, cur.isControlTask, cur.Important, cur.options);
 			}
 			catch (e)
 			{
@@ -1727,7 +1749,7 @@ function InitializeNotification()
 	{}
 }
 
-function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
+function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
 {
 	if (!timersObject.saved)
 		timersObject.saved = [];
@@ -1737,6 +1759,13 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 	if (savedInterval)
 	{
 		timerName = formatDateMinimal(date);
+	}
+	
+	var isExactlyTime = false;
+	if (options)
+	if (options.isExactlyTime)
+	{
+		isExactlyTime = options.isExactlyTime;
 	}
 
 	var newTimer =
@@ -1752,7 +1781,8 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 			isInterval:    savedInterval,
 			toDelete:      toDelete || false,
 			isControlTask: isControlTask || false,
-			Important:     isImportant
+			Important:     isImportant,
+			isExactlyTime: isExactlyTime
 		};
 
 	timersObject.saved.push(newTimer);
@@ -1917,7 +1947,7 @@ function setIntervalsWidth()
 	intervals.style.width = (document.body.clientWidth - main.clientWidth) + 'px';
 }
 
-// Эта функция работает быстрее, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
+// Эта функция работает быстро, поэтому нет проблем с тем, что таймер может не реагировать при его перерисовке
 function updateDeleteTextForTimersShorts()
 {
 	lastToDeleteSavedTimer = false;	// см. drawTimersShorts
@@ -2005,7 +2035,7 @@ function drawTimersShorts()
 				timersObject.saved = [];
 				for (var cur of t)
 				{
-					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask, cur.Important);
+					var newTimer = addSavedTimer(cur.id, cur.h, cur.m, cur.s, cur.name, cur.isInterval, cur.toDelete, cur.isControlTask, cur.Important, cur.options);
 
 					if (cur.isControlTask && !isControlTask)
 					{
@@ -2253,11 +2283,13 @@ window.onload = function()
 			var m = parseFloat(document.getElementById("minutes").value || 0);
 			var s = parseFloat(document.getElementById("seconds").value || 0);
 
-			var timerName   = document.getElementById("text").value;
-			var isImportant = document.getElementById("important").checked;
+			var timerName     = document.getElementById("text").value;
+			var isImportant   = document.getElementById("important").checked;
+			var isExactlyTime = document.getElementById("addAbsDate").checked;
 
-			// // addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
-			addSavedTimer(0, h, m, s, timerName, false, false, false, isImportant);
+			// // addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
+			addSavedTimer(0, h, m, s, timerName, false, false, false, isImportant, {isExactlyTime : isExactlyTime});
+
 			saveTimers();
 			drawTimersShorts();
 		}
