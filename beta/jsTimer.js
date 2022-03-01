@@ -1341,7 +1341,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 			if (timer.m)
 				document.getElementById("minutes").value = "";
 
-			document.getElementById("seconds").value = (timer.h || "") + ":" + (timer.m || "");
+			document.getElementById("seconds").value = timer.h + ":" + timer.m;
 		}
 		else
 		{
