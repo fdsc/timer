@@ -1333,6 +1333,8 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 
 		if (timer.isExactlyTime)
 		{
+			document.getElementById("addAbsDate").checked = true;
+
 			if (timer.h)
 				document.getElementById("hours")  .value = "";
 
@@ -1343,6 +1345,8 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 		}
 		else
 		{
+			document.getElementById("addAbsDate").checked = false;
+
 			if (timer.h)
 				document.getElementById("hours")  .value = timer.h || "";
 
