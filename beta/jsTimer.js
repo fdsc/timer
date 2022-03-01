@@ -207,7 +207,7 @@ function addControlTask()
 	var text = te.value;
 	te.value = '';
 
-	var isImportant   = document.getElementById("important").checked;
+	var isImportant   = document.getElementById("important") .checked;
 	var isExactlyTime = document.getElementById("addAbsDate").checked;
 
 	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
@@ -1777,7 +1777,7 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 	{
 		timerName = formatDateMinimal(date);
 	}
-	
+console.error(options); // TODO: !!!
 	var isExactlyTime = false;
 	if (options)
 	if (options.isExactlyTime)
