@@ -210,8 +210,19 @@ function addControlTask()
 	var isImportant   = document.getElementById("important") .checked;
 	var isExactlyTime = document.getElementById("addAbsDate").checked;
 
-	// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant)
-	addSavedTimer(0, h, m, s, text, false, false, true, isImportant, {isExactlyTime: isExactlyTime});
+
+	if (isExactlyTime)
+	{
+		var s = document.getElementById("seconds").value;
+			s = replaceNonColonSymbols(s);
+		var [hours, minutes] = s.split(":");
+		addSavedTimer(0, hours, minutes, 0, text, false, false, true, isImportant, {isExactlyTime: isExactlyTime});
+	}
+	else
+	{
+		// addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isControlTask, isImportant, options)
+		addSavedTimer(0, h, m, s, text, false, false, true, isImportant, {isExactlyTime: isExactlyTime});
+	}
 
 	hideAlert();
 
@@ -234,6 +245,17 @@ function addTimer_Mil(milliSeconds)
 	hideAlert();
 };
 
+function replaceNonColonSymbols(s)
+{
+		// На всякий случай, исправляем ошибки, типа 12,00. Исправляется только первое вхождение
+		s = s.replace(/[^0-9]/, ":");		// Первый неправильный символ в двоеточие
+		s = s.replaceAll(/[^0-9\:]/g, "");	// Все оставшиеся символы удаляем
+		s = s.replaceAll(/\:+/g, ":");		// Множественные повторения двоеточий - в одно двоеточие
+
+	return s;
+}
+
+
 var daysOfWeek = [['по', 'пн'], ['вт'], ['ср'], ['чт', 'че'], ['пя', 'пт'], ['сб', 'су'], ['вс', 'во']];
 function addTimer0()
 {/*
@@ -249,10 +271,8 @@ function addTimer0()
 		var m = document.getElementById("minutes").value;
 		var s = document.getElementById("seconds").value;
 
-		// На всякий случай, исправляем ошибки, типа 12,00. Исправляется только первое вхождение
-		s = s.replace(/[^0-9]/, ":");		// Первый неправильный символ в двоеточие
-		s = s.replaceAll(/[^0-9\:]/g, "");	// Все оставшиеся символы удаляем
-		s = s.replaceAll(/\:+/g, ":");		// Множественные повторения двоеточий - в одно двоеточие
+		s = replaceNonColonSymbols(s);
+
 
 		var [day, month]     = m.split(".");
 		var [hours, minutes] = s.split(":");
@@ -1778,7 +1798,7 @@ function addSavedTimer(id, h, m, s, timerName, savedInterval, toDelete, isContro
 	{
 		timerName = formatDateMinimal(date);
 	}
-console.error(options); // TODO: !!!
+
 	var isExactlyTime = false;
 	if (options)
 	if (options.isExactlyTime)
