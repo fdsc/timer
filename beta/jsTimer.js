@@ -215,7 +215,9 @@ function addControlTask()
 	{
 		var s = document.getElementById("seconds").value;
 			s = replaceNonColonSymbols(s);
+
 		var [hours, minutes] = s.split(":");
+
 		addSavedTimer(0, hours, minutes, 0, text, false, false, true, isImportant, {isExactlyTime: isExactlyTime});
 	}
 	else
@@ -1333,7 +1335,7 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 			{
 				var mil = 1000*(timer.h*3600 + timer.m*60 + timer.s);
 				var now = new Date();
-				var dtp = new Date(getDateWithoutTime(now).getTime() + mil);
+				var dtp = new Date(getDateWithoutTime(now) + mil);
 
 				addTimer(id, dtp.getTime(), val, true, false, isImportant);
 			}
