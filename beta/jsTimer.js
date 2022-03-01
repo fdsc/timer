@@ -1867,6 +1867,7 @@ function drawSavedTimer(timer)
 		if (timer.isExactlyTime)
 		{
 			tend.textContent = addNull(timer.h) + ":" + addNull(timer.m);
+			tend.style['background-color'] = '#FFFFFF';
 		}
 		else
 		{
