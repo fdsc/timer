@@ -1331,14 +1331,27 @@ function onClickToSavedTimer(Element, timer, addImmediately, timerType)
 		if (timer.name)
 			textElement.value = timer.name;
 
-		if (timer.h)
-			document.getElementById("hours")  .value = timer.h || "";
-		
-		if (timer.m)
-			document.getElementById("minutes").value = timer.m || "";
+		if (timer.isExactlyTime)
+		{
+			if (timer.h)
+				document.getElementById("hours")  .value = "";
 
-		if (timer.s)
-			document.getElementById("seconds").value = timer.s || "";
+			if (timer.m)
+				document.getElementById("minutes").value = "";
+
+			document.getElementById("seconds").value = (timer.h || "") + ":" + (timer.m || "");
+		}
+		else
+		{
+			if (timer.h)
+				document.getElementById("hours")  .value = timer.h || "";
+
+			if (timer.m)
+				document.getElementById("minutes").value = timer.m || "";
+
+			if (timer.s)
+				document.getElementById("seconds").value = timer.s || "";
+		}
 
 		var IE = document.getElementById("important");
 		if (!IE.checked)
