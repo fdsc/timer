@@ -51,6 +51,7 @@ self.addEventListener
 				(
 					function (cache)
 					{
+						console.debug("TimerJS: cache.put " + event.request.url);
 						cache.put(event.request, responseClone);
 					}
 				);
@@ -83,12 +84,12 @@ self.addEventListener
 							// https://developer.mozilla.org/en-US/docs/Web/API/Response
 							var r = new Response
 							(
-								'Network is unreilable or error occured',
+								'Network is unreilable or error occured (TimerJS)',
 								{
 									// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 									// Request Timeout
 									"status" : 408,
-									"statusText": "Network is unreilable or error occured"
+									"statusText": "Network is unreilable or error occured (TimerJS)"
 								}
 							);
 
