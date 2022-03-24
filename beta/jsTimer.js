@@ -276,8 +276,8 @@ function addTimer0()
 		s = replaceNonColonSymbols(s);
 
 
-		var [day, month]     = m.split(".");
-		var [hours, minutes] = s.split(":");
+		var [day, month]     = m.toLowerCase().split(".");
+		var [hours, minutes] = s.toLowerCase().split(":");
 
 		if (!hours && parseInt(hours) != "0")
 			hours = now.getHours();
