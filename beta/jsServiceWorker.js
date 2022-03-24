@@ -51,12 +51,12 @@ self.addEventListener
 				(
 					function (cache)
 					{
-						console.debug("TimerJS: cache.put " + event.request.url);
+						console.info("TimerJS: cache.put " + event.request.url);
 						cache.put(event.request, responseClone);
 					}
 				);
 
-				console.debug("TimerJS: service worker load from internet for url " + event.request.url);
+				console.info("TimerJS: service worker load from internet for url " + event.request.url);
 
 				return response;
 			}
@@ -65,8 +65,8 @@ self.addEventListener
 		(
 			function(error)
 			{
-				console.log("TimerJS: service worker load from the cache for url " + event.request.url);
-				console.log(error);
+				console.info("TimerJS: service worker load from the cache for url " + event.request.url);
+				console.info(error);
 
 				// Возвращаем запрошенный ресурс из кеша
 				return caches.match(event.request)
