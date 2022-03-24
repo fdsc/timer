@@ -17,7 +17,7 @@ self.addEventListener
 		(
 			caches.open(version)
 			.then
-			(
+			(/*
 				function(cache)
 				{
 					return cache.addAll
@@ -26,7 +26,7 @@ self.addEventListener
 						'jsTimer.js',
 						'B4v45ZrQwRVM.css'
 					]);
-				}
+				}*/
 			)
 		);
 	}
