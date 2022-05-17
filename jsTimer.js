@@ -70,8 +70,8 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 	);
 
 	document.getElementById("text").value = "";
-	// var importantElement = document.getElementById("important");
-	// importantElement.checked = false;
+	var importantElement = document.getElementById("important");
+	importantElement.checked = false;
 
 	if (!fromSave)
 	{
