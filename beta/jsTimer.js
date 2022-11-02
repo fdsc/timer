@@ -70,6 +70,8 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 	);
 
 	document.getElementById("text").value = "";
+	var importantElement = document.getElementById("important");
+	importantElement.checked = false;
 
 	if (!fromSave)
 	{
@@ -1662,9 +1664,14 @@ function MakeNotification(timer, header, text)
 
 		if (oldNotification instanceof Notification)
 		{
-			// Если не прошло минуты со времени последнего появления уведомления,
+            // Вычисляем время, через которое нужно заново вывести уведомление
+            // Для важных задач - 1 минута; для неважных это время, указанное в кнопке
+            // на отложение задач: soundRegimeObject.DeferTime
+            var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
+
+			// Если не прошло нужного времени со времени последнего появления уведомления,
 			// то ничего не делаем
-			if (new Date().getTime() - oldNotification.timestamp < 60 * 1000)
+			if (new Date().getTime() - oldNotification.timestamp < t * 60 * 1000)
 			{
 				return;
 			}
@@ -1683,7 +1690,6 @@ function MakeNotification(timer, header, text)
 			delete notificationObjects[timer.id];
 		}
 
-		// var notification = new Notification('To do list', { body: text, icon: img });
 		var notification = new Notification
 								(
 									header,
@@ -1712,6 +1718,10 @@ function MakeNotification(timer, header, text)
 							return;
 					}
 				}
+
+                // Устанавливаем новый timestamp, чтобы было понятно, когда мы закрыли уведомление и отсчёт минуты происходил уже от него
+                // Иначе будут проблемы с тем, что только что закрытое уведомление будет снова появляться через несколько секунд (если пользователь долго не закрывал уведомление)
+                notification.timestamp = new Date().getTime();
 
 				notification.deleted = true;
 				notification.close();
