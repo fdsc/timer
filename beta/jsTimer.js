@@ -1099,6 +1099,10 @@ function interval()
 			{
 				// var notification = notificationObjects[cur.id];
 				// if (  !(notification instanceof Notification)  )
+
+                // Делаем дополнительное сообщение
+                // Функция сама решает, нужно его делать или нет,
+                // и через какой интервал времени
                 MakeNotification(cur, cur.text);
 			}
 
