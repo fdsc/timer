@@ -1,4 +1,6 @@
 ﻿// Виноградов С.В. https://github.com/fdsc/timer
+console.log("timer loaded; version 20221102-1011");
+
 
 var AC = null;
 var audioSource = null;
