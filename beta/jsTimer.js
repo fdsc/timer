@@ -1740,6 +1740,9 @@ function MakeNotification(timer, header, text)
 			'close',
 			function(event)
 			{
+                // см. выше в onclick
+                notification.timestamp = new Date().getTime();
+
 				// Удаляем все старые таймеры
 				// На всякий случай, удаляем только те, что держатся более часа
 				// Остальные оставляем, чтобы можно было понять,
