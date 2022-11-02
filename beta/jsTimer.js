@@ -1743,7 +1743,8 @@ console.error(notification.timestamp);
 			{
                 // см. выше в onclick
                 notification.timestamp = new Date().getTime();
-
+console.error("dt closed " + new Date().getTime());
+console.error(notification.timestamp);
 				// Удаляем все старые таймеры
 				// На всякий случай, удаляем только те, что держатся более часа
 				// Остальные оставляем, чтобы можно было понять,
