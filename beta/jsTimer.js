@@ -1097,11 +1097,9 @@ function interval()
 			}
 			else
 			{
-				var notification = notificationObjects[cur.id];
-				if (  !(notification instanceof Notification)  )
-				{
-					MakeNotification(cur, cur.text);
-				}
+				// var notification = notificationObjects[cur.id];
+				// if (  !(notification instanceof Notification)  )
+                MakeNotification(cur, cur.text);
 			}
 
 			// Устанавливаем дату первого запроса именно здесь,
