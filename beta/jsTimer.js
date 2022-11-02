@@ -1744,6 +1744,9 @@ console.error(notification.timestamp);
 			function(event)
 			{
                 // см. выше в onclick
+                // onclick не всегда срабатывает в зависимости от браузера и настроек
+                notification.deleted = true;
+
                 notification.timestamp = new Date().getTime();
 console.error("dt closed " + new Date().getTime());
 console.error(notification.timestamp);
