@@ -1672,7 +1672,8 @@ function MakeNotification(timer, header, text)
             // Для важных задач - 1 минута; для неважных это время, указанное в кнопке
             // на отложение задач: soundRegimeObject.DeferTime
             var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
-
+console.error("ds " + (new Date().getTime() - oldNotification.timestamp));
+console.error("ts " + oldNotification.timestamp);
 			// Если не прошло нужного времени со времени последнего появления уведомления,
 			// то ничего не делаем
 			if (new Date().getTime() - oldNotification.timestamp < t * 60 * 1000)
