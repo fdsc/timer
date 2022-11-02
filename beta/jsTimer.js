@@ -1724,7 +1724,8 @@ function MakeNotification(timer, header, text)
                 // Устанавливаем новый timestamp, чтобы было понятно, когда мы закрыли уведомление и отсчёт минуты происходил уже от него
                 // Иначе будут проблемы с тем, что только что закрытое уведомление будет снова появляться через несколько секунд (если пользователь долго не закрывал уведомление)
                 notification.timestamp = new Date().getTime();
-
+console.error("dt " + new Date().getTime());
+console.error(notification.timestamp);
 				notification.deleted = true;
 				notification.close();
 				// Не будем удалять, просто закроем таймер
