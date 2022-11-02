@@ -1,5 +1,5 @@
 ﻿// Виноградов С.В. https://github.com/fdsc/timer
-console.log("timer loaded; version 20221102-1011");
+console.log("timer loaded; version 20221102-1025");
 
 
 var AC = null;
