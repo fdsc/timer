@@ -1672,11 +1672,11 @@ function MakeNotification(timer, header, text)
             // Для важных задач - 1 минута; для неважных это время, указанное в кнопке
             // на отложение задач: soundRegimeObject.DeferTime
             var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
-console.error("ds " + (new Date().getTime() - oldNotification.timestamp));
-console.error("ts " + oldNotification.timestamp);
+console.error("ds " + (new Date().getTime() - oldNotification.started));
+
 			// Если не прошло нужного времени со времени последнего появления уведомления,
 			// то ничего не делаем
-			if (new Date().getTime() - oldNotification.timestamp < t * 60 * 1000)
+			if (new Date().getTime() - oldNotification.started < t * 60 * 1000)
 			{
 				return;
 			}
@@ -1704,6 +1704,8 @@ console.error("ts " + oldNotification.timestamp);
 										vibrate: 			[300, 2500, 500]
 									}
 								);
+        
+        notification.started = new Date().getTime();
 
 		notificationObjects[timer.id] = notification;
 		notification.addEventListener
@@ -1726,9 +1728,9 @@ console.error("ts " + oldNotification.timestamp);
 
                 // Устанавливаем новый timestamp, чтобы было понятно, когда мы закрыли уведомление и отсчёт минуты происходил уже от него
                 // Иначе будут проблемы с тем, что только что закрытое уведомление будет снова появляться через несколько секунд (если пользователь долго не закрывал уведомление)
-                notification.timestamp = new Date().getTime();
+                notification.started = new Date().getTime();
 console.error("dt " + new Date().getTime());
-console.error(notification.timestamp);
+console.error(notification.started);
 				notification.deleted = true;
 				notification.close();
 				// Не будем удалять, просто закроем таймер
@@ -1748,9 +1750,9 @@ console.error(notification.timestamp);
                 // onclick не всегда срабатывает в зависимости от браузера и настроек
                 notification.deleted = true;
 
-                notification.timestamp = new Date().getTime();
+                notification.started = new Date().getTime();
 console.error("dt closed " + new Date().getTime());
-console.error(notification.timestamp);
+console.error(notification.started);
 				// Удаляем все старые таймеры
 				// На всякий случай, удаляем только те, что держатся более часа
 				// Остальные оставляем, чтобы можно было понять,
