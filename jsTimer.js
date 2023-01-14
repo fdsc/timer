@@ -1732,8 +1732,8 @@ function MakeNotification(timer, header, text)
                 notification.started = new Date().getTime();
                 
                 // Так как произошла активность пользователя, сбрасываем таймер последнего звучания сирены
-                var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
-                lastDateOfPlay = Date.now();
+                // var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
+                playObject.pause = Date.now() + 60*1000;
 
 				notification.deleted = true;
 				notification.close();
@@ -1755,8 +1755,8 @@ function MakeNotification(timer, header, text)
                 notification.deleted = true;
                 notification.started = new Date().getTime();
 
-                var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
-                lastDateOfPlay = Date.now();
+                // var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
+                playObject.pause = Date.now() + 60*1000;
 
 				// Удаляем все старые таймеры
 				// На всякий случай, удаляем только те, что держатся более часа
