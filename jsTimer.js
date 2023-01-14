@@ -1730,7 +1730,9 @@ function MakeNotification(timer, header, text)
                 notification.started = new Date().getTime();
                 
                 // Так как произошла активность пользователя, сбрасываем таймер последнего звучания сирены
-                lastDateOfPlay   = Date.now();
+                lastDateOfPlay = false;
+                playGeneral();
+                lastDateOfPlay = Date.now();
 
 				notification.deleted = true;
 				notification.close();
