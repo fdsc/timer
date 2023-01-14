@@ -1168,7 +1168,7 @@ function playGeneral()
 		return;
 	}
 
-	var t      = timer.Important ? 1 : soundRegimeObject.DeferTime;
+	var t      = ImportantPlay ? 1 : soundRegimeObject.DeferTime;
 	var Urgent = Date.now() - lastDateOfPlay;
 
 	// Звук ещё звучит
