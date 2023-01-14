@@ -1730,9 +1730,8 @@ function MakeNotification(timer, header, text)
                 notification.started = new Date().getTime();
                 
                 // Так как произошла активность пользователя, сбрасываем таймер последнего звучания сирены
-                lastDateOfPlay = false;
-                playGeneral();
-                lastDateOfPlay = Date.now();
+                var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
+                playObject.pause = Date.now() + t*60*1000;
 
 				notification.deleted = true;
 				notification.close();
