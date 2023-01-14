@@ -1755,6 +1755,9 @@ function MakeNotification(timer, header, text)
                 notification.deleted = true;
                 notification.started = new Date().getTime();
 
+                var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
+                lastDateOfPlay = Date.now();
+
 				// Удаляем все старые таймеры
 				// На всякий случай, удаляем только те, что держатся более часа
 				// Остальные оставляем, чтобы можно было понять,
