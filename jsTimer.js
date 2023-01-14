@@ -1732,8 +1732,7 @@ function MakeNotification(timer, header, text)
                 
                 // Так как произошла активность пользователя, сбрасываем таймер последнего звучания сирены
                 var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
-                playObject.pause = Date.now() + t*60*1000;
-                lastDateOfPlay   = Date.now();
+                lastDateOfPlay = Date.now();
 
 				notification.deleted = true;
 				notification.close();
