@@ -1168,8 +1168,8 @@ function playGeneral()
 		return;
 	}
 
-	
-	var Urgent   = Date.now() - lastDateOfPlay;
+	var t      = timer.Important ? 1 : soundRegimeObject.DeferTime;
+	var Urgent = Date.now() - lastDateOfPlay;
 
 	// Звук ещё звучит
 	if (lastTime < 0)
@@ -1200,7 +1200,7 @@ function playGeneral()
 			}
 		}
 		else
-		if (Urgent > 1*60*1000)
+		if (Urgent > t*60*1000)
 		{
 			var vol = 1.0;
 			if (playObject.state == 0)
@@ -1272,10 +1272,11 @@ function playGeneral()
 		else
 		{
 			playObject.state = -1;
-			if (Urgent > 2*60*1000)
+			/*if (Urgent > 2*60*1000)
 				playObject.pause = Date.now() + 60*1000;
 			else
-				playObject.pause = Date.now() + 30*1000;
+				playObject.pause = Date.now() + 30*1000;*/
+            playObject.pause = Date.now() + t*60*1000;
 		}
 
 		playObject.state++;
@@ -1283,10 +1284,10 @@ function playGeneral()
 	else
 	if (soundRegime == 3)
 	{
-		if (Urgent <= 90*1000 || ImportantPlay)
+		if (Urgent <= t*1000 || ImportantPlay)
 		{
 			play();
-			playObject.pause = Date.now() + 60*1000;
+			playObject.pause = Date.now() + t*1000;
 		}
 	}
 }
