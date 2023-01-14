@@ -1284,10 +1284,11 @@ function playGeneral()
 	else
 	if (soundRegime == 3)
 	{
-		if (Urgent >= t*60*1000 || ImportantPlay)
+        // Urgent обеспечивает только два гудка: 30 - это запас
+		if (Urgent <= (30 + 60)*1000 || ImportantPlay)
 		{
 			play();
-			playObject.pause = Date.now() + t*60*1000;
+			playObject.pause = Date.now() + 60*1000;
 		}
 	}
 }
