@@ -1284,10 +1284,10 @@ function playGeneral()
 	else
 	if (soundRegime == 3)
 	{
-		if (Urgent <= t*1000 || ImportantPlay)
+		if (Urgent >= t*60*1000 || ImportantPlay)
 		{
 			play();
-			playObject.pause = Date.now() + t*1000;
+			playObject.pause = Date.now() + t*60*1000;
 		}
 	}
 }
@@ -1733,6 +1733,7 @@ function MakeNotification(timer, header, text)
                 // Так как произошла активность пользователя, сбрасываем таймер последнего звучания сирены
                 var t = timer.Important ? 1 : soundRegimeObject.DeferTime;
                 playObject.pause = Date.now() + t*60*1000;
+                lastDateOfPlay   = Date.now();
 
 				notification.deleted = true;
 				notification.close();
