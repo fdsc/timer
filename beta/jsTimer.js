@@ -2511,7 +2511,8 @@ function drawTimers()
 				{
 					if (!MergeTimers(text))
 					{
-						alert("Кажется, формат копии таймеров не верен. Убедитесь, что вы загрузили резервную копию таймеров в буфер обмена из текстового файла");
+						alert("Кажется, формат копии таймеров в буфере обмена не верен. Убедитесь, что вы загрузили резервную копию таймеров в буфер обмена из текстового файла. Попробуйте выбрать файл напрямую.");
+						LoadFromFile();
 					}
 				}
 			)
@@ -2519,8 +2520,10 @@ function drawTimers()
 			(
 				function(e)
 				{
-					alert("Не удалось загрузить таймеры из буфера обмена");
+					alert("Не удалось загрузить таймеры из буфера обмена. Попробуйте выбрать файл напрямую.");
 					console.error(e);
+
+					LoadFromFile();
 				}
 			);
 		}
@@ -2551,6 +2554,43 @@ function saveFile(data)
 	var now = new Date();
 	var str = now.getFullYear() + "-" + addNull((now.getMonth() + 1)) + "-" + addNull(now.getDate());
 	a.download = 'timer-' + timersName + str + '.json';
+	a.click();
+}
+
+function LoadFromFile()
+{
+	var a  = document.createElement("input");
+	a.type = "file";
+	
+	a.addEventListener
+	(
+		"change",
+		function(event)
+		{
+			if (a.files.length <= 0)
+				return;
+
+			var reader = new FileReader();
+			reader.onload = function(event)
+			{
+				var text = event.target.result;
+				if (!MergeTimers(text))
+				{
+					alert("Файл '" + a.files[0].name + "' имеет неверный формат данных");
+				}
+			};
+
+			reader.onerror = function(event)
+			{
+				alert("Не удалось прочитать файл");
+				console.error("Не удалось прочитать файл");
+				console.error(event.target.error);
+			};
+
+			reader.readAsText(a.files[0]);
+		}
+	);
+
 	a.click();
 }
 
