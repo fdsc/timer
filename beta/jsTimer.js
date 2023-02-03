@@ -2194,10 +2194,15 @@ function doClearAllTimers()
 
 window.onload = function()
 {
-	window.onbeforeunload = function()
-	{
-		doCloseAllNotifications();
-	};
+	window.addEventListener
+	(
+		"beforeunload",
+		function()
+		{
+			doCloseAllNotifications();
+			return "AAA";
+		};
+	);
 
 	if (document.location.search)
 	{
