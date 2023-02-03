@@ -2162,19 +2162,23 @@ function drawTimersShorts()
 	setTimeout(setIntervalsWidth, 0);
 };
 
-function doClearAllTimers()
+function doCloseAllNotifications()
 {
-	if (!confirm("Вы действительно хотите полностью очистить страницу?\n(будут удалены все объекты: и таймеры, и контрольные задачи, и типовые таймеры и интервалы)"))
-		return;
-	
 	for (var notification in notificationObjects)
 	{
 		if (notification instanceof Notification)
 		{
-			notification.deleted = true;
 			notification.close();
 		}
 	}
+}
+
+function doClearAllTimers()
+{
+	if (!confirm("Вы действительно хотите полностью очистить страницу?\n(будут удалены все объекты: и таймеры, и контрольные задачи, и типовые таймеры и интервалы)"))
+		return;
+
+	doCloseAllNotifications();
 	notificationObjects = {};
 
 	timersObject = 
@@ -2185,6 +2189,11 @@ function doClearAllTimers()
 
 	saveTimers();
 	drawTimers();
+};
+
+window.onclose = function()
+{
+	doCloseAllNotifications();
 };
 
 window.onload = function()
