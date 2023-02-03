@@ -2182,7 +2182,7 @@ window.onload = function()
 		}
 
 		// Определяем, есть ли кнопка "удалить все таймеры"
-		var s = document.location.search.match(/clear=true/);
+		var s = document.location.search.match(/[?&]clear=true/);
 		if (s.length == 2)
 		{
 			canClearAllTimers = true;
