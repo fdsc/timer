@@ -2199,9 +2199,9 @@ window.onload = function()
 		var s = document.location.search.match(/[?&]clear=true/);
 		if (s && s.length == 1)
 		{
-			var cat_vtn = document.getElementById("ClearAllTimers");
-			cat_vtn.style.display = "inline";
-			cat_vtn.addEventListener('ClearAllTimers', doClearAllTimers);
+			var cat_btn = document.getElementById("ClearAllTimers");
+			cat_btn.style.display = "inline";
+			cat_btn.addEventListener('ClearAllTimers', doClearAllTimers);
 		}
 	}
 
