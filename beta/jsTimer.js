@@ -2541,17 +2541,16 @@ function drawTimers()
 
 function saveFile(data)
 {
-/*  var a = document.getElementById("linkForSavingFiles");
-  var file = new Blob([data], {
-    type: 'plain/text'
-  });
-  a.href = URL.createObjectURL(file);
-  a.download = 'file.txt';
-  a.click();*/
 	var file = new Blob(  [data], { type: 'plain/text' }  );
 	var a = document.createElement("a");
 	a.href = URL.createObjectURL(file);
-	a.download = 'timer.json';
+
+	if (timersName != "")
+		timersName = timersName + "-";
+
+	var now = new Date();
+	var str = now.getFullYear + "-" + (now.getMonth() + 1) + "-" + now.getDay();
+	a.download = 'timer-' + timersName + str + '.json';
 	a.click();
 }
 
