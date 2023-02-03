@@ -2195,15 +2195,15 @@ function doClearAllTimers()
 
 function set_beforeunload_eventHandler()
 {
-	window.addEventListener
+/*	window.addEventListener
 	(
 		"beforeunload",
 		function()
 		{
 			doCloseAllNotifications();
-			return true;
+			return false;
 		}
-	);
+	);*/
 }
 
 
