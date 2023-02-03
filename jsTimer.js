@@ -2565,7 +2565,7 @@ function saveFile(data)
 
 	var now = new Date();
 	var str = now.getFullYear() + "-" + addNull((now.getMonth() + 1)) + "-" + addNull(now.getDate());
-	a.download = 'timer-' + timersName + str + '.json';
+	a.download = 'timers-' + timersName + str + '.json';
 	a.click();
 }
 
