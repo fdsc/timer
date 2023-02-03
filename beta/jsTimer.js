@@ -13,6 +13,7 @@ var soundSwither;
 var timerStorageNameConst = 'timers.';
 var timerStorageName      = timerStorageNameConst;
 var timersName = "";
+var canClearAllTimers = false;
 
 var timersObject = 
 {
@@ -2166,6 +2167,7 @@ window.onload = function()
 {
 	if (document.location.search)
 	{
+		// Определяем имя хранилища таймеров
 		var s = document.location.search.match(/name=(.*)/);
 		if (s.length == 2)
 		{
@@ -2177,6 +2179,14 @@ window.onload = function()
 				var timersNameElement = document.getElementById("timersName");
 				timersNameElement.textContent = "Имя хранилища таймеров: " + timersName;
 			}
+		}
+
+		// Определяем, есть ли кнопка "удалить все таймеры"
+		var s = document.location.search.match(/clear=true/);
+		if (s.length == 2)
+		{
+			canClearAllTimers = true;
+			document.getElementById("ClearAllTimers").style.display = "block";
 		}
 	}
 
