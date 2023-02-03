@@ -1704,6 +1704,7 @@ function MakeNotification(timer, header, text)
 			delete notificationObjects[timer.id];
 		}
 
+		set_beforeunload_eventHandler();
 		var notification = new Notification
 								(
 									header,
@@ -2191,8 +2192,7 @@ function doClearAllTimers()
 	drawTimers();
 };
 
-
-window.onload = function()
+function set_beforeunload_eventHandler()
 {
 	window.addEventListener
 	(
@@ -2203,7 +2203,11 @@ window.onload = function()
 			return "AAA";
 		};
 	);
+}
 
+
+window.onload = function()
+{
 	if (document.location.search)
 	{
 		// Определяем имя хранилища таймеров
