@@ -2201,7 +2201,7 @@ window.onload = function()
 		{
 			var cat_btn = document.getElementById("ClearAllTimers");
 			cat_btn.style.display = "inline";
-			cat_btn.addEventListener('ClearAllTimers', doClearAllTimers);
+			cat_btn.addEventListener('click', doClearAllTimers);
 		}
 	}
 
