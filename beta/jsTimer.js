@@ -2191,13 +2191,14 @@ function doClearAllTimers()
 	drawTimers();
 };
 
-window.onbeforeunload = function()
-{
-	doCloseAllNotifications();
-};
 
 window.onload = function()
 {
+	window.onbeforeunload = function()
+	{
+		doCloseAllNotifications();
+	};
+
 	if (document.location.search)
 	{
 		// Определяем имя хранилища таймеров
