@@ -2172,6 +2172,9 @@ function doClearAllTimers()
 		timers: [],
 		saved:  []
 	};
+
+	saveTimers();
+	drawTimers();
 }
 
 window.onload = function()
