@@ -2186,7 +2186,7 @@ window.onload = function()
 		if (s && s.length == 1)
 		{
 			canClearAllTimers = true;
-			document.getElementById("ClearAllTimers").style.display = "block";
+			document.getElementById("ClearAllTimers").style.display = "inline";
 		}
 	}
 
