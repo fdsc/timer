@@ -1494,9 +1494,17 @@ function MergeTimers(text)
 			return false;
 		}
 
-		var t = JSON.parse(text);
-		if (!t || !t.timers || !t.saved)
+		try
+		{
+			var t = JSON.parse(text);
+			if (!t || !t.timers || !t.saved)
+				return false;
+		}
+		catch (e)
+		{
+			console.error(e);
 			return false;
+		}
 
 		for (var cur of t.timers)
 		{
