@@ -74,6 +74,7 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 	document.getElementById("text").value = "";
 	var importantElement = document.getElementById("important");
 	importantElement.checked = false;
+	set_beforeunload_eventHandler();
 
 	if (!fromSave)
 	{
@@ -103,6 +104,8 @@ function importantTimer(MouseEvent)
 
 function deleteTimer(MouseEvent)
 {
+	set_beforeunload_eventHandler();
+
 	//console.error(this);
 	//console.error(arguments);
 	// var main  = document.getElementById("main");
@@ -1704,6 +1707,7 @@ function MakeNotification(timer, header, text)
 			delete notificationObjects[timer.id];
 		}
 
+		set_beforeunload_eventHandler();
 		var notification = new Notification
 								(
 									header,
@@ -2191,10 +2195,19 @@ function doClearAllTimers()
 	drawTimers();
 };
 
-window.onbeforeunload = function()
+function set_beforeunload_eventHandler()
 {
-	doCloseAllNotifications();
-};
+	window.addEventListener
+	(
+		"beforeunload",
+		function()
+		{
+			doCloseAllNotifications();
+			return "AAA";
+		}
+	);
+}
+
 
 window.onload = function()
 {

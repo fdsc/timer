@@ -104,6 +104,8 @@ function importantTimer(MouseEvent)
 
 function deleteTimer(MouseEvent)
 {
+	set_beforeunload_eventHandler();
+
 	//console.error(this);
 	//console.error(arguments);
 	// var main  = document.getElementById("main");
