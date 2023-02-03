@@ -2169,7 +2169,7 @@ window.onload = function()
 	{
 		// Определяем имя хранилища таймеров
 		var s = document.location.search.match(/name=([^&]*)/);
-		if (s.length == 2)
+		if (s && s.length == 2)
 		{
 			timersName = s[1];
 			if (timersName)
@@ -2183,7 +2183,7 @@ window.onload = function()
 
 		// Определяем, есть ли кнопка "удалить все таймеры"
 		var s = document.location.search.match(/[?&]clear=true/);
-		if (s.length == 2)
+		if (s && s.length == 1)
 		{
 			canClearAllTimers = true;
 			document.getElementById("ClearAllTimers").style.display = "block";
