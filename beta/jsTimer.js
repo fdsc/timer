@@ -2436,7 +2436,9 @@ window.onload = function()
 		'click',
 		function(me)
 		{
-			navigator.clipboard.writeText(JSON.stringify(timersObject))
+			var data = JSON.stringify(timersObject);
+			saveFile(data);
+			navigator.clipboard.writeText(data)
 			.then
 			(
 				function()
@@ -2536,6 +2538,22 @@ function drawTimers()
 		100
 	);
 };
+
+function saveFile(data)
+{
+/*  var a = document.getElementById("linkForSavingFiles");
+  var file = new Blob([data], {
+    type: 'plain/text'
+  });
+  a.href = URL.createObjectURL(file);
+  a.download = 'file.txt';
+  a.click();*/
+	var file = new Blob(  [data], { type: 'plain/text' }  );
+	var a = document.createElement("a");
+	a.href = URL.createObjectURL(file);
+	a.download = 'timer.json';
+	a.click();
+}
 
 
 // https://developer.mozilla.org/ru/docs/Web/API/Service_Worker_API/Using_Service_Workers
