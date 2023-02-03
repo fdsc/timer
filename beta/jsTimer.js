@@ -2168,7 +2168,7 @@ window.onload = function()
 	if (document.location.search)
 	{
 		// Определяем имя хранилища таймеров
-		var s = document.location.search.match(/name=(.*)/);
+		var s = document.location.search.match(/name=([^&]*)/);
 		if (s.length == 2)
 		{
 			timersName = s[1];
