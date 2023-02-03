@@ -2175,7 +2175,7 @@ function doClearAllTimers()
 
 	saveTimers();
 	drawTimers();
-}
+};
 
 window.onload = function()
 {
@@ -2199,8 +2199,9 @@ window.onload = function()
 		var s = document.location.search.match(/[?&]clear=true/);
 		if (s && s.length == 1)
 		{
-			document.getElementById("ClearAllTimers").style.display = "inline";
-			btn.addEventListener('ClearAllTimers', doClearAllTimers);
+			var cat_vtn = document.getElementById("ClearAllTimers");
+			cat_vtn.style.display = "inline";
+			cat_vtn.addEventListener('ClearAllTimers', doClearAllTimers);
 		}
 	}
 
