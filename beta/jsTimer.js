@@ -2549,7 +2549,7 @@ function saveFile(data)
 		timersName = timersName + "-";
 
 	var now = new Date();
-	var str = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+	var str = now.getFullYear() + "-" + addNull((now.getMonth() + 1)) + "-" + addNull(now.getDate());
 	a.download = 'timer-' + timersName + str + '.json';
 	a.click();
 }
