@@ -2560,12 +2560,13 @@ function saveFile(data)
 	var a = document.createElement("a");
 	a.href = URL.createObjectURL(file);
 
-	if (timersName != "")
-		timersName = timersName + "-";
+	var TN = timersName;
+	if (TN != "")
+		TN = TN + "-";
 
 	var now = new Date();
 	var str = now.getFullYear() + "-" + addNull((now.getMonth() + 1)) + "-" + addNull(now.getDate());
-	a.download = 'timers-' + timersName + str + '.json';
+	a.download = 'timers-' + TN + str + '.json';
 	a.click();
 }
 
