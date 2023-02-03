@@ -2201,7 +2201,7 @@ function set_beforeunload_eventHandler()
 		{
 			doCloseAllNotifications();
 			return "AAA";
-		};
+		}
 	);
 }
 
