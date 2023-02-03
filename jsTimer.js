@@ -2446,7 +2446,7 @@ window.onload = function()
 		{
 			var data = JSON.stringify(timersObject);
 			saveFile(data);
-			navigator.clipboard.writeText(data)
+			/*navigator.clipboard.writeText(data)
 			.then
 			(
 				function()
@@ -2461,7 +2461,7 @@ window.onload = function()
 					alert("Не удалось сохранить таймеры в буфер обмена");
 					console.error(e);
 				}
-			);
+			);*/
 		}
 	);
 
@@ -2489,6 +2489,9 @@ function drawTimers()
 		var t = JSON.parse(timersFromStorage);
 			*/
 
+			LoadFromFile();
+
+/*
             try
             {
                 navigator.permissions.query
@@ -2533,7 +2536,8 @@ function drawTimers()
 
 					LoadFromFile();
 				}
-			);
+			);*/
+			
 		}
 	);
 
