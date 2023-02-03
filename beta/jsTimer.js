@@ -13,7 +13,6 @@ var soundSwither;
 var timerStorageNameConst = 'timers.';
 var timerStorageName      = timerStorageNameConst;
 var timersName = "";
-var canClearAllTimers = false;
 
 var timersObject = 
 {
@@ -2163,6 +2162,18 @@ function drawTimersShorts()
 	setTimeout(setIntervalsWidth, 0);
 };
 
+function doClearAllTimers()
+{
+	if (!confirm("Вы действительно хотите полностью очистить страницу?\n(будут удалены все объекты: и таймеры, и контрольные задачи, и типовые таймеры и интервалы)"))
+		return;
+
+	timersObject = 
+	{
+		timers: [],
+		saved:  []
+	};
+}
+
 window.onload = function()
 {
 	if (document.location.search)
@@ -2185,8 +2196,8 @@ window.onload = function()
 		var s = document.location.search.match(/[?&]clear=true/);
 		if (s && s.length == 1)
 		{
-			canClearAllTimers = true;
 			document.getElementById("ClearAllTimers").style.display = "inline";
+			btn.addEventListener('ClearAllTimers', doClearAllTimers);
 		}
 	}
 
