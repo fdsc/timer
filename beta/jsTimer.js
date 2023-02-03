@@ -2191,7 +2191,7 @@ function doClearAllTimers()
 	drawTimers();
 };
 
-window.onclose = function()
+document.onclose = function()
 {
 	doCloseAllNotifications();
 };
