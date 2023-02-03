@@ -1,5 +1,5 @@
 ﻿// Виноградов С.В. https://github.com/fdsc/timer
-console.log("timer loaded; version 20221102-1025");
+console.log("timer loaded; version 20230203-2242");
 
 
 var AC = null;
@@ -2162,12 +2162,52 @@ function drawTimersShorts()
 	setTimeout(setIntervalsWidth, 0);
 };
 
+function doCloseAllNotifications()
+{
+	for (var notification in notificationObjects)
+	{
+		if (notification instanceof Notification)
+		{
+			notification.close();
+		}
+	}
+}
+
+function doClearAllTimers()
+{
+	if (!confirm("Вы действительно хотите полностью очистить страницу?\n(будут удалены все объекты: и таймеры, и контрольные задачи, и типовые таймеры и интервалы)"))
+		return;
+
+	doCloseAllNotifications();
+	notificationObjects = {};
+
+	timersObject = 
+	{
+		timers: [],
+		saved:  []
+	};
+
+	saveTimers();
+	drawTimers();
+};
+
+document.onclose = function()
+{
+	doCloseAllNotifications();
+};
+
+window.onclose = function()
+{
+	doCloseAllNotifications();
+};
+
 window.onload = function()
 {
 	if (document.location.search)
 	{
-		var s = document.location.search.match(/name=(.*)/);
-		if (s.length == 2)
+		// Определяем имя хранилища таймеров
+		var s = document.location.search.match(/name=([^&]*)/);
+		if (s && s.length == 2)
 		{
 			timersName = s[1];
 			if (timersName)
@@ -2177,6 +2217,15 @@ window.onload = function()
 				var timersNameElement = document.getElementById("timersName");
 				timersNameElement.textContent = "Имя хранилища таймеров: " + timersName;
 			}
+		}
+
+		// Определяем, есть ли кнопка "удалить все таймеры"
+		var s = document.location.search.match(/[?&]clear=true/);
+		if (s && s.length == 1)
+		{
+			var cat_btn = document.getElementById("ClearAllTimers");
+			cat_btn.style.display = "inline";
+			cat_btn.addEventListener('click', doClearAllTimers);
 		}
 	}
 

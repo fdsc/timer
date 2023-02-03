@@ -2196,6 +2196,11 @@ document.onclose = function()
 	doCloseAllNotifications();
 };
 
+window.onclose = function()
+{
+	doCloseAllNotifications();
+};
+
 window.onload = function()
 {
 	if (document.location.search)
