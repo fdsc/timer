@@ -74,7 +74,6 @@ function addTimer(id, milliSeconds, text, isEnd, fromSave, ImportantTimer)
 	document.getElementById("text").value = "";
 	var importantElement = document.getElementById("important");
 	importantElement.checked = false;
-	set_beforeunload_eventHandler();
 
 	if (!fromSave)
 	{
@@ -1707,7 +1706,6 @@ function MakeNotification(timer, header, text)
 			delete notificationObjects[timer.id];
 		}
 
-		set_beforeunload_eventHandler();
 		var notification = new Notification
 								(
 									header,
@@ -2203,7 +2201,7 @@ function set_beforeunload_eventHandler()
 		function()
 		{
 			doCloseAllNotifications();
-			return "AAA";
+			return true;
 		}
 	);
 }
@@ -2211,6 +2209,12 @@ function set_beforeunload_eventHandler()
 
 window.onload = function()
 {
+	window.addEventListener
+	(
+		"click",
+		set_beforeunload_eventHandler
+	);
+
 	if (document.location.search)
 	{
 		// Определяем имя хранилища таймеров
