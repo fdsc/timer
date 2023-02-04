@@ -2189,6 +2189,14 @@ function doClearAllTimers()
 		saved:  []
 	};
 
+	soundRegimeObject = 
+	{
+		gainVal:     1.0,
+		soundRegime: 0,
+		DeferTime:   1
+	};
+
+	saveSoundRegime();
 	saveTimers();
 	drawTimers();
 };
