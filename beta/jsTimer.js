@@ -21,18 +21,21 @@ var timersObject =
 	saved:  []
 };
 
-var soundRegimeObject = {};
-setDefaultSoundRegime();
-
 // Эта функция вызывается в doClearAllTimers совместно с первичной инициализацией объекта
-function setDefaultSoundRegime()
+function getDefaultSoundRegime()
 {
-	soundRegimeObject.gainVal     = 0.16;
-	soundRegimeObject.gainVal2    = 0.4;
-	soundRegimeObject.soundRegime = 0;
-	soundRegimeObject.DeferTime   = 1;
+	var dsr = 
+	{
+		gainVal:     0.16,
+		gainVal2:    0.4,
+		soundRegime: 0,
+		DeferTime:   1
+	};
+
+	return dsr;
 }
 
+var soundRegimeObject = getDefaultSoundRegime();
 
 
 var SoundRegimeText = 
@@ -2197,11 +2200,12 @@ function doClearAllTimers()
 		saved:  []
 	};
 
-	setDefaultSoundRegime();
+	soundRegimeObject = getDefaultSoundRegime();
 
 	saveSoundRegime();
 	loadSoundRegime();
 	setGainValToHtml(  getGainVal()  );
+	onAudioLoad();		// Без этого не будут изменены значения непосредственно в звуковом контексте
 
 	saveTimers();
 	drawTimers();
