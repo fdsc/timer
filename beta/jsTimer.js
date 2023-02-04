@@ -706,6 +706,8 @@ function loadSoundRegime()
 				soundRegimeObject.DeferTime = 1;
 
 			btn.value = soundRegimeObject.DeferTime + " мин.";
+
+			setGainValToHtml(  getGainVal()  );
 		}
 	}
 	catch (e)
