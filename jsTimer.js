@@ -22,7 +22,7 @@ var timersObject =
 
 var soundRegimeObject = 
 {
-	gainVal:     1.0,
+	gainVal:     0.16,
 	soundRegime: 0,
 	DeferTime:   1
 };
