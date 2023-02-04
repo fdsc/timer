@@ -14,18 +14,29 @@ var timerStorageNameConst = 'timers.';
 var timerStorageName      = timerStorageNameConst;
 var timersName = "";
 
+// При изменении объекта вставить повторный сброс и в doClearAllTimers
 var timersObject = 
 {
 	timers: [],
 	saved:  []
 };
 
-var soundRegimeObject = 
+// Эта функция вызывается в doClearAllTimers совместно с первичной инициализацией объекта
+function getDefaultSoundRegime()
 {
-	gainVal:     0.16,
-	soundRegime: 0,
-	DeferTime:   1
-};
+	var dsr = 
+	{
+		gainVal:     0.16,
+		gainVal2:    0.4,
+		soundRegime: 0,
+		DeferTime:   1
+	};
+
+	return dsr;
+}
+
+var soundRegimeObject = getDefaultSoundRegime();
+
 
 var SoundRegimeText = 
 		[
@@ -2189,15 +2200,12 @@ function doClearAllTimers()
 		saved:  []
 	};
 
-	soundRegimeObject = 
-	{
-		gainVal:     1.0,
-		soundRegime: 0,
-		DeferTime:   1
-	};
+	soundRegimeObject = getDefaultSoundRegime();
 
 	saveSoundRegime();
 	loadSoundRegime();
+	setGainValToHtml(  getGainVal()  );
+	onAudioLoad();		// Без этого не будут изменены значения непосредственно в звуковом контексте
 
 	saveTimers();
 	drawTimers();
