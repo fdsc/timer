@@ -2197,6 +2197,8 @@ function doClearAllTimers()
 	};
 
 	saveSoundRegime();
+	loadSoundRegime();
+
 	saveTimers();
 	drawTimers();
 };
