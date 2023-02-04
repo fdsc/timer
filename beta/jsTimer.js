@@ -21,21 +21,18 @@ var timersObject =
 	saved:  []
 };
 
-// Эта функция вызывается в doClearAllTimers совместно с первичной инициализацией объекта
-function getDefaultSoundRegime()
-{
-	var dsr = 
-	{
-		gainVal:     0.16,
-		gainVal2:    0.4,
-		soundRegime: 0,
-		DeferTime:   1
-	};
+var soundRegimeObject = {};
+setDefaultSoundRegime();
 
-	return dsr;
+// Эта функция вызывается в doClearAllTimers совместно с первичной инициализацией объекта
+function setDefaultSoundRegime()
+{
+	soundRegimeObject.gainVal     = 0.16;
+	soundRegimeObject.gainVal2    = 0.4;
+	soundRegimeObject.soundRegime = 0;
+	soundRegimeObject.DeferTime   = 1;
 }
 
-var soundRegimeObject = getDefaultSoundRegime();
 
 
 var SoundRegimeText = 
@@ -2200,7 +2197,7 @@ function doClearAllTimers()
 		saved:  []
 	};
 
-	soundRegimeObject = getDefaultSoundRegime();
+	setDefaultSoundRegime();
 
 	saveSoundRegime();
 	loadSoundRegime();
