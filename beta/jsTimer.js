@@ -731,12 +731,12 @@ function getGainVal()
 
 function getGainVal1()
 {
-	return soundRegimeObject.gainVal ? soundRegimeObject.gainVal : 1.0;
+	return soundRegimeObject.gainVal ? soundRegimeObject.gainVal : 0.16;
 };
 
 function getGainVal2()
 {
-	return soundRegimeObject.gainVal2 ? soundRegimeObject.gainVal2 : 1.0;
+	return soundRegimeObject.gainVal2 ? soundRegimeObject.gainVal2 : 0.4;
 };
 
 function setGainVal(value, val2)
