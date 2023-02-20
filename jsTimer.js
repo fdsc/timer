@@ -14,6 +14,9 @@ var timerStorageNameConst = 'timers.';
 var timerStorageName      = timerStorageNameConst;
 var timersName = "";
 
+var INTERVAL_TIME = 100;
+var last_interval_time = 90;
+
 // При изменении объекта вставить повторный сброс и в doClearAllTimers
 var timersObject = 
 {
@@ -974,11 +977,19 @@ function formatTime(date)
 
 var lastDateOfPlay = false;
 var ImportantPlay  = false;
+
+var lastInterval = 0;
 function interval()
 {
 	var now = new Date().getTime();
 	var difMin  = 24*60*60*1000;
 	var minText = 'Таймер';
+
+	// Пропускаем интервал, если он ещё не истёк (нужно для замедленного режима)
+	if (now - lastInterval < last_interval_time)
+		return;
+
+	lastInterval = now;
 
 	var btn = document.getElementById("silent");
 	btn.value = "откл. 1 минута";
@@ -2623,13 +2634,32 @@ function drawTimers()
 
 	// audio = document.getElementById("audio");
 
+	// Переключаемся в замедленный режим, если идёт потеря фокуса
+	window.addEventListener
+	(
+		'blur',
+		function()
+		{
+			last_interval_time = 990;
+		}
+	);
+	// Переключаемся обратно в обычный режим
+	window.addEventListener
+	(
+		'focus',
+		function()
+		{
+			last_interval_time = 90;
+		}
+	);
+	
 	drawTimers();
 	InitializeNotification();
 
 	setInterval
 	(
 		interval,
-		100
+		INTERVAL_TIME
 	);
 };
 
