@@ -989,6 +989,8 @@ function interval()
 	if (now - lastInterval < last_interval_time)
 		return;
 
+	lastInterval = now;
+
 	var btn = document.getElementById("silent");
 	btn.value = "откл. 1 минута";
 
