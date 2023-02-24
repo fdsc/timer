@@ -2672,7 +2672,9 @@ function drawTimers()
 function calcResourceSavingMode()
 {
 	isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
-	
+
+	setIntervalForTimers();
+
 	return isResourceSavingMode;
 };
 

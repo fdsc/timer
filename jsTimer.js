@@ -14,7 +14,11 @@ var timerStorageNameConst = 'timers.';
 var timerStorageName      = timerStorageNameConst;
 var timersName = "";
 
-var INTERVAL_TIME = 100;
+var INTERVAL_ID          = 0;
+var INTERVAL_TIME        = 100;
+var onFocus              = true;
+var isResourceSavingMode = false;
+
 var last_interval_time = 90;
 
 // При изменении объекта вставить повторный сброс и в doClearAllTimers
@@ -2640,7 +2644,8 @@ function drawTimers()
 		'blur',
 		function()
 		{
-			last_interval_time = 990;
+			onFocus = false;
+			setIntervalForTimers();
 		}
 	);
 	// Переключаемся обратно в обычный режим
@@ -2649,14 +2654,67 @@ function drawTimers()
 		'focus',
 		function()
 		{
-			last_interval_time = 90;
+			onFocus = true;
+			setIntervalForTimers();
 		}
 	);
 	
+	btn = document.getElementById("ResourceSavingMode");
+	btn.addEventListener('click', calcResourceSavingMode);
+
 	drawTimers();
 	InitializeNotification();
 
-	setInterval
+	setIntervalForTimers();
+};
+
+
+function calcResourceSavingMode()
+{
+	isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
+
+	setIntervalForTimers();
+
+	return isResourceSavingMode;
+};
+
+
+function setIntervalForTimers()
+{
+	if (INTERVAL_ID != 0)
+	{
+		clearInterval(INTERVAL_ID);
+		INTERVAL_ID = 0;
+	}
+
+	if (onFocus)
+	{
+		if (isResourceSavingMode)
+		{
+			last_interval_time = 990;
+			INTERVAL_TIME      = 1000;
+		}
+		else
+		{
+			last_interval_time = 90;
+			INTERVAL_TIME      = 100;
+		}
+	}
+	else
+	{
+		if (isResourceSavingMode)
+		{
+			last_interval_time = 9990;
+			INTERVAL_TIME      = 10000;
+		}
+		else
+		{
+			last_interval_time = 990;
+			INTERVAL_TIME      = 1000;
+		}
+	}
+
+	INTERVAL_ID = setInterval
 	(
 		interval,
 		INTERVAL_TIME
