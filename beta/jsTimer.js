@@ -2660,7 +2660,7 @@ function drawTimers()
 	);
 	
 	btn = document.getElementById("ResourceSavingMode");
-	btn.addEventListener('click', calcResourceSavingMode);
+	btn.addEventListener('click', ResourceSavingModeClick);
 
 	drawTimers();
 	InitializeNotification();
@@ -2669,11 +2669,14 @@ function drawTimers()
 };
 
 
+function ResourceSavingModeClick()
+{
+	setIntervalForTimers();
+}
+
 function calcResourceSavingMode()
 {
 	isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
-
-	setIntervalForTimers();
 
 	return isResourceSavingMode;
 };
@@ -2681,6 +2684,8 @@ function calcResourceSavingMode()
 
 function setIntervalForTimers()
 {
+	calcResourceSavingMode();
+
 	if (INTERVAL_ID != 0)
 	{
 		clearInterval(INTERVAL_ID);
