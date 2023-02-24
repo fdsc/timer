@@ -17,7 +17,6 @@ var timersName = "";
 var INTERVAL_ID          = 0;
 var INTERVAL_TIME        = 100;
 var onFocus              = true;
-var isResourceSavingMode = false;
 
 var last_interval_time = 90;
 
@@ -36,7 +35,8 @@ function getDefaultSoundRegime()
 		gainVal:     0.16,
 		gainVal2:    0.4,
 		soundRegime: 0,
-		DeferTime:   1
+		DeferTime:   1,
+		isResourceSavingMode: false
 	};
 
 	return dsr;
@@ -713,6 +713,8 @@ function loadSoundRegime()
 				soundRegimeObject.DeferTime = 1;
 
 			btn.value = soundRegimeObject.DeferTime + " мин.";
+
+			document.getElementById("ResourceSavingMode").checked = soundRegimeObject.isResourceSavingMode;
 		}
 	}
 	catch (e)
@@ -723,6 +725,7 @@ function loadSoundRegime()
 
 function saveSoundRegime()
 {
+	calcResourceSavingMode();
 	localStorage.setItem(timerStorageName + '.soundRegime', JSON.stringify(soundRegimeObject));
 }
 
@@ -2660,7 +2663,7 @@ function drawTimers()
 	);
 	
 	btn = document.getElementById("ResourceSavingMode");
-	btn.addEventListener('click', calcResourceSavingMode);
+	btn.addEventListener('click', ResourceSavingModeClick);
 
 	drawTimers();
 	InitializeNotification();
@@ -2669,18 +2672,26 @@ function drawTimers()
 };
 
 
+function ResourceSavingModeClick()
+{
+	setIntervalForTimers();
+	saveSoundRegime();		// Режим экономии сохраняется вместе с режимом звука
+}
+
 function calcResourceSavingMode()
 {
-	isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
+	soundRegimeObject.isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
 
-	setIntervalForTimers();
+	// console.log('isResourceSavingMode: ' + soundRegimeObject.isResourceSavingMode);
 
-	return isResourceSavingMode;
+	return soundRegimeObject.isResourceSavingMode;
 };
 
 
 function setIntervalForTimers()
 {
+	calcResourceSavingMode();
+
 	if (INTERVAL_ID != 0)
 	{
 		clearInterval(INTERVAL_ID);
@@ -2689,7 +2700,7 @@ function setIntervalForTimers()
 
 	if (onFocus)
 	{
-		if (isResourceSavingMode)
+		if (soundRegimeObject.isResourceSavingMode)
 		{
 			last_interval_time = 990;
 			INTERVAL_TIME      = 1000;
@@ -2702,7 +2713,7 @@ function setIntervalForTimers()
 	}
 	else
 	{
-		if (isResourceSavingMode)
+		if (soundRegimeObject.isResourceSavingMode)
 		{
 			last_interval_time = 9990;
 			INTERVAL_TIME      = 10000;
