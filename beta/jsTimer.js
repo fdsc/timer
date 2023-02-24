@@ -17,7 +17,6 @@ var timersName = "";
 var INTERVAL_ID          = 0;
 var INTERVAL_TIME        = 100;
 var onFocus              = true;
-var isResourceSavingMode = false;
 
 var last_interval_time = 90;
 
@@ -715,8 +714,7 @@ function loadSoundRegime()
 
 			btn.value = soundRegimeObject.DeferTime + " мин.";
 
-			isResourceSavingMode = soundRegimeObject.isResourceSavingMode;
-			document.getElementById("ResourceSavingMode").checked = isResourceSavingMode;
+			document.getElementById("ResourceSavingMode").checked = soundRegimeObject.isResourceSavingMode;
 		}
 	}
 	catch (e)
@@ -727,7 +725,7 @@ function loadSoundRegime()
 
 function saveSoundRegime()
 {
-	soundRegimeObject.isResourceSavingMode = calcResourceSavingMode();
+	calcResourceSavingMode();
 	localStorage.setItem(timerStorageName + '.soundRegime', JSON.stringify(soundRegimeObject));
 }
 
@@ -2682,9 +2680,11 @@ function ResourceSavingModeClick()
 
 function calcResourceSavingMode()
 {
-	isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
+	soundRegimeObject.isResourceSavingMode = document.getElementById("ResourceSavingMode").checked;
 
-	return isResourceSavingMode;
+	// console.log('isResourceSavingMode: ' + soundRegimeObject.isResourceSavingMode);
+
+	return soundRegimeObject.isResourceSavingMode;
 };
 
 
@@ -2700,7 +2700,7 @@ function setIntervalForTimers()
 
 	if (onFocus)
 	{
-		if (isResourceSavingMode)
+		if (soundRegimeObject.isResourceSavingMode)
 		{
 			last_interval_time = 990;
 			INTERVAL_TIME      = 1000;
@@ -2713,7 +2713,7 @@ function setIntervalForTimers()
 	}
 	else
 	{
-		if (isResourceSavingMode)
+		if (soundRegimeObject.isResourceSavingMode)
 		{
 			last_interval_time = 9990;
 			INTERVAL_TIME      = 10000;
