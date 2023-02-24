@@ -36,7 +36,8 @@ function getDefaultSoundRegime()
 		gainVal:     0.16,
 		gainVal2:    0.4,
 		soundRegime: 0,
-		DeferTime:   1
+		DeferTime:   1,
+		isResourceSavingMode: false
 	};
 
 	return dsr;
@@ -713,6 +714,9 @@ function loadSoundRegime()
 				soundRegimeObject.DeferTime = 1;
 
 			btn.value = soundRegimeObject.DeferTime + " мин.";
+
+			isResourceSavingMode = soundRegimeObject.isResourceSavingMode;
+			document.getElementById("ResourceSavingMode").checked = isResourceSavingMode;
 		}
 	}
 	catch (e)
@@ -723,6 +727,7 @@ function loadSoundRegime()
 
 function saveSoundRegime()
 {
+	soundRegimeObject.isResourceSavingMode = calcResourceSavingMode();
 	localStorage.setItem(timerStorageName + '.soundRegime', JSON.stringify(soundRegimeObject));
 }
 
@@ -2672,6 +2677,7 @@ function drawTimers()
 function ResourceSavingModeClick()
 {
 	setIntervalForTimers();
+	saveSoundRegime();		// Режим экономии сохраняется вместе с режимом звука
 }
 
 function calcResourceSavingMode()
