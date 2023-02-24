@@ -2690,12 +2690,12 @@ function setIntervalForTimers()
 		if (isResourceSavingMode)
 		{
 			last_interval_time = 990;
-			interval           = 1000;
+			INTERVAL_TIME      = 1000;
 		}
 		else
 		{
 			last_interval_time = 90;
-			interval           = 100;
+			INTERVAL_TIME      = 100;
 		}
 	}
 	else
@@ -2703,12 +2703,12 @@ function setIntervalForTimers()
 		if (isResourceSavingMode)
 		{
 			last_interval_time = 9990;
-			interval           = 10000;
+			INTERVAL_TIME      = 10000;
 		}
 		else
 		{
 			last_interval_time = 990;
-			interval           = 1000;
+			INTERVAL_TIME      = 1000;
 		}
 	}
 
