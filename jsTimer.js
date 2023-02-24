@@ -988,7 +988,7 @@ var ImportantPlay  = false;
 var lastInterval = 0;
 function interval()
 {
-	var now = new Date().getTime();
+	var now     = new Date().getTime();
 	var difMin  = 24*60*60*1000;
 	var minText = 'Таймер';
 
@@ -2710,6 +2710,8 @@ function setIntervalForTimers()
 			last_interval_time = 90;
 			INTERVAL_TIME      = 100;
 		}
+
+		document.body.style.display="block";
 	}
 	else
 	{
@@ -2717,11 +2719,13 @@ function setIntervalForTimers()
 		{
 			last_interval_time = 9990;
 			INTERVAL_TIME      = 10000;
+			document.body.style.display="none";
 		}
 		else
 		{
 			last_interval_time = 990;
 			INTERVAL_TIME      = 1000;
+			document.body.style.display="block";
 		}
 	}
 
