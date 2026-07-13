@@ -1,31 +1,28 @@
 import tkinter as tk
-from tkinter import messagebox
 from datetime import datetime, timedelta
+from notifier import show_alert
 
 class TaskBlock:
-    """
-    Кастомный блок задачи: ровно 4 строки.
-    1: текст задачи
-    2: время до оповещения + дата/время оповещения
-    3: кнопки «Удалить» и «Важная/не важная»
-    4: разделитель (подчёркивание)
-    """
-
-    # Цвета: используем явные значения вместо SystemButtonFace
-    COLOR_NORMAL_BG = "#f0f0f0"       # нейтральный светло‑серый фон кнопки
-    COLOR_NORMAL_ACTIVE = "#e0e0e0"   # фон при наведении
-    COLOR_IMPORTANT_BG = "#ffebee"    # розовый для важной
+    COLOR_NORMAL_BG = "#f0f0f0"
+    COLOR_NORMAL_ACTIVE = "#e0e0e0"
+    COLOR_IMPORTANT_BG = "#ffebee"
     COLOR_IMPORTANT_ACTIVE = "#ffcdd2"
     COLOR_FRAME_NORMAL = "#ffffff"
     COLOR_FRAME_IMPORTANT = "#fff0f0"
 
     def __init__(self, parent, task_id, text, alert_time, on_delete):
         self.task_id = task_id
-        self.alert_time = alert_time
+        self.alert_time = alert_time  # notifier сам посчитает просрочку по этому полю
+        self.text = text
         self.is_important = False
         self.on_delete = on_delete
 
-        # Контейнер блока
+        # Флаги для логики повторных оповещений
+        self._alerted_once    = False       # было ли первое оповещение
+        self._retry_scheduled = False     # запланировано ли повторное?
+        self._retry_delay_sec_important = 60        # задержка перед повторным оповещением (сек). Для важных задач.
+        self._retry_delay_sec_normal    = 900       # задержка перед повторным оповещением (сек). Для неважных задач.
+
         self.frame = tk.Frame(parent, bd=1, relief="solid", padx=4, pady=4)
         self.frame.pack(fill="x", pady=(0, 2))
 
@@ -39,7 +36,7 @@ class TaskBlock:
         )
         self.lbl_text.grid(row=0, column=0, sticky="w", columnspan=2)
 
-        # Строка 2: время до оповещения и дата/время оповещения
+        # Строка 2: время до/после оповещения
         self.lbl_time_info = tk.Label(
             self.frame,
             text="",
@@ -68,11 +65,18 @@ class TaskBlock:
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 
-        # Строка 4: разделитель
-        sep = tk.Frame(self.frame, height=2, bg="gray")
+        # Строка 4: разделитель на всю ширину
+        sep = tk.Frame(
+            self.frame,
+            height=2,
+            bg="gray"
+        )
+        # columnspan=2 + sticky="ew" растягивают разделитель на всю ширину контейнера
         sep.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(6, 0))
+        # Гарантируем растяжение колонок внутри фрейма блока
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(1, weight=1)
 
-        # Таймер
         self.update_timer()
 
     def update_timer(self):
@@ -90,17 +94,39 @@ class TaskBlock:
             text=f"Осталось: {time_left_str} | Оповещение: {alert_datetime_str}"
         )
 
+        # ЛОГИКА ОПОВЕЩЕНИЙ
         if total_seconds == 0:
-            if not hasattr(self, "_alerted"):
-                self._alerted = True
-                messagebox.showinfo(
-                    "Оповещение",
-                    f"Время вышло!\nЗадача: {self.lbl_text.cget('text')}"
-                )
-                # Если нужно автоудаление — раскомментируй:
-                # self.on_delete(self.task_id)
+            # Первое оповещение
+            if not self._alerted_once:
+                self._alerted_once = True
+                # Передаем только себя — notifier сам прочитает alert_time и посчитает просрочку
+                show_alert(self)
 
+                # Если задача важная, планируем повторное оповещение через 60 сек
+                if self.is_important and not self._retry_scheduled:
+                    self._retry_scheduled = True
+                    self.frame.after(self._retry_delay_sec_important * 1000, self.trigger_retry_alert)
+                if not self.is_important and not self._retry_scheduled:
+                    self._retry_scheduled = True
+                    self.frame.after(self._retry_delay_sec_normal * 1000, self.trigger_retry_alert)
+
+        # Следующий тик через 1 секунду
         self.frame.after(1000, self.update_timer)
+
+    def trigger_retry_alert(self):
+        """Вызывается через 60 секунд после первого оповещения, если задача важная."""
+        # Проверяем, существует ли ещё этот блок (не удалили ли задачу)
+        if not hasattr(self, "frame") or not self.frame.winfo_exists():
+            return
+
+        # Показываем оповещение снова.
+        # notifier увидит актуальный alert_time, посчитает новую просрочку
+        # и при необходимости повысит urgency (если прошло больше 5 минут)
+        show_alert(self)
+
+        # Если нужно бесконечное напоминание каждую минуту — раскомментируй строку ниже:
+        # self.frame.after(self._retry_delay_sec * 1000, self.trigger_retry_alert)
+        # Сейчас реализовано только ОДНО повторное напоминание.
 
     def toggle_priority(self):
         self.is_important = not self.is_important
