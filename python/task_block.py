@@ -1,6 +1,7 @@
 import tkinter as tk
 from datetime import datetime, timedelta
 from notifier import show_alert
+import math
 
 class TaskBlock:
     COLOR_NORMAL_BG        = "#f0f0f0"
@@ -14,6 +15,7 @@ class TaskBlock:
         return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
 
     def __init__(self, parent, task_id, text, alert_time, on_delete, is_important_initial: bool = False):
+        self.parent  = parent
         self.task_id = task_id
         self.alert_time = alert_time
         self.text = text
@@ -23,13 +25,12 @@ class TaskBlock:
         self._alerted_once = False
         self._retry_scheduled = False
         self._retry_delay_sec_important = 60
-        self._retry_delay_sec_normal = 900
+        self._retry_delay_sec_normal = 300
 
-        self.root = parent.winfo_toplevel()
+        self.root = parent.list_frame.winfo_toplevel()
 
-        # Применяем правильный фон сразу при создании
         bg_color = self.getBgColor()
-        self.frame = tk.Frame(parent, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
+        self.frame = tk.Frame(parent.list_frame, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
         self.frame.pack(fill="x", pady=(0, 2))
 
         self.lbl_text = tk.Label(
@@ -73,7 +74,6 @@ class TaskBlock:
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 
-        # Применяем стиль текста сразу при создании
         if self.is_important:
             self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c")
         else:
@@ -109,7 +109,7 @@ class TaskBlock:
     def update_timer(self):
         now = datetime.now()
         delta = self.alert_time - now
-        total_seconds = max(0, int(delta.total_seconds()))
+        total_seconds = max(0, int(math.ceil(delta.total_seconds())))
 
         mins, secs = divmod(total_seconds, 60)
         hrs, mins = divmod(mins, 60)
