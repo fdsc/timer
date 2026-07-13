@@ -23,6 +23,8 @@ class App:
         self.opts = load_or_create_opts(self.data_dir)
         # Инициализируем громкость из настроек
         self.volume_factor = self.opts.get("volume_percent", 100) / 100.0
+        # Несохранённое значение громкости
+        self._pending_volume_value = None
 
         # Инициализируем media_config.txt, если нет
         self.media_config_path = init_media_config(self.data_dir)
@@ -280,9 +282,17 @@ class App:
 
         # Обновляем значение в словаре настроек
         self.opts["volume_percent"] = v
-        # Сохраняем в файл
-        save_opts(self.data_dir, self.opts)
+        self._pending_volume_value  = v
 
+        # Сохраняем в файл с отложенным выполнением
+        self.root.after(3000, self.save_pending_volume)
+
+    def save_pending_volume(self):
+        """Гарантированно сохраняет последнее значение громкости, если оно ещё не было сохранено."""
+        if self._pending_volume_value is not None:
+            self.opts["volume_percent"] = self._pending_volume_value
+            save_opts(self.data_dir, self.opts)
+            self._pending_volume_value = None
 
     def _on_test_sound_click(self, event=None):
         """Проигрывает тестовый звук при клике по метке с процентом громкости."""
@@ -325,3 +335,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
     root.mainloop()
+    
+    # Завершение работы приложения
+    app.save_pending_volume()
