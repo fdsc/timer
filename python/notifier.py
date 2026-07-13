@@ -16,6 +16,27 @@ def notify(title: str, message: str, urgency: str = "normal") -> bool:
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
 
+def play_sound(sound_path: str) -> None:
+    """
+    Проигрывает звук через утилиту `play` (пакет sox).
+    
+    sound_path — путь к аудиофайлу (.wav, .ogg, .flac и т.п.).
+    Если файл не найден или play недоступен — просто ничего не делаем.
+    """
+    try:
+        # play автоматически выберет текущий аудиовыход (Pulse/PipWire/ALSA)
+        subprocess.run(
+            ["play", "-q", sound_path],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=3
+        )
+    except Exception:
+        # Если play нет, файл не найден, или ошибка воспроизведения — игнорируем,
+        # чтобы программа не падала из‑за звука.
+        pass
+
 def fallback_messagebox(title: str, message: str) -> None:
     """Запасной вариант: tkinter.messagebox."""
     import tkinter.messagebox as mb
@@ -41,47 +62,53 @@ def show_alert(task_obj: Any) -> None:
     notifier сам:
       1. Вычисляет просрочку по task_obj.alert_time
       2. Определяет urgency на основе важности и просрочки
-      3. Формирует заголовок и сообщение
-      4. Отправляет уведомление
+      3. Проигрывает звук
+      4. Формирует заголовок и сообщение
+      5. Отправляет уведомление
     
     Ожидается, что task_obj имеет атрибуты:
       - text: описание задачи
       - is_important: булево
       - alert_time: datetime (время, когда задача должна сработать)
     """
-    # Получаем данные из объекта
     text = getattr(task_obj, "text", "Неизвестная задача")
     is_important = bool(getattr(task_obj, "is_important", False))
     alert_time = getattr(task_obj, "alert_time", None)
 
     # Вычисляем просрочку
     if alert_time is None:
-        # Если времени нет — считаем, что просрочки нет (или это ошибка)
         overdue_seconds = 0
     else:
         delta = datetime.now() - alert_time
         overdue_seconds = max(0, int(delta.total_seconds()))
 
-    # Определяем urgency
     urgency_level = _calculate_urgency(is_important, overdue_seconds)
 
     # Формируем сообщение
     if is_important:
         base_title = "❗ ВАЖНАЯ ЗАДАЧА"
-        extra_msg = "Требуется внимание."
     else:
         base_title = "Задача"
-        extra_msg = "Время вышло."
 
     if overdue_seconds > 0:
         minutes, secs = divmod(overdue_seconds, 60)
         time_diff_str = f"{minutes} мин {secs} сек назад"
-        message = f"{extra_msg}\nЗадача: {text}\nПросрочено: {time_diff_str}"
+        message = f"Задача: {text}\nПросрочено: {time_diff_str}"
     else:
-        message = f"{extra_msg}\nЗадача: {text}"
+        message = f"Задача: {text}"
 
     title = f"{base_title}"
 
-    # Отправляем
+    # Проигрываем звук: подбери любой короткий звуковой файл у себя в системе
+    # Примеры путей, которые часто есть в Arch:
+    #   /usr/share/sounds/freedesktop/stereo/complete.oga
+    #   /usr/share/sounds/gnome/default/alerts/bell.ogg
+    #   /usr/share/sounds/alsa/Front_Center.wav
+    #
+    # Ниже — пример с универсальным путём. Если такого нет — замени на свой.
+    sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
+    play_sound(sound_file)
+
+    # Отправляем уведомление
     if not notify(title, message, urgency=urgency_level):
         fallback_messagebox(title, message)

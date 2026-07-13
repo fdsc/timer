@@ -3,81 +3,108 @@ from datetime import datetime, timedelta
 from notifier import show_alert
 
 class TaskBlock:
-    COLOR_NORMAL_BG = "#f0f0f0"
-    COLOR_NORMAL_ACTIVE = "#e0e0e0"
-    COLOR_IMPORTANT_BG = "#ffebee"
+    COLOR_NORMAL_BG        = "#f0f0f0"
+    COLOR_NORMAL_ACTIVE    = "#e0e0e0"
+    COLOR_IMPORTANT_BG     = "#ffebee"
     COLOR_IMPORTANT_ACTIVE = "#ffcdd2"
-    COLOR_FRAME_NORMAL = "#ffffff"
-    COLOR_FRAME_IMPORTANT = "#fff0f0"
+    COLOR_FRAME_NORMAL     = "#ffffff"
+    COLOR_FRAME_IMPORTANT  = "#fff0f0"
 
-    def __init__(self, parent, task_id, text, alert_time, on_delete):
+    def getBgColor(self):
+        return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
+
+    def __init__(self, parent, task_id, text, alert_time, on_delete, is_important_initial: bool = False):
         self.task_id = task_id
-        self.alert_time = alert_time  # notifier сам посчитает просрочку по этому полю
+        self.alert_time = alert_time
         self.text = text
-        self.is_important = False
+        self.is_important = is_important_initial
         self.on_delete = on_delete
 
-        # Флаги для логики повторных оповещений
-        self._alerted_once    = False       # было ли первое оповещение
-        self._retry_scheduled = False     # запланировано ли повторное?
-        self._retry_delay_sec_important = 60        # задержка перед повторным оповещением (сек). Для важных задач.
-        self._retry_delay_sec_normal    = 900       # задержка перед повторным оповещением (сек). Для неважных задач.
+        self._alerted_once = False
+        self._retry_scheduled = False
+        self._retry_delay_sec_important = 60
+        self._retry_delay_sec_normal = 900
 
-        self.frame = tk.Frame(parent, bd=1, relief="solid", padx=4, pady=4)
+        self.root = parent.winfo_toplevel()
+
+        # Применяем правильный фон сразу при создании
+        bg_color = self.getBgColor()
+        self.frame = tk.Frame(parent, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
         self.frame.pack(fill="x", pady=(0, 2))
 
-        # Строка 1: текст задачи
         self.lbl_text = tk.Label(
             self.frame,
             text=text,
             anchor="w",
             justify="left",
-            font=("TkDefaultFont", 11)
+            font=("TkDefaultFont", 11),
+            bg=bg_color
         )
         self.lbl_text.grid(row=0, column=0, sticky="w", columnspan=2)
 
-        # Строка 2: время до/после оповещения
+        self._setup_copy_menu_for_label(self.lbl_text, text)
+
         self.lbl_time_info = tk.Label(
             self.frame,
             text="",
             anchor="w",
             justify="left",
-            fg="#555"
+            fg="#555",
+            bg=bg_color
         )
         self.lbl_time_info.grid(row=1, column=0, sticky="w", columnspan=2)
 
-        # Строка 3: кнопки
         btn_del = tk.Button(
             self.frame,
             text="Удалить",
             command=lambda: self.on_delete(self.task_id),
-            width=10
+            width=10,
+            bg="#f0f0f0"
         )
         btn_del.grid(row=2, column=0, padx=(0, 8), sticky="w")
 
         self.btn_priority = tk.Button(
             self.frame,
-            text="Важная",
+            text="Не важная" if not self.is_important else "Важная",
             command=self.toggle_priority,
             width=12,
-            bg=self.COLOR_NORMAL_BG,
-            activebackground=self.COLOR_NORMAL_ACTIVE
+            bg=self.COLOR_IMPORTANT_BG if self.is_important else "#f0f0f0",
+            activebackground=self.COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 
-        # Строка 4: разделитель на всю ширину
-        sep = tk.Frame(
-            self.frame,
-            height=2,
-            bg="gray"
-        )
-        # columnspan=2 + sticky="ew" растягивают разделитель на всю ширину контейнера
+        # Применяем стиль текста сразу при создании
+        if self.is_important:
+            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c")
+        else:
+            self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000")
+
+        sep = tk.Frame(self.frame, height=2, bg="gray")
         sep.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(6, 0))
-        # Гарантируем растяжение колонок внутри фрейма блока
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_columnconfigure(1, weight=1)
 
         self.update_timer()
+
+
+    def _setup_copy_menu_for_label(self, label, text_to_copy):
+        """Создаёт контекстное меню для Label, чтобы копировать текст задачи."""
+        menu = tk.Menu(label, tearoff=0)
+
+        def copy_text():
+            self.root.clipboard_clear()
+            self.root.clipboard_append(text_to_copy)
+
+        menu.add_command(label="Копировать текст задачи", command=copy_text)
+
+        def popup(event):
+            try:
+                menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                menu.grab_release()
+
+        label.bind("<Button-3>", popup)
+
 
     def update_timer(self):
         now = datetime.now()
@@ -128,21 +155,28 @@ class TaskBlock:
         # self.frame.after(self._retry_delay_sec * 1000, self.trigger_retry_alert)
         # Сейчас реализовано только ОДНО повторное напоминание.
 
+    # task_block.py
+
     def toggle_priority(self):
         self.is_important = not self.is_important
+
         if self.is_important:
             self.btn_priority.config(
-                text="Не важная",
+                text="Важная",
                 bg=self.COLOR_IMPORTANT_BG,
                 activebackground=self.COLOR_IMPORTANT_ACTIVE
             )
             self.frame.config(bg=self.COLOR_FRAME_IMPORTANT)
-            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"))
+            # Обновляем цвет и стиль текста при переключении
+            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c", bg=self.getBgColor())
+            self.lbl_time_info.config(bg=self.COLOR_FRAME_IMPORTANT)
         else:
             self.btn_priority.config(
-                text="Важная",
+                text="Не важная",
                 bg=self.COLOR_NORMAL_BG,
                 activebackground=self.COLOR_NORMAL_ACTIVE
             )
             self.frame.config(bg=self.COLOR_FRAME_NORMAL)
-            self.lbl_text.config(font=("TkDefaultFont", 11))
+            # Обновляем цвет и стиль текста при переключении
+            self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
+            self.lbl_time_info.config(bg=self.COLOR_FRAME_NORMAL)
