@@ -207,11 +207,11 @@ class TaskBlock:
         isSuccess = tasks_storage.save_task(
             data_dir=self.parent.data_dir,
             task_data={
-                "task_id": task_id,
-                "text": text,
-                "alert_time": alert_time,
-                "is_important": is_important,
-                "is_quiet": is_quiet,
+                "task_id":      self.task_id,
+                "text":         self.text,
+                "alert_time":   self.alert_time,
+                "is_important": self.is_important,
+                "is_quiet":     self.is_quiet,
             },
             lock=self.parent.storage_lock,
             io_error_flag=self.parent.io_error_flag
@@ -318,10 +318,10 @@ class TaskBlock:
 
         # Удаляем файл на диске
         success = tasks_storage.delete_task_file(
-            data_dir=self.parent.data_dir,
-            task_id=task_id,
-            lock=self.parent.storage_lock,
-            io_error_flag=self.parent.io_error_flag
+            data_dir      = self.parent.data_dir,
+            task_id       = self.task_id,
+            lock          = self.parent.storage_lock,
+            io_error_flag = self.parent.io_error_flag
         )
 
         if not success:

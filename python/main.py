@@ -41,29 +41,12 @@ class App:
         # Несохранённое значение громкости
         self._pending_volume_value = None
 
-        # Инициализируем media_config.txt, если нет
+        # Инициализируем media.conf, если нет
         self.media_config_path = init_media_config(self.data_dir)
 
         # Загружаем пути к медиафайлам
         media_paths = load_media_paths(self.media_config_path)
         notifier.MEDIA_PATHS = media_paths  # передаём в notifier
-
-        # Инициализация хранилища задач
-        if not tasks_storage.ensure_tasks_dir(self.data_dir):
-            self.io_error_flag = True
-            messagebox.showerror("Ошибка доступа к диску", f"Не удалось создать или получить доступ к папке для хранения задач. Закройте программу и устраните ошибку. '{tasks_storage.get_tasks_dir()}'")
-            # Блокируем кнопки добавления
-            self._disable_add_buttons()
-            # Дальше не пытаемся загружать задачи
-            self.tasks = {}
-        else:
-            # Загрузка задач
-            loaded = tasks_storage.load_all_tasks(self.data_dir, self.storage_lock)
-            self.tasks = {}  # словарь task_id -> TaskBlock
-            for t in loaded:
-                # Восстанавливаем задачу в UI
-                self._restore_task_from_dict(t)
-
 
         # Новое поле: состояние логики общего фонового сигнала
         self.alert_sound_state = {
@@ -244,6 +227,23 @@ class App:
         self.quiet_list_frame.pack(fill="both", expand=True, padx=4, pady=4)
 
         # ------------------------------------------------
+        # Инициализация хранилища задач
+        if not tasks_storage.ensure_tasks_dir(self.data_dir):
+            self.io_error_flag = True
+            messagebox.showerror("Ошибка доступа к диску", f"Не удалось создать или получить доступ к папке для хранения задач. Закройте программу и устраните ошибку. '{tasks_storage.get_tasks_dir()}'")
+            # Блокируем кнопки добавления
+            self._disable_add_buttons()
+            # Дальше не пытаемся загружать задачи
+            self.tasks = {}
+        else:
+            # Загрузка задач
+            loaded = tasks_storage.load_all_tasks(self.data_dir, self.storage_lock)
+            self.tasks = {}  # словарь task_id -> TaskBlock
+            for t in loaded:
+                # Восстанавливаем задачу в UI
+                self._restore_task_from_dict(t)
+
+
         # Отключаем кнопки, если есть ошибка ввода-вывода
         if self.io_error_flag:
             self._disable_add_buttons()
@@ -349,7 +349,8 @@ class App:
         block.save()
 
         # Пересортировываем задачи по приоритету
-        self._reorder_tasks_in_frame()
+        frame=self.quiet_list_frame if block.is_quiet else self.list_frame
+        self._reorder_tasks_in_frame(frame)
 
 
     def _reorder_tasks_in_frame(self, frame: tk.Frame):
