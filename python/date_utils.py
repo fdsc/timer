@@ -13,39 +13,79 @@ WEEKDAY_MAP = {
     "вс": 6, "вос": 6,
 }
 
-def parse_weekday_to_date(day_str: str, now: datetime) -> tuple[int, int, int]:
+def parse_weekday_to_date(day_str: str, now: datetime) -> tuple[int | None, int | None, int | None]:
     """
-    Если day_str — это код дня недели (или начинается с него), возвращает (год, месяц, день)
-    ближайшего будущего дня с таким днём недели.
-    Иначе возвращает (None, None, None), чтобы использовать обычную логику парсинга.
+    Если day_str — это код дня недели (опционально с суффиксом *N), возвращает (год, месяц, день)
+    соответствующего дня в будущем.
+
+    Поддерживаемые форматы:
+      - "вт"          → ближайший будущий вторник (если сегодня не вторник)
+      - "вт*1"        → ближайший будущий вторник (то же, что и "вт")
+      - "вт*2"        → вторник через 1 неделю от ближайшего
+      - "вт*3"        → вторник через 2 недели от ближайшего
+      - "Вт * 3"       → тоже вторник через 2 недели (пробелы игнорируются)
+
+    Логика: N в "вт*N" означает «N‑й по счёту будущий день недели», начиная с ближайшего.
+    То есть *1 — это первый будущий, *2 — второй и т.д.
+
+    Если строка не похожа на день недели — возвращает (None, None, None), чтобы использовать обычный парсер.
     """
     if not day_str:
         return None, None, None
 
     s = day_str.strip().lower()
 
-    # Ищем совпадение по префиксу среди ключей WEEKDAY_MAP
+    # Ищем позицию символа '*'
+    star_pos = s.find("*")
+    
     target_weekday = None
-    for prefix, wd in WEEKDAY_MAP.items():
-        if s.startswith(prefix):
-            target_weekday = wd
-            break
+    prefix_len = 0
+
+    if star_pos != -1:
+        # Есть звёздочка: ищем день недели в части до неё
+        prefix = s[:star_pos].strip()
+        for p, wd in WEEKDAY_MAP.items():
+            if prefix.startswith(p):
+                target_weekday = wd
+                prefix_len = len(p)
+                break
+        # Остаток после '*' — это номер вхождения (1, 2, 3...)
+        rest = s[star_pos+1:].strip()
+    else:
+        # Звёздочки нет: ищем день недели во всей строке
+        for prefix, wd in WEEKDAY_MAP.items():
+            if s.startswith(prefix):
+                target_weekday = wd
+                prefix_len = len(prefix)
+                rest = ""
+                break
 
     if target_weekday is None:
-        # Не похоже на день недели — отдаём управление обычному парсеру
         return None, None, None
 
-    # Текущий день недели (понедельник = 0)
+    weeks_count = 1  # По умолчанию — ближайший будущий день недели
+    if rest:
+        try:
+            weeks_count = int(rest)
+            if weeks_count < 1:
+                raise ValueError("Номер вхождения должен быть >= 1")
+        except ValueError:
+            raise ValueError(f"Некорректный формат смещения недель в '{day_str}'. Ожидалось что-то вроде 'вт*1', 'вт*2'.")
+
     current_weekday = now.weekday()
 
-    # Сколько дней нужно прибавить, чтобы попасть на следующий нужный день
+    # Дни до ближайшего будущего целевого дня недели
     days_ahead = target_weekday - current_weekday
-    if days_ahead <= 0:  # Если сегодня или уже прошёл — берём следующую неделю
+    if days_ahead <= 0:
         days_ahead += 7
 
-    next_date = now + timedelta(days=days_ahead)
+    # Если weeks_count == 1 — берём days_ahead
+    # Если weeks_count > 1 — добавляем (weeks_count - 1) * 7 дней
+    total_days = days_ahead + (weeks_count - 1) * 7
+    next_date = now + timedelta(days=total_days)
 
     return next_date.year, next_date.month, next_date.day
+
 
 def parse_with_plus(val: str, base: int) -> Optional[int]:
     """
