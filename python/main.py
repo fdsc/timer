@@ -164,11 +164,11 @@ class App:
         self.btn_mute = tk.Button(
             vol_frame,
             text="O",
-            command=self._toggle_mute,
+            command=self.toggle_mute,
             width=2,
             activebackground="#ffaaaa"
         )
-        self._toggle_mute()
+        self.toggle_mute()
         self.btn_mute.pack(side="left", padx=(4, 8))
 
         # Сначала метка «Громкость:»
@@ -217,6 +217,12 @@ class App:
 
         self.quiet_list_frame = tk.Frame(self.quiet_tab_frame)
         self.quiet_list_frame.pack(fill="both", expand=True, padx=4, pady=4)
+
+    def get_quiet_tasks(self):
+        return [task for task in self.tasks.values() if task.is_quiet]
+
+    def get_non_quiet_tasks(self):
+        return [task for task in self.tasks.values() if not task.is_quiet]
 
 
     def add_task(self, is_important: bool = False, is_quiet: bool = False):
@@ -390,7 +396,7 @@ class App:
 
         widget.bind("<Button-3>", popup)
 
-    def _toggle_mute(self):
+    def toggle_mute(self):
         self.is_muted = not self.is_muted
         if self.is_muted:
             self.btn_mute.config(text="X", bg="#FF0000")
