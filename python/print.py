@@ -7,7 +7,8 @@ files_to_show = [
     "main.py",
     "task_block.py",
     "notifier.py",
-    "config_manager.py"
+    "config_manager.py",
+    "date_utils.py"
 ]
 
 current_dir = os.getcwd()

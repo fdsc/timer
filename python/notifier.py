@@ -58,10 +58,8 @@ def cancel_notify_for_task(task_id):
         os.kill(pid, signal.SIGINT)
     except ProcessLookupError:
         pass  # уже завершился
-        print("!!!!!!!!!!!!!!!!!!!1")
     except Exception:
-        print("!!!!!!!!!!!!!!!!!!!2")
-        pass
+        traceback.print_exc()
 
 def notify(title: str, message: str, task_id, urgency: str = "normal", icon_path: str | None = None) -> bool:
     return _run_notify_with_wait(title, message, task_id, urgency, icon_path)

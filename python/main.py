@@ -7,10 +7,12 @@ from tkinter import messagebox
 import time
 from datetime import timedelta, datetime
 from pathlib import Path
+import traceback
 
 import notifier
 from task_block import TaskBlock
 from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths
+from date_utils import build_alert_time
 
 
 # nuitka???
@@ -79,19 +81,19 @@ class App:
         time_frame.pack(side="left")
 
         tk.Label(time_frame, text="Д:").pack(side="left")
-        self.entry_days = tk.Entry(time_frame, width=3)
+        self.entry_days = tk.Entry(time_frame, width=5)
         self.entry_days.pack(side="left", padx=(0, 8))
 
         tk.Label(time_frame, text="Ч:").pack(side="left")
-        self.entry_hours = tk.Entry(time_frame, width=3)
+        self.entry_hours = tk.Entry(time_frame, width=5)
         self.entry_hours.pack(side="left", padx=(0, 8))
 
         tk.Label(time_frame, text="М:").pack(side="left")
-        self.entry_minutes = tk.Entry(time_frame, width=3)
+        self.entry_minutes = tk.Entry(time_frame, width=5)
         self.entry_minutes.pack(side="left", padx=(0, 8))
 
         tk.Label(time_frame, text="С:").pack(side="left")
-        self.entry_seconds = tk.Entry(time_frame, width=3)
+        self.entry_seconds = tk.Entry(time_frame, width=5)
         self.entry_seconds.pack(side="left", padx=(0, 0))
 
         # Третья строка: абсолютная дата и регулятор громкости
@@ -103,19 +105,19 @@ class App:
         abs_date_frame.pack(side="left", anchor="e")
 
         tk.Label(abs_date_frame, text="Год:").pack(side="left")
-        self.entry_abs_year = tk.Entry(abs_date_frame, width=5)
+        self.entry_abs_year = tk.Entry(abs_date_frame, width=7)
         self.entry_abs_year.pack(side="left", padx=(0, 8))
 
         tk.Label(abs_date_frame, text="Месяц:").pack(side="left")
-        self.entry_abs_month = tk.Entry(abs_date_frame, width=3)
+        self.entry_abs_month = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_month.pack(side="left", padx=(0, 8))
 
         tk.Label(abs_date_frame, text="День:").pack(side="left")
-        self.entry_abs_day = tk.Entry(abs_date_frame, width=3)
+        self.entry_abs_day = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_day.pack(side="left", padx=(0, 8))
 
         tk.Label(abs_date_frame, text="Время (Ч:М):").pack(side="left")
-        self.entry_abs_time = tk.Entry(abs_date_frame, width=7)
+        self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
         self.entry_abs_time.insert(0, "")
         self.entry_abs_time.pack(side="left", padx=(0, 0))
 
@@ -162,71 +164,50 @@ class App:
         alert_time = None
 
         # Сначала пробуем абсолютную дату
-        year_str = self.entry_abs_year.get().strip()
+        year_str  = self.entry_abs_year.get() .strip()
         month_str = self.entry_abs_month.get().strip()
-        day_str = self.entry_abs_day.get().strip()
-        time_str = self.entry_abs_time.get().strip()
+        day_str   = self.entry_abs_day.get()  .strip()
+        time_str  = self.entry_abs_time.get() .strip()
 
-        if year_str and month_str and day_str:
+        if year_str or month_str or day_str or time_str:
             try:
-                year = int(year_str)
-                month = int(month_str)
-                day = int(day_str)
-
-                # Парсим время: если пусто — берём текущее; если есть — разбираем Ч:М
-                now = datetime.now()
-                hour = now.hour
-                minute = now.minute
-
-                if time_str:
-                    parts = time_str.split(":")
-                    if len(parts) == 1:
-                        hour = int(parts[0])
-                    elif len(parts) >= 2:
-                        hour = int(parts[0])
-                        minute = int(parts[1])
-
-                alert_time = datetime(year, month, day, hour, minute, 0)
-            except ValueError:
-                import tkinter.messagebox as mb
-                mb.showerror("Ошибка", "Некорректная абсолютная дата или время. Проверьте формат.")
+                alert_time = build_alert_time(year_str, month_str, day_str, time_str)
+            except ValueError as e:
+                messagebox.showerror("Ошибка", str(e))
                 return
         else:
-            # Иначе используем относительное время
+            # Fallback на относительное время, если не задана полная абсолютная дата
             try:
-                days_str = self.entry_days.get().strip()
-                hours_str = self.entry_hours.get().strip()
+                now         = datetime.now()
+                days_str    = self.entry_days.get()   .strip()
+                hours_str   = self.entry_hours.get()  .strip()
                 minutes_str = self.entry_minutes.get().strip()
                 seconds_str = self.entry_seconds.get().strip()
 
-                days = int(days_str) if days_str else 0
-                hours = int(hours_str) if hours_str else 0
+                days    = int(days_str)    if days_str    else 0
+                hours   = int(hours_str)   if hours_str   else 0
                 minutes = int(minutes_str) if minutes_str else 0
                 seconds = int(seconds_str) if seconds_str else 0
 
-                if days < 0 or hours < 0 or minutes < 0 or seconds < 0:
-                    raise ValueError
-
                 total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
+                if total_seconds <= 0:
+                    raise ValueError
 
                 MAX_DELAY_DAYS = 380
                 if total_seconds > MAX_DELAY_DAYS * 86400:
-                    import tkinter.messagebox as mb
-                    mb.showerror(
+                    messagebox.showerror(
                         "Ошибка",
                         f"Слишком большая задержка. Максимум: {MAX_DELAY_DAYS} дней."
                     )
                     return
 
                 if total_seconds <= 0:
-                    import tkinter.messagebox as mb
-                    mb.showerror("Ошибка", "Общее время должно быть больше 0 секунд.")
+                    messagebox.showerror("Ошибка", "Общее время должно быть больше 0 секунд.")
                     return
 
-                alert_time = datetime.now() + timedelta(seconds=total_seconds)
-            except ValueError:
-                import tkinter.messagebox as mb
-                mb.showerror("Ошибка", "Укажите корректные неотрицательные целые числа для дней, часов, минут и секунд (можно оставить пустыми — будет 0).")
+                alert_time = now + timedelta(seconds=total_seconds)
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Не удалось создать задачу: {e}")
                 return
 
         task_id = str(int(time.time() * 1000)) + str(len(self.tasks))
