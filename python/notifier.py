@@ -37,7 +37,7 @@ def _on_notify_finished(task_id: int, app: Any | None) -> None:
 
 
 def _run_notify_with_wait(title: str, message: str, task_id, app: Any, urgency: str = "normal", icon_path: str | None = None) -> bool:
-    cmd = ["notify-send", "-u", urgency, "-w"]
+    cmd = ["notify-send", "-u", urgency, "-w", "-t", "3600000"]
     if icon_path and Path(icon_path).exists():
         cmd.extend(["-i", icon_path])
     cmd.extend([title, message])
@@ -95,8 +95,6 @@ def play_sound(sound_path: str, volume_factor: float = 1.0) -> None:
     thread = threading.Thread(target=_play_sound_async, args=(sound_path, volume_factor), daemon=True)
     thread.start()
 
-def play_low_tone(volume_factor: float = 1.0) -> None:
-    play_sound(MEDIA_PATHS[4], volume_factor)
 
 def fallback_messagebox(title: str, message: str) -> None:
     import tkinter.messagebox as mb
@@ -115,6 +113,44 @@ def _calculate_urgency(is_important: bool, overdue_seconds: int) -> str:
 _pending_alert_tasks = set()
 
 
+def sound_alert(task_obj: Any) -> None:
+    # 2. Проверяем, нужно ли активировать общий режим
+    app = task_obj.parent  # это экземпляр App
+    maybe_activate_general_mode(app)
+    
+    task_obj.last_sound = datetime.now()
+
+    is_important = bool(getattr(task_obj, "is_important", False))
+    alert_time   = getattr(task_obj, "alert_time", None)
+    if alert_time is None:
+        overdue_seconds = 0
+    else:
+        delta = datetime.now() - alert_time
+        overdue_seconds = max(0, int(delta.total_seconds()))
+
+    # 3. Если общий режим активен — НЕ проигрываем индивидуальный звук
+    state = app.alert_sound_state
+    if not state["is_general_mode_active"]:
+        sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
+        if MEDIA_PATHS:
+            idx = -1
+            if not is_important and overdue_seconds == 0:
+                idx = 0
+            elif not is_important and overdue_seconds > 0:
+                idx = 1
+            elif is_important and overdue_seconds == 0:
+                idx = 2
+            elif is_important and overdue_seconds > 0:
+                idx = 3
+
+            if 0 <= idx < len(MEDIA_PATHS):
+                sound_file = MEDIA_PATHS[idx]
+
+        # Проигрываем индивидуальный звук, если общий режим выключен
+        volume_factor = getattr(app, "volume_factor", 1.0)
+        play_sound(sound_file, volume_factor)
+
+
 def show_alert(task_obj: Any) -> None:
     app = task_obj.parent  # это экземпляр App
 
@@ -123,53 +159,34 @@ def show_alert(task_obj: Any) -> None:
         if app.check_bulk_alerts(len(_pending_alert_tasks)):
             return
 
-    text = getattr(task_obj, "text", "Неизвестная задача")
-    is_important = bool(getattr(task_obj, "is_important", False))
-    alert_time = getattr(task_obj, "alert_time", None)
-    volume_factor = getattr(app, "volume_factor", 1.0)
-    task_id = getattr(task_obj, "task_id", None)
+        text = getattr(task_obj, "text", "Неизвестная задача")
+        is_important = bool(getattr(task_obj, "is_important", False))
+        alert_time = getattr(task_obj, "alert_time", None)
+        volume_factor = getattr(app, "volume_factor", 1.0)
+        task_id = getattr(task_obj, "task_id", None)
 
-    with _state_lock:
-        if task_id in _pending_alert_tasks:
-            return
+        if alert_time is None:
+            overdue_seconds = 0
+        else:
+            delta = datetime.now() - alert_time
+            overdue_seconds = max(0, int(delta.total_seconds()))
 
-    if alert_time is None:
-        overdue_seconds = 0
-    else:
-        delta = datetime.now() - alert_time
-        overdue_seconds = max(0, int(delta.total_seconds()))
+        urgency_level = _calculate_urgency(is_important, overdue_seconds)
+        base_title = "❗ ВАЖНАЯ ЗАДАЧА" if is_important else "Задача"
 
-    urgency_level = _calculate_urgency(is_important, overdue_seconds)
-    base_title = "❗ ВАЖНАЯ ЗАДАЧА" if is_important else "Задача"
+        if overdue_seconds > 0:
+            minutes, secs = divmod(overdue_seconds, 60)
+            time_diff_str = f"{minutes} мин {secs} сек назад"
+            message = f"Задача: {text}\nПросрочено: {time_diff_str}"
+        else:
+            message = f"Задача: {text}"
 
-    if overdue_seconds > 0:
-        minutes, secs = divmod(overdue_seconds, 60)
-        time_diff_str = f"{minutes} мин {secs} сек назад"
-        message = f"Задача: {text}\nПросрочено: {time_diff_str}"
-    else:
-        message = f"Задача: {text}"
-
-    title = base_title
-
-    sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
-    if MEDIA_PATHS:
-        idx = -1
-        if not is_important and overdue_seconds == 0:
-            idx = 0
-        elif not is_important and overdue_seconds > 0:
-            idx = 1
-        elif is_important and overdue_seconds == 0:
-            idx = 2
-        elif is_important and overdue_seconds > 0:
-            idx = 3
-
-        if 0 <= idx < len(MEDIA_PATHS):
-            sound_file = MEDIA_PATHS[idx]
+        title = base_title
 
     # --- ЛОГИКА ОБЩЕЙ СИГНАЛИЗАЦИИ ---
 
     # 1. Если очередь была пустой, фиксируем момент появления первой активной задачи
-    with _state_lock:
+    
         if len(_pending_alert_tasks) == 0:
             state = app.alert_sound_state
             state["first_pending_add_time"] = datetime.now()
@@ -179,17 +196,11 @@ def show_alert(task_obj: Any) -> None:
                 app.root.after_cancel(state["general_sound_timer_id"])
                 state["general_sound_timer_id"] = None
 
-        # 2. Проверяем, нужно ли активировать общий режим
-        maybe_activate_general_mode(app)
-
-        # 3. Если общий режим активен — НЕ проигрываем индивидуальный звук
-        state = app.alert_sound_state
-        if not state["is_general_mode_active"]:
-            # Проигрываем индивидуальный звук, если общий режим выключен
-            play_sound(sound_file, volume_factor)
-        # Иначе — индивидуальный звук пропускаем, общий будет проигрываться раз в минуту
+        if task_id in _pending_alert_tasks:
+            return
 
         _pending_alert_tasks.add(task_id)
+        task_obj.last_notification = datetime.now()
 
         ok = notify(title, message, task_id, app, urgency=urgency_level)
         if not ok:
@@ -334,9 +345,10 @@ def check_and_play_general_sound(app: Any) -> None:
 
         # Проигрываем общий звук
         volume_factor = getattr(app, "volume_factor", 1.0)
-        sound_file = MEDIA_PATHS[4] if len(MEDIA_PATHS) > 4 else None
+        sound_file = MEDIA_PATHS[4] if len(MEDIA_PATHS) > 4 else MEDIA_PATHS[3]
         if sound_file and Path(sound_file).exists():
             play_sound(sound_file, volume_factor)
+            print("!!!!!! MEDIA_PATHS[4] play_sound(sound_file, volume_factor)")
 
         # Планируем следующий тик
         state["general_sound_timer_id"] = app.root.after(_general_sound_timeout, lambda: check_and_play_general_sound(app))

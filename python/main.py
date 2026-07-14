@@ -165,7 +165,7 @@ class App:
     def add_task(self, is_important: bool = False):
         text = self.entry_task.get().strip()
         if not text:
-            mb.showwarning("Внимание", "Введите текст задачи.")
+            messagebox.showwarning("Внимание", "Введите текст задачи.")
             return
 
         alert_time = None

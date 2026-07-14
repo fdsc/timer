@@ -1,6 +1,6 @@
 import tkinter as tk
 from datetime import datetime, timedelta
-from notifier import show_alert,cancel_notify_for_task
+from notifier import show_alert,sound_alert,cancel_notify_for_task
 import math
 
 class TaskBlock:
@@ -24,8 +24,10 @@ class TaskBlock:
         self._stopped = False
         self._alerted_once = False
         self._retry_scheduled = False
-        self._retry_delay_sec_important = 60
-        self._retry_delay_sec_normal = 300
+        self._retry_delay_sec_important   = 60
+        self._retry_delay_sec_important_s = 15
+        self._retry_delay_sec_normal      = 300
+        self._retry_delay_sec_normal_s    = 60
         self._delete_confirmation_max_interval=10;
         self._delete_confirmation_min_interval=0.350;
         self._delete_confirm_active = False
@@ -131,37 +133,40 @@ class TaskBlock:
         if total_seconds == 0:
             # Первое оповещение
             if not self._alerted_once:
-                self._alerted_once = True
-                # Передаем только себя — notifier сам прочитает alert_time и посчитает просрочку
-                show_alert(self)
-
-                # Если задача важная, планируем повторное оповещение через 60 сек
-                if self.is_important and not self._retry_scheduled:
-                    self._retry_scheduled = True
-                    self.frame.after(self._retry_delay_sec_important * 1000, self.trigger_retry_alert)
-                if not self.is_important and not self._retry_scheduled:
-                    self._retry_scheduled = True
-                    self.frame.after(self._retry_delay_sec_normal * 1000, self.trigger_retry_alert)
+                self._alerted_once     = True       # Это нельзя сохранять в файле
+                self._retry_scheduled  = True
+                self.last_notification = datetime(1900, 1, 1, 0, 0, 0)
+                self.last_sound        = datetime(1900, 1, 1, 0, 0, 0)
+                self.trigger_retry_alert()
 
         # Следующий тик через 1 секунду
         self.frame.after(1000, self.update_timer)
 
     def trigger_retry_alert(self):
-        """Вызывается через 60 секунд после первого оповещения, если задача важная."""
         # Проверяем, существует ли ещё этот блок (не удалили ли задачу)
         if not hasattr(self, "frame") or not self.frame.winfo_exists():
             return
 
-        # Показываем оповещение снова.
-        # notifier увидит актуальный alert_time, посчитает новую просрочку
-        # и при необходимости повысит urgency (если прошло больше 5 минут)
-        show_alert(self)
+        now   = datetime.now()
+        delta = now - self.last_notification
+        ts    = delta.total_seconds()
 
-        # Если нужно бесконечное напоминание каждую минуту — раскомментируй строку ниже:
-        # self.frame.after(self._retry_delay_sec * 1000, self.trigger_retry_alert)
-        # Сейчас реализовано только ОДНО повторное напоминание.
+        delta = now - self.last_sound
+        tss   = delta.total_seconds()
 
-    # task_block.py
+        if self.is_important:
+            if ts  > self._retry_delay_sec_important:
+                show_alert(self)
+            if tss > self._retry_delay_sec_important_s:
+                sound_alert(self)
+        else:
+            if ts  > self._retry_delay_sec_normal:
+                show_alert(self)
+            if tss > self._retry_delay_sec_normal_s:
+                sound_alert(self)
+
+        self.frame.after(1000, self.trigger_retry_alert)
+
 
     def toggle_priority(self):
         self.is_important = not self.is_important
