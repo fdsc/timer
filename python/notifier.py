@@ -66,6 +66,8 @@ def play_sound(sound_path: str, volume_factor: float = 1.0) -> None:
     thread = threading.Thread(target=_play_sound_async, args=(sound_path, volume_factor), daemon=True)
     thread.start()
 
+def play_low_tone(volume_factor: float = 1.0) -> None:
+    play_sound(MEDIA_PATHS[4], volume_factor)
 
 def fallback_messagebox(title: str, message: str) -> None:
     import tkinter.messagebox as mb

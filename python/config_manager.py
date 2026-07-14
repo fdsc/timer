@@ -1,6 +1,7 @@
 import os
 import json
 import tkinter as tk
+import subprocess
 from tkinter import filedialog
 from pathlib import Path
 
@@ -8,6 +9,22 @@ CONFIG_STORE_PATH = Path.home() / ".config" / "vinny-task-tracker" / "config_sto
 MEDIA_CONFIG_PATH = None  # будет установлено после получения data_dir
 MEDIA_CONFIG_FILE = "media.conf"
 DEFAULT_VOLUME = 100
+
+
+def get_folder_via_zenity(text, initialDir) -> str | None:
+    # zenity --file-selection --directory --filename="$HOME/.config/" --title="Выберите папку для задач"
+    try:
+        result = subprocess.run(
+            ["zenity", "--file-selection", "--directory", f"--title=\"{text}\"", f"--filename=\"initialDir\""],
+            capture_output=True,
+            text=True,
+            check=False  # не выбрасываем исключение при отмене
+        )
+        path = result.stdout.strip()
+        return path if path else None
+    except FileNotFoundError:
+        return None
+
 
 def get_user_data_dir() -> Path:
     """
@@ -18,7 +35,7 @@ def get_user_data_dir() -> Path:
     global MEDIA_CONFIG_PATH
 
     # Проверяем, есть ли сохранённый путь
-    if CONFIG_STORE_PATH.exists():
+    if CONFIG_STORE_PATH.exists() and False:
         try:
             with open(CONFIG_STORE_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -35,10 +52,7 @@ def get_user_data_dir() -> Path:
     root.attributes("-topmost", True)
 
     initial_dir = str(Path.home() / ".config")
-    data_dir = filedialog.askdirectory(
-        title="Выберите папку для хранения задач и настроек",
-        initialdir=initial_dir
-    )
+    data_dir = get_folder_via_zenity("Выберите папку для хранения задач и настроек", initial_dir)
     root.destroy()
 
     if not data_dir:
@@ -108,6 +122,7 @@ def init_media_config(data_dir: Path) -> Path:
         "/usr/share/sounds/freedesktop/stereo/message-new-instant.oga",
         "/usr/share/sounds/freedesktop/stereo/message-new-instant.oga",
         "/usr/share/sounds/freedesktop/stereo/suspend-error.oga",
+        "low_tone.flac",
         "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
     ]
 
