@@ -236,7 +236,6 @@ class App:
             task_id=task_id,
             text=text,
             alert_time=alert_time,
-            on_delete=self.delete_task,
             is_important_initial=is_important
         )
         self.tasks[task_id] = block
@@ -267,9 +266,7 @@ class App:
         ]
 
         from notifier import show_bulk_critical_alert
-        print(len(active_tasks))
-        for t in active_tasks:
-            print(t.text)
+
         if len(active_tasks) > 2 or countOfPendingNotifications > 1:
             show_bulk_critical_alert(self, active_tasks, icon_path=None)
             return True
@@ -316,22 +313,6 @@ class App:
 
         widget.bind("<Button-3>", popup)
 
-
-    def delete_task(self, task_id):
-        block = self.tasks.get(task_id)
-        if not block:
-            return
-
-        confirm = tk.messagebox.askyesno(
-            "Удалить задачу?",
-            f"Удалить задачу «{block.text}»?"
-        )
-        if not confirm:
-            return
-
-        del self.tasks[task_id]
-        block.frame.destroy()
-        block._stopped = True
 
 
 if __name__ == "__main__":

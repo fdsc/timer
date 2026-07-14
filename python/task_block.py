@@ -14,13 +14,12 @@ class TaskBlock:
     def getBgColor(self):
         return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
 
-    def __init__(self, parent, task_id, text, alert_time, on_delete, is_important_initial: bool = False):
+    def __init__(self, parent, task_id, text, alert_time, is_important_initial: bool = False):
         self.parent  = parent
         self.task_id = task_id
         self.alert_time = alert_time
         self.text = text
         self.is_important = is_important_initial
-        self.on_delete = on_delete
 
         self._stopped = False
         self._alerted_once = False
@@ -56,14 +55,15 @@ class TaskBlock:
         )
         self.lbl_time_info.grid(row=1, column=0, sticky="w", columnspan=2)
 
-        btn_del = tk.Button(
+        self.btn_del = tk.Button(
             self.frame,
             text="Удалить",
-            command=lambda: self.on_delete(self.task_id),
+            #command=lambda: self.on_delete(self.task_id),
+            command=self._start_delete_confirmation,
             width=10,
             bg="#f0f0f0"
         )
-        btn_del.grid(row=2, column=0, padx=(0, 8), sticky="w")
+        self.btn_del.grid(row=2, column=0, padx=(0, 8), sticky="w")
 
         self.btn_priority = tk.Button(
             self.frame,
@@ -102,14 +102,17 @@ class TaskBlock:
 
         label.bind("<Button-3>", popup)
 
+    def getRemained(self):
+        # Возвращает просрочку задачи в секундах (целое)
+        now = datetime.now()
+        delta = self.alert_time - now
+        return max(0, int(math.ceil(delta.total_seconds())))
 
     def update_timer(self):
         if self._stopped:
             return
 
-        now = datetime.now()
-        delta = self.alert_time - now
-        total_seconds = max(0, int(math.ceil(delta.total_seconds())))
+        total_seconds = self.getRemained()
 
         mins, secs = divmod(total_seconds, 60)
         hrs, mins = divmod(mins, 60)
@@ -180,3 +183,48 @@ class TaskBlock:
             self.frame.config(bg=self.COLOR_FRAME_NORMAL)
             self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
             self.lbl_time_info.config(bg=self.COLOR_FRAME_NORMAL)
+
+    def _start_delete_confirmation(self):
+        """Активирует режим подтверждения удаления: кнопка меняется на «Точно удалить» на 10 секунд."""
+        # Если уже в режиме удаления или задача просрочена, удаляем задачу без дополнительных запросов
+        if getattr(self, "_delete_confirm_active", False) or self.getRemained() == 0:
+            self.delete_task()
+            return  # уже в режиме подтверждения
+
+        self._delete_confirm_active = True
+        self.btn_del.config(text="Точно удалить")
+
+        # Планируем сброс через 10 секунд
+        self.frame.after(10000, self._cancel_delete_confirmation)
+
+        
+    def _cancel_delete_confirmation(self):
+        """Сбрасывает режим подтверждения, если пользователь не подтвердил удаление за 10 секунд."""
+        if not getattr(self, "_delete_confirm_active", False):
+            return
+
+        self._delete_confirm_active = False
+        self.btn_del.config(text="Удалить")
+
+    def delete_task(self):
+        """Выполняет удаление задачи, если режим подтверждения активен."""
+        if not getattr(self, "_delete_confirm_active", False):
+            # На случай прямого вызова извне — fallback
+            self._on_delete_direct()
+            return
+
+        # Сбрасываем флаг подтверждения перед удалением
+        self._delete_confirm_active = False
+        self._on_delete_direct()
+
+
+    def _on_delete_direct(self):
+        """Реальная логика удаления задачи."""
+        if self.task_id not in self.parent.tasks:
+            return
+
+        del self.parent.tasks[self.task_id]
+        if hasattr(self, "frame") and self.frame.winfo_exists():
+            self.frame.destroy()
+        self._stopped = True
+

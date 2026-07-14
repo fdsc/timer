@@ -35,7 +35,7 @@ def get_user_data_dir() -> Path:
     global MEDIA_CONFIG_PATH
 
     # Проверяем, есть ли сохранённый путь
-    if CONFIG_STORE_PATH.exists() and False:
+    if CONFIG_STORE_PATH.exists():
         try:
             with open(CONFIG_STORE_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
