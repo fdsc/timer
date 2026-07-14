@@ -26,6 +26,9 @@ class TaskBlock:
         self._retry_scheduled = False
         self._retry_delay_sec_important = 60
         self._retry_delay_sec_normal = 300
+        self._delete_confirmation_max_interval=10;
+        self._delete_confirmation_min_interval=0.350;
+        self._delete_confirm_active = False
 
         self.root = parent.list_frame.winfo_toplevel()
 
@@ -187,32 +190,43 @@ class TaskBlock:
     def _start_delete_confirmation(self):
         """Активирует режим подтверждения удаления: кнопка меняется на «Точно удалить» на 10 секунд."""
         # Если уже в режиме удаления или задача просрочена, удаляем задачу без дополнительных запросов
-        if getattr(self, "_delete_confirm_active", False) or self.getRemained() == 0:
+        if self.getDeleteConfirmationResult() or self.getRemained() == 0:
             self.delete_task()
-            return  # уже в режиме подтверждения
+            return
 
-        self._delete_confirm_active = True
-        self.btn_del.config(text="Точно удалить")
+        self._delete_confirm_active = datetime.now()
+        self.btn_del.config(text="Точно удалить?")
 
         # Планируем сброс через 10 секунд
         self.frame.after(10000, self._cancel_delete_confirmation)
 
-        
+    def getDeleteConfirmationTime(self):
+        """Возвращает время в секундах (float), прошедшее с момента первого нажатия на кнопку 'удалить'"""
+        if self._delete_confirm_active == False:
+            return 0.0;
+
+        now = datetime.now()
+        delta = now - self._delete_confirm_active
+        return delta.total_seconds();
+    
+    def getDeleteConfirmationResult(self):
+        time = self.getDeleteConfirmationTime()
+        # Если значение времени, прошедшее с момента нажатия кнопки "удалить", слишком мало
+        if time <= self._delete_confirmation_min_interval:
+            return False
+        if time >= self._delete_confirmation_max_interval:
+            return False
+
+        return True
+
+
     def _cancel_delete_confirmation(self):
         """Сбрасывает режим подтверждения, если пользователь не подтвердил удаление за 10 секунд."""
-        if not getattr(self, "_delete_confirm_active", False):
-            return
-
         self._delete_confirm_active = False
         self.btn_del.config(text="Удалить")
 
     def delete_task(self):
-        """Выполняет удаление задачи, если режим подтверждения активен."""
-        if not getattr(self, "_delete_confirm_active", False):
-            # На случай прямого вызова извне — fallback
-            self._on_delete_direct()
-            return
-
+        """Выполняет удаление задачи."""
         # Сбрасываем флаг подтверждения перед удалением
         self._delete_confirm_active = False
         self._on_delete_direct()
