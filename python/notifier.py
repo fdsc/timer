@@ -1,3 +1,5 @@
+import os
+import signal
 import subprocess
 import threading
 from datetime import datetime
@@ -9,7 +11,7 @@ import traceback
 MEDIA_PATHS: List[str] = []
 
 # Глобальное состояние: отслеживаем активные notify-send с флагом -w
-_active_notify_handles = set()
+_active_notify_handles = {}
 
 def _run_notify_with_wait(title: str, message: str, task_id, urgency: str = "normal", icon_path: str | None = None) -> bool:
     """
@@ -29,9 +31,9 @@ def _run_notify_with_wait(title: str, message: str, task_id, urgency: str = "nor
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-            _active_notify_handles.add(proc.pid)
+            _active_notify_handles[task_id] = proc.pid
             proc.wait()  # ждём, пока пользователь закроет уведомление
-            _active_notify_handles.discard(proc.pid)
+            _active_notify_handles.pop(task_id, None)
         except (FileNotFoundError, subprocess.CalledProcessError):
             pass
         finally:
@@ -47,6 +49,19 @@ def _run_notify_with_wait(title: str, message: str, task_id, urgency: str = "nor
         traceback.print_exc()
         return False
 
+def cancel_notify_for_task(task_id):
+    """Убивает notify-send для конкретного task_id (если запущен с -w)."""
+    pid = _active_notify_handles.pop(task_id, None)
+    if pid is None:
+        return
+    try:
+        os.kill(pid, signal.SIGINT)
+    except ProcessLookupError:
+        pass  # уже завершился
+        print("!!!!!!!!!!!!!!!!!!!1")
+    except Exception:
+        print("!!!!!!!!!!!!!!!!!!!2")
+        pass
 
 def notify(title: str, message: str, task_id, urgency: str = "normal", icon_path: str | None = None) -> bool:
     return _run_notify_with_wait(title, message, task_id, urgency, icon_path)

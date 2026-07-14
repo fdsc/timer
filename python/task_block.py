@@ -1,6 +1,6 @@
 import tkinter as tk
 from datetime import datetime, timedelta
-from notifier import show_alert
+from notifier import show_alert,cancel_notify_for_task
 import math
 
 class TaskBlock:
@@ -241,4 +241,5 @@ class TaskBlock:
         if hasattr(self, "frame") and self.frame.winfo_exists():
             self.frame.destroy()
         self._stopped = True
+        cancel_notify_for_task(self.task_id)
 
