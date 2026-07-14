@@ -34,7 +34,7 @@ def get_user_data_dir() -> Path:
     root.withdraw()
     root.attributes("-topmost", True)
 
-    initial_dir = str(Path.home())
+    initial_dir = str(Path.home() / ".config")
     data_dir = filedialog.askdirectory(
         title="Выберите папку для хранения задач и настроек",
         initialdir=initial_dir
@@ -42,7 +42,7 @@ def get_user_data_dir() -> Path:
     root.destroy()
 
     if not data_dir:
-        data_dir = str(Path.home() / ".local" / "share" / "task-tracker")
+        sys.exit(1)
 
     data_dir_path = Path(data_dir).expanduser().resolve()
     data_dir_path.mkdir(parents=True, exist_ok=True)

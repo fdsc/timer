@@ -1,5 +1,6 @@
 #!/bin/python3
-# Требуются пакеты sox, 
+# Требуются пакеты sox, tk
+# Проверка наличия tkinter: python3 -m tkinter
 
 import tkinter as tk
 from tkinter import messagebox
