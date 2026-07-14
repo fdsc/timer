@@ -14,11 +14,12 @@ class TaskBlock:
     def getBgColor(self):
         return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
 
-    def __init__(self, parent, task_id, text, alert_time, is_important_initial: bool = False):
-        self.parent  = parent
-        self.task_id = task_id
-        self.alert_time = alert_time
-        self.text = text
+    def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, is_quiet: bool = False):
+        self.parent       = parent
+        self.task_id      = task_id
+        self.alert_time   = alert_time
+        self.text         = text
+        self.is_quiet     = is_quiet
         self.is_important = is_important_initial
 
         self._stopped = False
@@ -32,10 +33,12 @@ class TaskBlock:
         self._delete_confirmation_min_interval=0.350;
         self._delete_confirm_active = False
 
+        self._container_frame = frame
+
         self.root = parent.list_frame.winfo_toplevel()
 
         bg_color = self.getBgColor()
-        self.frame = tk.Frame(parent.list_frame, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
+        self.frame = tk.Frame(self._container_frame, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
         self.frame.pack(fill="x", pady=(0, 2))
 
         self.lbl_text = tk.Label(
@@ -113,10 +116,21 @@ class TaskBlock:
         delta = self.alert_time - now
         return max(0, int(math.ceil(delta.total_seconds())))
 
+
+    def upsetQuietTab(self):
+        self.parent.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="----- Тихие -----")
+
+    def resetQuietTab(self):
+        self.parent.lbl_quiet_overdue_indicator.pack_forget()
+        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="Тихие")
+
+
     def update_timer(self):
         if self._stopped:
             return
 
+        now = datetime.now()
         total_seconds = self.getRemained()
 
         mins, secs = divmod(total_seconds, 60)
@@ -139,6 +153,16 @@ class TaskBlock:
                 self.last_sound        = datetime(1900, 1, 1, 0, 0, 0)
                 self.trigger_retry_alert()
 
+        has_overdue_quiet = any(
+            t.alert_time is not None and (now - t.alert_time).total_seconds() >= 0 and t.is_quiet
+            for t in self.parent.tasks.values()
+        )
+
+        if has_overdue_quiet:
+            self.upsetQuietTab()
+        else:
+            self.resetQuietTab()
+
         # Следующий тик через 1 секунду
         self.frame.after(1000, self.update_timer)
 
@@ -154,16 +178,17 @@ class TaskBlock:
         delta = now - self.last_sound
         tss   = delta.total_seconds()
 
-        if self.is_important:
-            if ts  > self._retry_delay_sec_important:
-                show_alert(self)
-            if tss > self._retry_delay_sec_important_s:
-                sound_alert(self)
-        else:
-            if ts  > self._retry_delay_sec_normal:
-                show_alert(self)
-            if tss > self._retry_delay_sec_normal_s:
-                sound_alert(self)
+        if not self.is_quiet:
+            if self.is_important:
+                if ts  > self._retry_delay_sec_important:
+                    show_alert(self)
+                if tss > self._retry_delay_sec_important_s:
+                    sound_alert(self)
+            else:
+                if ts  > self._retry_delay_sec_normal:
+                    show_alert(self)
+                if tss > self._retry_delay_sec_normal_s:
+                    sound_alert(self)
 
         self.frame.after(1000, self.trigger_retry_alert)
 
@@ -235,6 +260,9 @@ class TaskBlock:
         # Сбрасываем флаг подтверждения перед удалением
         self._delete_confirm_active = False
         self._on_delete_direct()
+
+        if len(self.parent.tasks) == 0:
+            self.resetQuietTab()
 
 
     def _on_delete_direct(self):

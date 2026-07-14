@@ -3,6 +3,7 @@
 # Проверка наличия tkinter: python3 -m tkinter
 
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 import time
 from datetime import timedelta, datetime
@@ -60,6 +61,19 @@ class App:
         # Привязываем контекстное меню для копирования текста задачи
         self._setup_copy_menu(self.entry_task)
 
+        # Индикатор просроченных тихих задач на основной вкладке
+        self.lbl_quiet_overdue_indicator = tk.Label(
+            top,
+            text="⚠️ Есть просроченные тихие задачи!",
+            fg="#b71c1c",
+            font=("TkDefaultFont", 10, "bold"),
+            anchor="w",
+            justify="left"
+        )
+        self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.lbl_quiet_overdue_indicator.pack_forget()  # скрываем по умолчанию
+
+
         # Строка 2: кнопки добавления + компоненты времени (справа от кнопок)
         time_and_btn_row = tk.Frame(top)
         time_and_btn_row.pack(fill="x", pady=(0, 0))
@@ -69,7 +83,9 @@ class App:
             time_and_btn_row,
             text="+",
             command=lambda: self.add_task(is_important=False),
-            width=2
+            width=2,
+            bg="#e0ffe0",
+            activebackground="#c6e9c6"
         )
         btn_add_normal.pack(side="left", padx=(0, 8))
 
@@ -82,6 +98,17 @@ class App:
             activebackground="#ffcdd2"
         )
         btn_add_important.pack(side="left", padx=(0, 16))
+
+        # Кнопка тихой задачи
+        btn_add_quiet = tk.Button(
+            time_and_btn_row,
+            text="V",
+            command=lambda: self.add_task(is_important=False, is_quiet=True),
+            width=2,
+            bg="#888888",
+            activebackground="#AAAAAA"
+        )
+        btn_add_quiet.pack(side="left", padx=(0, 8))
 
         # Компоненты времени (справа во второй строке)
         time_frame = tk.Frame(time_and_btn_row)
@@ -141,28 +168,46 @@ class App:
             vol_frame,
             from_=0,
             to=100,
+            resolution=0.5,
             orient="horizontal",
             length=200,
+            showvalue=False,
+            tickinterval=0,
             command=self._on_volume_change
         )
         self.scale_volume.set(self.volume_factor*100)
         self.scale_volume.pack(side="left", padx=(4, 0))
 
         # Метка с процентами (справа от слайдера)
-        self.lbl_vol_value = tk.Label(vol_frame, text=str(int(self.volume_factor*100)) + "%", width=4, anchor="e")
+        self.lbl_vol_value = tk.Label(vol_frame, text=str(int(self.volume_factor*100)) + "%", width=5, anchor="e")
         self.lbl_vol_value.pack(side="left", padx=(8, 0))
 
         # Привязываем клик по метке громкости для ручного теста звука
         self.lbl_vol_value.bind("<Button-1>", self._on_test_sound_click)
 
-
-        self.list_frame = tk.Frame(root)
-        self.list_frame.pack(fill="both", expand=True, padx=4, pady=4)
-
+        # Здесь размещаются как тихие задачи, так и обычные
         self.tasks = {}
 
+        # ----- Вкладки -----
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(fill="both", expand=True, padx=4, pady=4)
 
-    def add_task(self, is_important: bool = False):
+        # Основная вкладка
+        self.main_tab_frame = tk.Frame(self.notebook)
+        self.notebook.add(self.main_tab_frame, text="Задачи")
+
+        self.list_frame = tk.Frame(self.main_tab_frame)
+        self.list_frame.pack(fill="both", expand=True, padx=4, pady=4)
+
+        # Вкладка тихих задач
+        self.quiet_tab_frame = tk.Frame(self.notebook)
+        self.notebook.add(self.quiet_tab_frame, text="Тихие")
+
+        self.quiet_list_frame = tk.Frame(self.quiet_tab_frame)
+        self.quiet_list_frame.pack(fill="both", expand=True, padx=4, pady=4)
+
+
+    def add_task(self, is_important: bool = False, is_quiet: bool = False):
         text = self.entry_task.get().strip()
         if not text:
             messagebox.showwarning("Внимание", "Введите текст задачи.")
@@ -222,9 +267,11 @@ class App:
         block = TaskBlock(
             parent=self,
             task_id=task_id,
+            frame=self.quiet_list_frame if is_quiet else self.list_frame,
             text=text,
             alert_time=alert_time,
-            is_important_initial=is_important
+            is_important_initial=is_important,
+            is_quiet=is_quiet
         )
         self.tasks[task_id] = block
 
@@ -264,7 +311,7 @@ class App:
 
     def _on_volume_change(self, val: str):
         """Обработчик изменения громкости: обновляет метку, множитель и сохраняет в opts.json."""
-        v = int(val)
+        v = float(val)
         self.lbl_vol_value.config(text=f"{v}%")
         self.volume_factor = v / 100.0
 
