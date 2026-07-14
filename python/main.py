@@ -1,7 +1,10 @@
+#!/bin/python3
+# Требуются пакеты sox, 
+
 import tkinter as tk
 from tkinter import messagebox
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pathlib import Path
 
 import notifier
@@ -152,7 +155,6 @@ class App:
     def add_task(self, is_important: bool = False):
         text = self.entry_task.get().strip()
         if not text:
-            import tkinter.messagebox as mb
             mb.showwarning("Внимание", "Введите текст задачи.")
             return
 
@@ -328,6 +330,7 @@ class App:
 
         del self.tasks[task_id]
         block.frame.destroy()
+        block._stopped = True
 
 
 if __name__ == "__main__":

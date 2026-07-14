@@ -3,6 +3,8 @@ import threading
 from datetime import datetime
 from typing import Any, List
 from pathlib import Path
+import traceback
+
 
 MEDIA_PATHS: List[str] = []
 
@@ -14,7 +16,6 @@ def _run_notify_with_wait(title: str, message: str, task_id, urgency: str = "nor
     Запускает notify-send -w в отдельном потоке, чтобы не блокировать GUI.
     Возвращает True, если команда успешно запущена; завершение ожидания
     обрабатывается внутри потока через clear_pending_after_notify.
-    task_id передаётся через замыкание (захватывается из внешней области).
     """
     cmd = ["notify-send", "-u", urgency, "-w"]
     if icon_path and Path(icon_path).exists():
@@ -36,10 +37,7 @@ def _run_notify_with_wait(title: str, message: str, task_id, urgency: str = "nor
         finally:
             # clear_pending_after_notify должен быть вызван с нужным task_id
             if hasattr(run_and_clear, "task_id"):
-                _pending_alert_tasks.discard(run_and_clear.task_id)
-
-    # task_id «пробрасываем» через атрибут функции — это простой способ передать его в поток
-    run_and_clear.task_id = task_id
+                _pending_alert_tasks.discard(task_id)
 
     try:
         t = threading.Thread(target=run_and_clear, daemon=True)

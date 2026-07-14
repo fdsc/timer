@@ -6,6 +6,7 @@ from pathlib import Path
 
 CONFIG_STORE_PATH = Path.home() / ".config" / "vinny-task-tracker" / "config_store.json"
 MEDIA_CONFIG_PATH = None  # будет установлено после получения data_dir
+MEDIA_CONFIG_FILE = "media.conf"
 DEFAULT_VOLUME = 100
 
 def get_user_data_dir() -> Path:
@@ -23,7 +24,7 @@ def get_user_data_dir() -> Path:
                 data = json.load(f)
                 saved_path = Path(data.get("data_dir"))
                 if saved_path.exists():
-                    MEDIA_CONFIG_PATH = saved_path / "media_config.txt"
+                    MEDIA_CONFIG_PATH = saved_path / MEDIA_CONFIG_FILE
                     return saved_path
         except (json.JSONDecodeError, KeyError, TypeError):
             pass
@@ -46,7 +47,7 @@ def get_user_data_dir() -> Path:
     data_dir_path = Path(data_dir).expanduser().resolve()
     data_dir_path.mkdir(parents=True, exist_ok=True)
 
-    MEDIA_CONFIG_PATH = data_dir_path / "media_config.txt"
+    MEDIA_CONFIG_PATH = data_dir_path / MEDIA_CONFIG_FILE
 
     CONFIG_STORE_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_STORE_PATH, "w", encoding="utf-8") as f:
@@ -71,7 +72,7 @@ def load_or_create_opts(data_dir: Path) -> dict:
     if "volume_percent" not in opts:
         opts["volume_percent"] = DEFAULT_VOLUME
 
-    if not opts_path.exists() or "volume_percent" not in json.load(open(opts_path, "r", encoding="utf-8")) if opts_path.exists() else True:
+    if not opts_path.exists() or "volume_percent" not in opts if opts_path.exists() else True:
         with open(opts_path, "w", encoding="utf-8") as f:
             json.dump(opts, f, ensure_ascii=False, indent=2)
 
@@ -86,7 +87,7 @@ def save_opts(data_dir: Path, opts: dict) -> None:
 
 def init_media_config(data_dir: Path) -> Path:
     """
-    Создаёт media_config.txt, если его нет.
+    Создаёт MEDIA_CONFIG_FILE, если его нет.
     Формат: одна строка — один путь к файлу.
     Строки по порядку:
       1. звук для обычной непросроченной задачи
@@ -96,7 +97,7 @@ def init_media_config(data_dir: Path) -> Path:
     Если файл уже есть — не перезаписывает, но гарантирует, что он существует.
     Возвращает путь к файлу.
     """
-    media_path = data_dir / "media.conf"
+    media_path = data_dir / MEDIA_CONFIG_FILE
 
     if media_path.exists():
         return media_path
@@ -119,7 +120,7 @@ def init_media_config(data_dir: Path) -> Path:
 
 def load_media_paths(media_config_path: Path):
     """
-    Загружает пути из media_config.txt.
+    Загружает пути из MEDIA_CONFIG_FILE.
     Возвращает список строк (пустые строки и комментарии можно игнорировать).
     Если файла нет — возвращает пустой список.
     """

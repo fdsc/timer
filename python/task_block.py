@@ -22,6 +22,7 @@ class TaskBlock:
         self.is_important = is_important_initial
         self.on_delete = on_delete
 
+        self._stopped = False
         self._alerted_once = False
         self._retry_scheduled = False
         self._retry_delay_sec_important = 60
@@ -66,24 +67,20 @@ class TaskBlock:
 
         self.btn_priority = tk.Button(
             self.frame,
-            text="Не важная" if not self.is_important else "Важная",
+            text="",
             command=self.toggle_priority,
             width=12,
-            bg=self.COLOR_IMPORTANT_BG if self.is_important else "#f0f0f0",
+            bg="#f0f0f0",
             activebackground=self.COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
-
-        if self.is_important:
-            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c")
-        else:
-            self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000")
 
         sep = tk.Frame(self.frame, height=2, bg="gray")
         sep.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(6, 0))
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_columnconfigure(1, weight=1)
 
+        self._update_priority_ui()
         self.update_timer()
 
 
@@ -107,6 +104,9 @@ class TaskBlock:
 
 
     def update_timer(self):
+        if self._stopped:
+            return
+
         now = datetime.now()
         delta = self.alert_time - now
         total_seconds = max(0, int(math.ceil(delta.total_seconds())))
@@ -159,7 +159,9 @@ class TaskBlock:
 
     def toggle_priority(self):
         self.is_important = not self.is_important
+        self._update_priority_ui()
 
+    def _update_priority_ui(self):
         if self.is_important:
             self.btn_priority.config(
                 text="Важная",
@@ -167,7 +169,6 @@ class TaskBlock:
                 activebackground=self.COLOR_IMPORTANT_ACTIVE
             )
             self.frame.config(bg=self.COLOR_FRAME_IMPORTANT)
-            # Обновляем цвет и стиль текста при переключении
             self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c", bg=self.getBgColor())
             self.lbl_time_info.config(bg=self.COLOR_FRAME_IMPORTANT)
         else:
@@ -177,6 +178,5 @@ class TaskBlock:
                 activebackground=self.COLOR_NORMAL_ACTIVE
             )
             self.frame.config(bg=self.COLOR_FRAME_NORMAL)
-            # Обновляем цвет и стиль текста при переключении
             self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
             self.lbl_time_info.config(bg=self.COLOR_FRAME_NORMAL)
