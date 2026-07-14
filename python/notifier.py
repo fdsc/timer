@@ -9,11 +9,13 @@ import traceback
 
 
 MEDIA_PATHS: List[str] = []
+_fallback_sound="/usr/share/sounds/freedesktop/stereo/complete.oga"
 
 # Глобальное состояние: отслеживаем активные notify-send с флагом -w
 _active_notify_handles = {}
 
-_general_sound_timeout = 60*1000
+_general_sound_timeout    = 60*1000
+_general_sound_entry_time = 18
 BULK_TASK_ID = -1
 _state_lock  = threading.RLock()
 
@@ -131,7 +133,7 @@ def sound_alert(task_obj: Any) -> None:
     # 3. Если общий режим активен — НЕ проигрываем индивидуальный звук
     state = app.alert_sound_state
     if not state["is_general_mode_active"]:
-        sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
+        sound_file = _fallback_sound
         if MEDIA_PATHS:
             idx = -1
             if not is_important and overdue_seconds == 0:
@@ -146,9 +148,13 @@ def sound_alert(task_obj: Any) -> None:
             if 0 <= idx < len(MEDIA_PATHS):
                 sound_file = MEDIA_PATHS[idx]
 
+        if not Path(sound_file).exists():
+            sound_file = _fallback_sound
+
         # Проигрываем индивидуальный звук, если общий режим выключен
         volume_factor = getattr(app, "volume_factor", 1.0)
         play_sound(sound_file, volume_factor)
+
 
 
 def show_alert(task_obj: Any) -> None:
@@ -247,11 +253,14 @@ def show_bulk_critical_alert(app, tasks_list, icon_path: str | None = None) -> N
     if len(sorted_tasks) > 20:
         message += f"\n\n... и ещё {len(sorted_tasks) - 20} задач."
 
-    title = "⚠️ МНОГО ЗАДАЧ!"
+    title = "⚠️ МНОГО ЗАДАЧ! ⚠️"
 
-    sound_file = "/usr/share/sounds/freedesktop/stereo/audio-volume-high.oga"
+    sound_file = _fallback_sound
     if MEDIA_PATHS and len(MEDIA_PATHS) > 3:
         sound_file = MEDIA_PATHS[3]
+
+    if not Path(sound_file).exists():
+        sound_file = _fallback_sound
 
     volume_factor = getattr(app, "volume_factor", 1.0)
     play_sound(sound_file, volume_factor)
@@ -307,7 +316,7 @@ def maybe_activate_general_mode(app: Any) -> bool:
         return False
 
     elapsed = (datetime.now() - state["first_pending_add_time"]).total_seconds()
-    if elapsed <= 180:
+    if elapsed <= _general_sound_entry_time:
         return False
 
     if state["is_general_mode_active"]:
@@ -321,7 +330,7 @@ def maybe_activate_general_mode(app: Any) -> bool:
         check_and_play_general_sound(app)
 
     if state["general_sound_timer_id"] is None:
-        state["general_sound_timer_id"] = app.root.after(_general_sound_timeout, tick)
+        state["general_sound_timer_id"] = app.root.after(0, tick)
 
     return True
 
@@ -332,7 +341,6 @@ def check_and_play_general_sound(app: Any) -> None:
     проигрывает общий звук (MEDIA_PATHS[4]). Если очередь пуста — останавливает таймер.
     """
     state = app.alert_sound_state
-
     with _state_lock:
         if not _pending_alert_tasks:
             # Очередь пуста: сбрасываем состояние и останавливаем таймер
@@ -346,9 +354,11 @@ def check_and_play_general_sound(app: Any) -> None:
         # Проигрываем общий звук
         volume_factor = getattr(app, "volume_factor", 1.0)
         sound_file = MEDIA_PATHS[4] if len(MEDIA_PATHS) > 4 else MEDIA_PATHS[3]
+        if not Path(sound_file).exists():
+            sound_file = _fallback_sound
+
         if sound_file and Path(sound_file).exists():
             play_sound(sound_file, volume_factor)
-            print("!!!!!! MEDIA_PATHS[4] play_sound(sound_file, volume_factor)")
 
         # Планируем следующий тик
         state["general_sound_timer_id"] = app.root.after(_general_sound_timeout, lambda: check_and_play_general_sound(app))
