@@ -153,6 +153,10 @@ class TaskBlock:
                 self.last_sound        = datetime(1900, 1, 1, 0, 0, 0)
                 self.trigger_retry_alert()
 
+                frame=self.parent.quiet_list_frame if self.is_quiet else self.parent.list_frame
+                self.parent._reorder_tasks_in_frame(frame)
+
+
         has_overdue_quiet = any(
             t.alert_time is not None and (now - t.alert_time).total_seconds() >= 0 and t.is_quiet
             for t in self.parent.tasks.values()

@@ -159,6 +159,18 @@ class App:
         vol_frame = tk.Frame(third_row)
         vol_frame.pack(side="right", anchor="e")  # anchor="e" прижмёт фрейм вправо
 
+        # Кнопка глушения звука
+        self.is_muted = True
+        self.btn_mute = tk.Button(
+            vol_frame,
+            text="O",
+            command=self._toggle_mute,
+            width=2,
+            activebackground="#ffaaaa"
+        )
+        self._toggle_mute()
+        self.btn_mute.pack(side="left", padx=(4, 8))
+
         # Сначала метка «Громкость:»
         lbl_vol_label = tk.Label(vol_frame, text="Громкость:")
         lbl_vol_label.pack(side="left", padx=(0, 8))
@@ -288,6 +300,36 @@ class App:
         self.entry_abs_time.delete(0, tk.END)
 
 
+    def _reorder_tasks_in_frame(self, frame: tk.Frame):
+        """Переупаковывает блоки задач в frame согласно приоритету: важные и просроченные — выше."""
+        # Получаем все виджеты-потомки (это наши TaskBlock.frame)
+        children = list(frame.winfo_children())
+        # Сортируем: сначала важные, потом просроченные, потом по времени создания (по убыванию task_id)
+        def sort_key(child):
+            # child — это frame внутри TaskBlock; нужно получить сам TaskBlock
+            # У нас нет прямой ссылки, поэтому ищем по task_id в self.tasks
+            # Предполагаем, что task_id хранится в self у TaskBlock, а frame уникален
+            block = None
+            for t in self.tasks.values():
+                if t.frame is child:
+                    block = t
+                    break
+            if not block:
+                return (True, 0, 0)  # на всякий случай — в конец
+            now = datetime.now()
+            is_overdue = block.alert_time is not None and (now - block.alert_time).total_seconds() >= 0
+            # Приоритет: (не просрочен → 1, (не важный → 1, важный → 0), просрочен → 0), затем alert_time (чем больше, тем новее)
+            return (not is_overdue, not block.is_important, block.alert_time.timestamp())
+
+        children.sort(key=sort_key)
+
+        # Переpack-им в новом порядке
+        for child in children:
+            child.pack_forget()
+        for child in children:
+            child.pack(fill="x", pady=(0, 2))
+
+
     def check_bulk_alerts(self, countOfPendingNotifications):
         """
         Проверяет количество активных задач и при необходимости показывает
@@ -348,6 +390,12 @@ class App:
 
         widget.bind("<Button-3>", popup)
 
+    def _toggle_mute(self):
+        self.is_muted = not self.is_muted
+        if self.is_muted:
+            self.btn_mute.config(text="X", bg="#FF0000")
+        else:
+            self.btn_mute.config(text="O", bg="#8888cc")
 
 
 if __name__ == "__main__":

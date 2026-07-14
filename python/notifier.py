@@ -120,6 +120,9 @@ def sound_alert(task_obj: Any) -> None:
     app = task_obj.parent  # это экземпляр App
     maybe_activate_general_mode(app)
     
+    if task_obj.parent.is_muted:
+        return;
+    
     task_obj.last_sound = datetime.now()
 
     is_important = bool(getattr(task_obj, "is_important", False))
@@ -358,7 +361,8 @@ def check_and_play_general_sound(app: Any) -> None:
             sound_file = _fallback_sound
 
         if sound_file and Path(sound_file).exists():
-            play_sound(sound_file, volume_factor)
+            if not task_obj.parent.is_muted:
+                play_sound(sound_file, volume_factor)
 
         # Планируем следующий тик
         state["general_sound_timer_id"] = app.root.after(_general_sound_timeout, lambda: check_and_play_general_sound(app))
