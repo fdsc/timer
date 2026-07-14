@@ -39,6 +39,13 @@ class App:
         media_paths = load_media_paths(self.media_config_path)
         notifier.MEDIA_PATHS = media_paths  # передаём в notifier
 
+        # Новое поле: состояние логики общего фонового сигнала
+        self.alert_sound_state = {
+            "first_pending_add_time": None,      # datetime | None
+            "is_general_mode_active": False,     # bool
+            "general_sound_timer_id": None       # int | None (ID от root.after)
+        }
+
 
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=8)
