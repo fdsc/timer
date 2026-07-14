@@ -3,14 +3,15 @@
 # Проверка наличия tkinter: python3 -m tkinter
 
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk,messagebox
 import time
 from datetime import timedelta, datetime
 from pathlib import Path
 import traceback
+import threading
 
 import notifier
+import tasks_storage
 from task_block import TaskBlock
 from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths
 from date_utils import build_alert_time
@@ -23,6 +24,13 @@ class App:
         self.root = root
         self.root.title("Кастомные блоки задач (4 строки)")
         self.root.geometry("1024x768")
+
+        # Счётчик задач для именования новых задач
+        self.task_id_counter=0
+        # Блокировка для доступа к файлам
+        self.storage_lock = threading.Lock()
+        # Флаг неисправности ввода-вывода
+        self.io_error_flag = False
 
         # Получаем путь к папке данных (спрашивает при первом запуске)
         self.data_dir = get_user_data_dir()
@@ -39,6 +47,23 @@ class App:
         # Загружаем пути к медиафайлам
         media_paths = load_media_paths(self.media_config_path)
         notifier.MEDIA_PATHS = media_paths  # передаём в notifier
+
+        # Инициализация хранилища задач
+        if not tasks_storage.ensure_tasks_dir(self.data_dir):
+            self.io_error_flag = True
+            messagebox.showerror("Ошибка доступа к диску", f"Не удалось создать или получить доступ к папке для хранения задач. Закройте программу и устраните ошибку. '{self.data_dir}'")
+            # Блокируем кнопки добавления
+            self._disable_add_buttons()
+            # Дальше не пытаемся загружать задачи
+            self.tasks = {}
+        else:
+            # Загрузка задач
+            loaded = tasks_storage.load_all_tasks(self.data_dir, self.storage_lock)
+            self.tasks = {}  # словарь task_id -> TaskBlock
+            for t in loaded:
+                # Восстанавливаем задачу в UI
+                self._restore_task_from_dict(t)
+
 
         # Новое поле: состояние логики общего фонового сигнала
         self.alert_sound_state = {
@@ -218,6 +243,15 @@ class App:
         self.quiet_list_frame = tk.Frame(self.quiet_tab_frame)
         self.quiet_list_frame.pack(fill="both", expand=True, padx=4, pady=4)
 
+        # ------------------------------------------------
+        # Отключаем кнопки, если есть ошибка ввода-вывода
+        if self.io_error_flag:
+            self._disable_add_buttons()
+
+        # Привязка закрытия окна (без финального сохранения)
+        root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+
     def get_quiet_tasks(self):
         return [task for task in self.tasks.values() if task.is_quiet]
 
@@ -226,9 +260,13 @@ class App:
 
 
     def add_task(self, is_important: bool = False, is_quiet: bool = False):
+        """Добавляет задачу, создаёт TaskBlock и сохраняет на диск."""
+        if self.io_error_flag:
+            return
+
         text = self.entry_task.get().strip()
         if not text:
-            messagebox.showwarning("Внимание", "Введите текст задачи.")
+            messagebox.showwarning("Ошибка ввода", "Наименование задачи не может быть пустым.")
             return
 
         alert_time = None
@@ -280,7 +318,8 @@ class App:
                 messagebox.showerror("Ошибка", f"Не удалось создать задачу: {e}")
                 return
 
-        task_id = str(int(time.time() * 1000)) + str(len(self.tasks))
+        task_id = self._generate_task_id()
+        self.task_id_counter += 1
 
         block = TaskBlock(
             parent=self,
@@ -304,6 +343,13 @@ class App:
         self.entry_abs_month.delete(0, tk.END)
         self.entry_abs_day.delete(0, tk.END)
         self.entry_abs_time.delete(0, tk.END)
+
+
+        # Сохраняем на диск (alert_time=None превратится в текущее время)
+        block.save()
+
+        # Пересортировываем задачи по приоритету
+        self._reorder_tasks_in_frame()
 
 
     def _reorder_tasks_in_frame(self, frame: tk.Frame):
@@ -403,6 +449,47 @@ class App:
         else:
             self.btn_mute.config(text="O", bg="#888888")
 
+    def _disable_add_buttons(self):
+        """Блокирует кнопки добавления задач."""
+        for btn in [self.btn_add_normal, self.btn_add_important, self.btn_add_quiet]:
+            btn.config(state="disabled")
+
+    def on_close(self):
+        """Закрытие окна: ничего не сохраняем, просто уничтожаем окно."""
+        self.root.destroy()
+
+    def _generate_task_id(self) -> str:
+        """Генерирует уникальный task_id по новому правилу."""
+        base = str(int(time.time() * 1000))
+        task_id = f"{base}{self.task_id_counter}"
+        self.task_id_counter += 1
+        return task_id
+
+    def _restore_task_from_dict(self, data: dict):
+        """Восстанавливает задачу из словаря (после загрузки с диска) в UI."""
+        task_id = data.get("task_id", "")
+        if not task_id or task_id in self.tasks:
+            print(f"Обнаружена задача без id или копия задачи с id {task_id} и текстом {task_id.text}. Игнорирована.")
+            return
+
+        text         = data.get("text", "ошибка загрузки")
+        is_important = bool(data.get("is_important", False))
+        is_quiet     = bool(data.get("is_quiet", False))
+        alert_time   = data.get("alert_time") # Уже переведено в datetime
+
+        frame = self.quiet_list_frame if is_quiet else self.list_frame
+
+        task_block = TaskBlock(
+            parent=self,
+            frame=frame,
+            task_id=task_id,
+            text=text,
+            alert_time=alert_time,
+            is_important_initial=is_important,
+            is_quiet=is_quiet
+        )
+
+        self.tasks[task_id] = task_block
 
 if __name__ == "__main__":
     from datetime import datetime

@@ -1,7 +1,10 @@
 import tkinter as tk
+from tkinter import messagebox
 from datetime import datetime, timedelta
 from notifier import show_alert,sound_alert,cancel_notify_for_task
 import math
+import tasks_storage
+
 
 class TaskBlock:
     COLOR_NORMAL_BG        = "#f0f0f0"
@@ -197,9 +200,37 @@ class TaskBlock:
         self.frame.after(1000, self.trigger_retry_alert)
 
 
+    def save(self):
+        if self.parent.io_error_flag:
+            return False
+
+        isSuccess = tasks_storage.save_task(
+            data_dir=self.parent.data_dir,
+            task_data={
+                "task_id": task_id,
+                "text": text,
+                "alert_time": alert_time,
+                "is_important": is_important,
+                "is_quiet": is_quiet,
+            },
+            lock=self.parent.storage_lock,
+            io_error_flag=self.parent.io_error_flag
+        )
+
+        if not isSuccess:
+            self.parent.io_error_flag = True
+            messagebox.showerror("Ошибка сохранения", f"Не удалось сохранить задачу. Сохранение отключено. '{self.parent.data_dir}'")
+            self.parent._disable_add_buttons()
+
+        return isSuccess
+
     def toggle_priority(self):
+        if self.parent.io_error_flag:
+            return
+
         self.is_important = not self.is_important
         self._update_priority_ui()
+        self.save()
 
     def _update_priority_ui(self):
         if self.is_important:
@@ -276,10 +307,25 @@ class TaskBlock:
         """Реальная логика удаления задачи."""
         if self.task_id not in self.parent.tasks:
             return
+        if self.parent.io_error_flag:
+            return
 
         del self.parent.tasks[self.task_id]
         if hasattr(self, "frame") and self.frame.winfo_exists():
             self.frame.destroy()
         self._stopped = True
         cancel_notify_for_task(self.task_id)
+
+        # Удаляем файл на диске
+        success = tasks_storage.delete_task_file(
+            data_dir=self.parent.data_dir,
+            task_id=task_id,
+            lock=self.parent.storage_lock,
+            io_error_flag=self.parent.io_error_flag
+        )
+
+        if not success:
+            self.parent.io_error_flag = True
+            messagebox.showerror("Ошибка сохранения", f"Не удалось удалить файл задачи. Сохранение отключено. '{self.parent.data_dir}'")
+            self.parent._disable_add_buttons()
 
