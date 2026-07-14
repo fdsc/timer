@@ -403,7 +403,13 @@ class App:
             now = datetime.now()
             is_overdue = block.alert_time is not None and (now - block.alert_time).total_seconds() >= 0
             # Приоритет: (не просрочен → 1, (не важный → 1, важный → 0), просрочен → 0), затем alert_time (чем больше, тем новее)
-            return (not is_overdue, not block.is_important, block.alert_time.timestamp())
+            if is_overdue:
+                if block.is_important:
+                    return (0, 0, block.alert_time.timestamp())
+                else:
+                    return (0, 1, block.alert_time.timestamp())
+            else:
+                return (1, 0, block.alert_time.timestamp())
 
         children.sort(key=sort_key)
 
