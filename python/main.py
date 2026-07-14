@@ -395,7 +395,7 @@ class App:
         if self.is_muted:
             self.btn_mute.config(text="X", bg="#FF0000")
         else:
-            self.btn_mute.config(text="O", bg="#8888cc")
+            self.btn_mute.config(text="O", bg="#888888")
 
 
 if __name__ == "__main__":

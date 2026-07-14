@@ -361,7 +361,7 @@ def check_and_play_general_sound(app: Any) -> None:
             sound_file = _fallback_sound
 
         if sound_file and Path(sound_file).exists():
-            if not task_obj.parent.is_muted:
+            if not app.is_muted:
                 play_sound(sound_file, volume_factor)
 
         # Планируем следующий тик
