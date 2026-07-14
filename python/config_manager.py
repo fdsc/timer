@@ -86,6 +86,9 @@ def load_or_create_opts(data_dir: Path) -> dict:
     if "volume_percent" not in opts:
         opts["volume_percent"] = DEFAULT_VOLUME
 
+    if "geometry" not in opts:
+        opts["geometry"] = "1024x768"
+
     if not opts_path.exists() or "volume_percent" not in opts if opts_path.exists() else True:
         with open(opts_path, "w", encoding="utf-8") as f:
             json.dump(opts, f, ensure_ascii=False, indent=2)

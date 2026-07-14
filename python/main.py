@@ -20,10 +20,20 @@ from date_utils import build_alert_time
 # nuitka???
 
 class App:
+    def rootResize(self, e):
+        self.opts["geometry"] = self.root.geometry()
+        self.root.after(3000, save_opts, self.data_dir, self.opts)
+
+        for task in self.tasks.values():
+            if task._stopped: continue
+
+            task.lbl_text.configure(
+                wraplength=self.canvas_m.winfo_width() - self.scrollbar.winfo_width()-8
+            )
+
     def __init__(self, root):
         self.root = root
         self.root.title("Кастомные блоки задач (4 строки)")
-        self.root.geometry("1024x768")
 
         # Счётчик задач для именования новых задач
         self.task_id_counter=0
@@ -40,6 +50,9 @@ class App:
         self.volume_factor = self.opts.get("volume_percent", 100) / 100.0
         # Несохранённое значение громкости
         self._pending_volume_value = None
+
+        self.root.geometry(self.opts["geometry"])
+        self.root.bind("<Configure>", self.rootResize)
 
         # Инициализируем media.conf, если нет
         self.media_config_path = init_media_config(self.data_dir)
@@ -215,16 +228,34 @@ class App:
         # Основная вкладка
         self.main_tab_frame = tk.Frame(self.notebook)
         self.notebook.add(self.main_tab_frame, text="Задачи")
+        
+        self.canvas_m = tk.Canvas(self.main_tab_frame, highlightthickness=0)
+        self.canvas_m.pack(side="left", fill="both", expand=True)
+        
+        self.scrollbar = ttk.Scrollbar(self.main_tab_frame, orient="vertical", command=self.canvas_m.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.canvas_m.configure(yscrollcommand=self.scrollbar.set)
 
-        self.list_frame = tk.Frame(self.main_tab_frame)
-        self.list_frame.pack(fill="both", expand=True, padx=4, pady=4)
+        self.list_frame = tk.Frame(self.canvas_m)
+        self.list_frame.bind("<Configure>", lambda e: self.canvas_m.configure(scrollregion=self.canvas_m.bbox("all")))
+        self.canvas_m.create_window((0, 0), window=self.list_frame, anchor="nw")
+        #self.list_frame.pack(fill="both", expand=True, padx=4, pady=4)
 
         # Вкладка тихих задач
         self.quiet_tab_frame = tk.Frame(self.notebook)
         self.notebook.add(self.quiet_tab_frame, text="Тихие")
 
-        self.quiet_list_frame = tk.Frame(self.quiet_tab_frame)
-        self.quiet_list_frame.pack(fill="both", expand=True, padx=4, pady=4)
+        self.canvas_q = tk.Canvas(self.quiet_tab_frame, highlightthickness=0)
+        self.canvas_q.pack(side="left", fill="both", expand=True)
+
+        self.scrollbar = ttk.Scrollbar(self.quiet_tab_frame, orient="vertical", command=self.canvas_q.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.canvas_q.configure(yscrollcommand=self.scrollbar.set)
+
+        self.quiet_list_frame = tk.Frame(self.canvas_q)
+        self.quiet_list_frame.bind("<Configure>", lambda e: self.canvas_q.configure(scrollregion=self.canvas_q.bbox("all")))
+        self.canvas_q.create_window((0, 0), window=self.quiet_list_frame, anchor="nw")
+
 
         # ------------------------------------------------
         # Инициализация хранилища задач
@@ -415,14 +446,8 @@ class App:
         self._pending_volume_value  = v
 
         # Сохраняем в файл с отложенным выполнением
-        self.root.after(3000, self.save_pending_volume)
+        self.root.after(3000, save_opts, self.data_dir, self.opts)
 
-    def save_pending_volume(self):
-        """Гарантированно сохраняет последнее значение громкости, если оно ещё не было сохранено."""
-        if self._pending_volume_value is not None:
-            self.opts["volume_percent"] = self._pending_volume_value
-            save_opts(self.data_dir, self.opts)
-            self._pending_volume_value = None
 
     def _on_test_sound_click(self, event=None):
         """Проигрывает тестовый звук при клике по метке с процентом громкости."""
@@ -457,6 +482,11 @@ class App:
 
     def on_close(self):
         """Закрытие окна: ничего не сохраняем, просто уничтожаем окно."""
+        save_opts(self.data_dir, self.opts)   # твоё сохранение
+
+        if not messagebox.askyesno("Закрыть список задач?", "Задачи перестанут отслеживаться в случае закрытия."):
+            return
+
         self.root.destroy()
 
     def _generate_task_id(self) -> str:
@@ -497,6 +527,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
     root.mainloop()
-    
-    # Завершение работы приложения
-    app.save_pending_volume()

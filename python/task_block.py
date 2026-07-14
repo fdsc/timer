@@ -50,7 +50,7 @@ class TaskBlock:
             anchor="w",
             justify="left",
             font=("TkDefaultFont", 11),
-            bg=bg_color
+            bg=bg_color,
         )
         self.lbl_text.grid(row=0, column=0, sticky="w", columnspan=2)
 
