@@ -30,9 +30,12 @@ def iso_to_datetime(s: str) -> Optional[datetime]:
     except Exception:
         return None
 
+def get_tasks_dir(data_dir: Path) -> str:
+    return data_dir / "tasks"
+
 def ensure_tasks_dir(data_dir: Path) -> bool:
     """Создаёт папку tasks внутри data_dir. Возвращает True при успехе, False при ошибке."""
-    tasks_dir = data_dir / "tasks"
+    tasks_dir = get_tasks_dir(data_dir)
     try:
         tasks_dir.mkdir(parents=True, exist_ok=True)
         return True
@@ -85,7 +88,7 @@ def load_all_tasks(data_dir: Path, lock: threading.Lock) -> List[Dict[str, Any]]
     - Файлы с некорректными именами (не только цифры) игнорируются (с логированием).
     - Повреждённые или неполные файлы загружаются как аварийные задачи.
     """
-    tasks_dir = data_dir / "tasks"
+    tasks_dir = get_tasks_dir(data_dir)
     loaded_tasks = []
     current_time = datetime.now()
 
@@ -127,7 +130,7 @@ def save_task(data_dir: Path, task_data: Dict[str, Any], lock: threading.Lock, i
         print("[tasks_storage] Недопустимый task_id для сохранения.")
         return False
 
-    tasks_dir = data_dir / "tasks"
+    tasks_dir = get_tasks_dir(data_dir)
     file_path = tasks_dir / f"{task_id}.json"
 
     # Подготавливаем данные для сохранения
@@ -164,7 +167,7 @@ def delete_task_file(data_dir: Path, task_id: str, lock: threading.Lock, io_erro
     if io_error_flag or not task_id:
         return False
 
-    tasks_dir = data_dir / "tasks"
+    tasks_dir = get_tasks_dir(data_dir)
     file_path = tasks_dir / f"{task_id}.json"
 
     with lock:

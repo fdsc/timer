@@ -219,7 +219,7 @@ class TaskBlock:
 
         if not isSuccess:
             self.parent.io_error_flag = True
-            messagebox.showerror("Ошибка сохранения", f"Не удалось сохранить задачу. Сохранение отключено. '{self.parent.data_dir}'")
+            messagebox.showerror("Ошибка доступа к диску", f"Не удалось сохранить задачу. Сохранение отключено. '{tasks_storage.get_tasks_dir()}'")
             self.parent._disable_add_buttons()
 
         return isSuccess
@@ -326,6 +326,6 @@ class TaskBlock:
 
         if not success:
             self.parent.io_error_flag = True
-            messagebox.showerror("Ошибка сохранения", f"Не удалось удалить файл задачи. Сохранение отключено. '{self.parent.data_dir}'")
+            messagebox.showerror("Ошибка доступа к диску", f"Не удалось удалить файл задачи. Сохранение отключено. '{tasks_storage.get_tasks_dir()}'")
             self.parent._disable_add_buttons()
 

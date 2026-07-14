@@ -51,7 +51,7 @@ class App:
         # Инициализация хранилища задач
         if not tasks_storage.ensure_tasks_dir(self.data_dir):
             self.io_error_flag = True
-            messagebox.showerror("Ошибка доступа к диску", f"Не удалось создать или получить доступ к папке для хранения задач. Закройте программу и устраните ошибку. '{self.data_dir}'")
+            messagebox.showerror("Ошибка доступа к диску", f"Не удалось создать или получить доступ к папке для хранения задач. Закройте программу и устраните ошибку. '{tasks_storage.get_tasks_dir()}'")
             # Блокируем кнопки добавления
             self._disable_add_buttons()
             # Дальше не пытаемся загружать задачи
