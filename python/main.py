@@ -9,6 +9,7 @@ from datetime import timedelta, datetime
 from pathlib import Path
 import traceback
 import threading
+import fcntl
 
 import notifier
 import helper
@@ -45,12 +46,19 @@ class App:
 
         # Получаем путь к папке данных (спрашивает при первом запуске)
         self.data_dir = get_user_data_dir()
+
+        # ------------------------------------------------------
+        # Блокировка для предотвращения запуска двух экземпляров
+        self.lock_file_path = Path(self.data_dir) / ".lock"
+        self._acquire_single_instance_lock()
+
         # Загружаем или создаём opts.json
         self.opts = load_or_create_opts(self.data_dir)
         # Инициализируем громкость из настроек
         self.volume_factor = self.opts.get("volume_percent", 100) / 100.0
         # Несохранённое значение громкости
         self._pending_volume_value = None
+
 
         self.root.geometry(self.opts["geometry"])
         self.root.bind("<Configure>", self.rootResize)
@@ -635,7 +643,21 @@ class App:
         # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
         self._reorder_tasks_in_frame(self.list_frame)
 
+    def _acquire_single_instance_lock(self):
+        self.lock_fd = open(self.lock_file_path, "w")
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print("Приложение уже запущено. \nЕсли вам нужно запускать два экземпляра одновременно, запускайте их из-под разных пользователей с разными директориями для сохранения.")
+            raise SystemExit(1)
 
+    def destroy(self):
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+            self.lock_fd.close()
+        except Exception:
+            pass
+        super().destroy() if hasattr(super(), "destroy") else None
 
 if __name__ == "__main__":
     from datetime import datetime
