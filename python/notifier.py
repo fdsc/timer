@@ -159,6 +159,12 @@ def sound_alert(task_obj: Any) -> None:
         play_sound(sound_file, volume_factor)
 
 
+def truncate_with_ellipsis(text: str, maxLength: int = 30, suffix: str = "...") -> str:
+    if len(text) <= maxLength:
+        return text
+
+    return text[:maxLength] + suffix
+
 
 def show_alert(task_obj: Any) -> None:
     app = task_obj.parent  # это экземпляр App
@@ -181,14 +187,14 @@ def show_alert(task_obj: Any) -> None:
             overdue_seconds = max(0, int(delta.total_seconds()))
 
         urgency_level = _calculate_urgency(is_important, overdue_seconds)
-        base_title = "❗ ВАЖНАЯ ЗАДАЧА" if is_important else "Задача"
+        base_title = f"❗ {truncate_with_ellipsis(text)}" if is_important else truncate_with_ellipsis(text)
 
         if overdue_seconds > 0:
             minutes, secs = divmod(overdue_seconds, 60)
             time_diff_str = f"{minutes} мин {secs} сек назад"
-            message = f"Задача: {text}\nПросрочено: {time_diff_str}"
+            message = f"{text}\nПросрочено: {time_diff_str}"
         else:
-            message = f"Задача: {text}"
+            message = f"{text}"
 
         title = base_title
 
