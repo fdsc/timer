@@ -35,7 +35,7 @@ def _on_notify_finished(task_id: int, app: Any | None) -> None:
 
         # Стандартная проверка: если очередь пуста — сбрасываем состояние общего сигнала
         if app is not None and len(_pending_alert_tasks) == 0:
-            reset_alert_sound_state(app)
+            app.root.after(0, lambda: reset_alert_sound_state(app))
 
 
 def _run_notify_with_wait(title: str, message: str, task_id, app: Any, urgency: str = "normal", icon_path: str | None = None) -> bool:

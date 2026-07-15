@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import tkinter as tk
 import subprocess
@@ -92,7 +93,7 @@ def load_or_create_opts(data_dir: Path) -> dict:
     if "combodefer" not in opts:
         opts["combodefer"] = "0"
 
-    if not opts_path.exists() or "volume_percent" not in opts if opts_path.exists() else True:
+    if not opts_path.exists():
         with open(opts_path, "w", encoding="utf-8") as f:
             json.dump(opts, f, ensure_ascii=False, indent=2)
 

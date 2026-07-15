@@ -265,7 +265,7 @@ class TaskBlock:
 
     def getDeleteConfirmationTime(self):
         """Возвращает время в секундах (float), прошедшее с момента первого нажатия на кнопку 'удалить'"""
-        if self._delete_confirm_active == False:
+        if self._delete_confirm_active is False:
             return 0.0;
 
         now = datetime.now()

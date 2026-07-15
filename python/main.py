@@ -11,6 +11,7 @@ import traceback
 import threading
 import fcntl
 
+
 import notifier
 import helper
 import tasks_storage
@@ -24,7 +25,7 @@ from date_utils import build_alert_time
 class App:
     def rootResize(self, e):
         self.opts["geometry"] = self.root.geometry()
-        self.root.after(3000, save_opts, self.data_dir, self.opts)
+        save_opts(self.data_dir, self.opts)
 
         for task in self.tasks.values():
             if task._stopped: continue
@@ -127,7 +128,7 @@ class App:
         time_and_btn_row.pack(fill="x", pady=(0, 0))
 
         # Кнопки добавления (слева во второй строке)
-        btn_add_normal = tk.Button(
+        self.btn_add_normal = tk.Button(
             time_and_btn_row,
             text="+",
             command=lambda: self.add_task(is_important=False),
@@ -135,9 +136,9 @@ class App:
             bg="#e0ffe0",
             activebackground="#c6e9c6"
         )
-        btn_add_normal.pack(side="left", padx=(0, 8))
+        self.btn_add_normal.pack(side="left", padx=(0, 8))
 
-        btn_add_important = tk.Button(
+        self.btn_add_important = tk.Button(
             time_and_btn_row,
             text="!",
             command=lambda: self.add_task(is_important=True),
@@ -145,10 +146,10 @@ class App:
             bg="#ffebee",
             activebackground="#ffcdd2"
         )
-        btn_add_important.pack(side="left", padx=(0, 16))
+        self.btn_add_important.pack(side="left", padx=(0, 16))
 
         # Кнопка тихой задачи
-        btn_add_quiet = tk.Button(
+        self.btn_add_quiet = tk.Button(
             time_and_btn_row,
             text="V",
             command=lambda: self.add_task(is_important=False, is_quiet=True),
@@ -156,7 +157,7 @@ class App:
             bg="#888888",
             activebackground="#AAAAAA"
         )
-        btn_add_quiet.pack(side="left", padx=(0, 8))
+        self.btn_add_quiet.pack(side="left", padx=(0, 8))
 
         # Компоненты времени (справа во второй строке)
         time_frame = tk.Frame(time_and_btn_row)
@@ -474,7 +475,8 @@ class App:
 
     def _on_volume_change(self, val: str):
         """Обработчик изменения громкости: обновляет метку, множитель и сохраняет в opts.json."""
-        v = float(val)
+        #val = re.sub(r'[^0-9-.]', '.', val)    # Заменяем запятые на точки, если нужно
+        v = float(val.replace(',', '.'))
         self.lbl_vol_value.config(text=f"{v}%")
         self.volume_factor = v / 100.0
 
@@ -483,7 +485,7 @@ class App:
         self._pending_volume_value  = v
 
         # Сохраняем в файл с отложенным выполнением
-        self.root.after(3000, save_opts, self.data_dir, self.opts)
+        save_opts(self.data_dir, self.opts)
 
 
     def _on_test_sound_click(self, event=None):
@@ -524,7 +526,8 @@ class App:
         if not messagebox.askyesno("Закрыть список задач?", "Задачи перестанут отслеживаться в случае закрытия."):
             return
 
-        self.root.destroy()
+        self.quit_window()
+
 
     def _generate_task_id(self) -> str:
         """Генерирует уникальный task_id по новому правилу."""
@@ -537,7 +540,7 @@ class App:
         """Восстанавливает задачу из словаря (после загрузки с диска) в UI."""
         task_id = data.get("task_id", "")
         if not task_id or task_id in self.tasks:
-            print(f"Обнаружена задача без id или копия задачи с id {task_id} и текстом {task_id.text}. Игнорирована.")
+            print(f"Обнаружена задача без id или копия задачи с id {task_id} и текстом {data.get("text")}. Игнорирована.")
             return
 
         text         = data.get("text", "ошибка загрузки")
@@ -567,10 +570,10 @@ class App:
             self.opts["combodefer"] = current_idx
             save_opts(self.data_dir, self.opts)
 
-    def do_defer_list(self, list, base_seconds: int, lastDefer: datetime) -> datetime:
+    def do_defer_list(self, tlist, base_seconds: int, lastDefer: datetime) -> datetime:
         applied_count = 0
 
-        for i, task in enumerate(list):
+        for i, task in enumerate(tlist):
 
             important_interval = base_seconds // 2 if not task.is_important else base_seconds
             normal_interval    = base_seconds
@@ -592,7 +595,7 @@ class App:
                 continue
 
 
-            prev_task = list[i - 1]
+            prev_task = tlist[i - 1]
             delta_sec = (task.defer_time - prev_task.defer_time).total_seconds()
 
             if delta_sec <= interval_seconds:
@@ -672,6 +675,12 @@ class App:
         except Exception:
             pass
         super().destroy() if hasattr(super(), "destroy") else None
+
+    def quit_window(self):
+        """Выход из приложения"""
+        save_opts(self.data_dir, self.opts)   # твоё сохранение
+        self.root.quit()
+        self.root.destroy()
 
 if __name__ == "__main__":
     from datetime import datetime
