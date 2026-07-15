@@ -1,5 +1,13 @@
 # timer
 
+В директории python расположен standalone органайзер для ПК на основе Linux.
+Требует установленных пакетов sox, tk, zenity (часто уже установлены, кроме sox).
+Запуск: python3 main.py
+
+
+Поддержка JavaScript напоминателя прекращена (в корневой директории).
+
+
 JavaScript таймер
 Доступен по адресу
 https://fdsc.github.io/timer/
