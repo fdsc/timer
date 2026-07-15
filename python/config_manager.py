@@ -5,12 +5,19 @@ import tkinter as tk
 import subprocess
 from tkinter import filedialog
 from pathlib import Path
+import threading
+import time
+from datetime import datetime
+import traceback
 
 CONFIG_STORE_PATH = Path.home() / ".config" / "vinny-task-tracker" / "config_store.json"
 MEDIA_CONFIG_PATH = None  # будет установлено после получения data_dir
 MEDIA_CONFIG_FILE = "media.conf"
 DEFAULT_VOLUME = 100
 
+_save_timers = {}
+_save_locks = {}
+_save_timer_start_times = {}
 
 def get_folder_via_zenity(text, initialDir) -> str | None:
     # zenity --file-selection --directory --filename="$HOME/.config/" --title="Выберите папку для задач"
@@ -98,6 +105,47 @@ def load_or_create_opts(data_dir: Path) -> dict:
             json.dump(opts, f, ensure_ascii=False, indent=2)
 
     return opts
+
+def _do_save_opts(data_dir, opts, timer_key):
+    """Внутренняя функция для выполнения отложенного сохранения."""
+    # Удаляем таймер из словаря после выполнения
+    with _save_locks.get(timer_key, threading.Lock()):
+        _save_timers.pop(timer_key, None)
+        _save_timer_start_times.pop(timer_key, None)
+
+    # Выполняем сохранение
+    save_opts(data_dir, opts)
+
+
+def save_opts_debounced(data_dir: Path, opts: dict, delay: float = 3.0) -> None:
+    """
+    Сохраняет opts.json не чаще, чем раз в delay секунд.
+    При множественных вызовах в пределах delay реальное сохранение
+    произойдёт только один раз — через delay после последнего вызова.
+    """
+    key = str(data_dir)
+
+    if key not in _save_locks:
+        _save_locks[key] = threading.Lock()
+
+    with _save_locks[key]:
+        now = time.time()
+
+        # Отменяем предыдущий таймер только если прошло не более 3 секунд
+        if key in _save_timers and key in _save_timer_start_times:
+            elapsed = now - _save_timer_start_times[key]
+            if elapsed <= delay:
+                _save_timers[key].cancel()
+                _save_timers.pop(key, None)
+
+        # Если таймера нет (отменили или не было) — создаём новый
+        if key not in _save_timers:
+            timer = threading.Timer(delay, _do_save_opts, args=[data_dir, opts, key])
+            timer.daemon = True
+            _save_timers[key] = timer
+            if key not in _save_timer_start_times:
+                _save_timer_start_times[key] = time.time()
+            timer.start()
 
 
 def save_opts(data_dir: Path, opts: dict) -> None:

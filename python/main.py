@@ -16,7 +16,7 @@ import notifier
 import helper
 import tasks_storage
 from task_block import TaskBlock
-from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths
+from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths, save_opts_debounced
 from date_utils import build_alert_time
 
 
@@ -24,8 +24,12 @@ from date_utils import build_alert_time
 
 class App:
     def rootResize(self, e):
-        self.opts["geometry"] = self.root.geometry()
-        save_opts(self.data_dir, self.opts)
+        g = self.root.geometry()
+        if g == self.opts["geometry"]:
+            return
+
+        self.opts["geometry"] = g
+        save_opts_debounced(self.data_dir, self.opts)
 
         for task in self.tasks.values():
             if task._stopped: continue
@@ -485,7 +489,7 @@ class App:
         self._pending_volume_value  = v
 
         # Сохраняем в файл с отложенным выполнением
-        save_opts(self.data_dir, self.opts)
+        save_opts_debounced(self.data_dir, self.opts)
 
 
     def _on_test_sound_click(self, event=None):
@@ -521,7 +525,7 @@ class App:
 
     def on_close(self):
         """Закрытие окна: ничего не сохраняем, просто уничтожаем окно."""
-        save_opts(self.data_dir, self.opts)   # твоё сохранение
+        save_opts(self.data_dir, self.opts)
 
         if not messagebox.askyesno("Закрыть список задач?", "Задачи перестанут отслеживаться в случае закрытия."):
             return
@@ -568,7 +572,7 @@ class App:
 
         if current_idx != saved_idx:
             self.opts["combodefer"] = current_idx
-            save_opts(self.data_dir, self.opts)
+            save_opts_debounced(self.data_dir, self.opts)
 
     def do_defer_list(self, tlist, base_seconds: int, lastDefer: datetime) -> datetime:
         applied_count = 0
@@ -678,7 +682,7 @@ class App:
 
     def quit_window(self):
         """Выход из приложения"""
-        save_opts(self.data_dir, self.opts)   # твоё сохранение
+        save_opts(self.data_dir, self.opts)
         self.root.quit()
         self.root.destroy()
 
