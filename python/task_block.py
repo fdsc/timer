@@ -172,24 +172,28 @@ class TaskBlock:
         if not hasattr(self, "frame") or not self.frame.winfo_exists():
             return
 
-        now   = datetime.now()
-        delta = now - self.last_notification
-        ts    = delta.total_seconds()
+        total_seconds = self.getRemained()
+        # Если задача отложена, то может быть, что total_seconds снова больше 0
+        if total_seconds <= 0:
+        
+            now   = datetime.now()
+            delta = now - self.last_notification
+            ts    = delta.total_seconds()
 
-        delta = now - self.last_sound
-        tss   = delta.total_seconds()
+            delta = now - self.last_sound
+            tss   = delta.total_seconds()
 
-        if not self.is_quiet:
-            if self.is_important:
-                if ts  > self._retry_delay_sec_important:
-                    show_alert(self)
-                if tss > self._retry_delay_sec_important_s:
-                    sound_alert(self)
-            else:
-                if ts  > self._retry_delay_sec_normal:
-                    show_alert(self)
-                if tss > self._retry_delay_sec_normal_s:
-                    sound_alert(self)
+            if not self.is_quiet:
+                if self.is_important:
+                    if ts  > self._retry_delay_sec_important:
+                        show_alert(self)
+                    if tss > self._retry_delay_sec_important_s:
+                        sound_alert(self)
+                else:
+                    if ts  > self._retry_delay_sec_normal:
+                        show_alert(self)
+                    if tss > self._retry_delay_sec_normal_s:
+                        sound_alert(self)
 
         self.frame.after(1000, self.trigger_retry_alert)
 

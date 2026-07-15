@@ -460,7 +460,7 @@ class App:
         # Считаем «активными» все задачи, у которых alert_time уже наступило или прошло
         active_tasks = [
             t for t in self.tasks.values()
-            if t.alert_time is None or (now - t.alert_time).total_seconds() >= 0
+            if t.alert_time is None or t.getRemained() <= 0
         ]
 
         from notifier import show_bulk_critical_alert
@@ -567,6 +567,46 @@ class App:
             self.opts["combodefer"] = current_idx
             save_opts(self.data_dir, self.opts)
 
+    def do_defer_list(self, list, base_seconds: int, lastDefer: datetime) -> datetime:
+        applied_count = 0
+
+        for i, task in enumerate(list):
+
+            important_interval = base_seconds // 2 if not task.is_important else base_seconds
+            normal_interval    = base_seconds
+
+            # Определяем, какой интервал использовать для этой задачи
+            interval_seconds = important_interval if task.is_important else normal_interval
+
+            if i == 0:
+                delta_sec = (task.defer_time - lastDefer).total_seconds()
+                if delta_sec > interval_seconds:
+                    break
+
+                new_defer = max(lastDefer + timedelta(seconds=interval_seconds), task.defer_time)
+                if new_defer != task.defer_time:
+                    task.set_defer_time(new_defer)
+                    lastDefer = new_defer
+                    applied_count += 1
+
+                continue
+
+
+            prev_task = list[i - 1]
+            delta_sec = (task.defer_time - prev_task.defer_time).total_seconds()
+
+            if delta_sec <= interval_seconds:
+                # Задача слишком близко к предыдущей — сдвигаем её
+                new_defer = prev_task.defer_time + timedelta(seconds=interval_seconds)
+                task.set_defer_time(new_defer)
+                lastDefer = new_defer
+                applied_count += 1
+            else:
+                break
+
+        return lastDefer
+
+
     def do_defer(self, is_important: bool = False):
         """
         Откладывает НЕ тихие задачи так, чтобы между ними был заданный интервал.
@@ -586,14 +626,20 @@ class App:
              дальше не трогаем (процесс завершается).
         """
 
+        notifier.cancel_notify_for_task(notifier.BULK_TASK_ID)
+        for task in self.tasks.values():
+            notifier.cancel_notify_for_task(task.task_id)
+
         now = datetime.now()
 
         # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
-        non_quiet_tasks = [t for t in self.tasks.values() if not t.is_quiet]
-        if not non_quiet_tasks:
+        non_quiet_tasks_i = [t for t in self.tasks.values() if not t.is_quiet and t.is_important]
+        non_quiet_tasks_n = [t for t in self.tasks.values() if not t.is_quiet and not t.is_important]
+        if not non_quiet_tasks_i and not non_quiet_tasks_n:
             return
 
-        non_quiet_tasks.sort(key=lambda t: t.alert_time)
+        non_quiet_tasks_i.sort(key=lambda t: t.alert_time)
+        non_quiet_tasks_n.sort(key=lambda t: t.alert_time)
 
         # 2. Получаем интервал из comboDefer
         combo_value_str = self.comboDefer.get()
@@ -605,40 +651,8 @@ class App:
         if base_seconds <= 0:
             base_seconds = 60
 
-
-        important_interval = base_seconds // 2 if not is_important else base_seconds
-        normal_interval    = base_seconds
-
-        applied_count = 0
-
-        for i, task in enumerate(non_quiet_tasks):
-
-            # Определяем, какой интервал использовать для этой задачи
-            interval_seconds = important_interval if task.is_important else normal_interval
-
-            if i == 0:
-                delta_sec = (task.defer_time - now).total_seconds()
-                if delta_sec > interval_seconds:
-                    break
-
-                new_defer = max(now + timedelta(seconds=interval_seconds), task.defer_time)
-                if new_defer != task.defer_time:
-                    task.set_defer_time(new_defer)
-                    applied_count += 1
-
-                continue
-
-
-            prev_task = non_quiet_tasks[i - 1]
-            delta_sec = (task.defer_time - prev_task.defer_time).total_seconds()
-
-            if delta_sec <= interval_seconds:
-                # Задача слишком близко к предыдущей — сдвигаем её
-                new_defer = prev_task.defer_time + timedelta(seconds=interval_seconds)
-                task.set_defer_time(new_defer)
-                applied_count += 1
-            else:
-                break
+        lastDefer = self.do_defer_list(non_quiet_tasks_i, base_seconds, now)
+        self.do_defer_list(non_quiet_tasks_n, base_seconds, lastDefer)
 
         # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
         self._reorder_tasks_in_frame(self.list_frame)
