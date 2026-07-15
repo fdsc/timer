@@ -11,6 +11,7 @@ import traceback
 import threading
 
 import notifier
+import helper
 import tasks_storage
 from task_block import TaskBlock
 from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths
@@ -77,10 +78,26 @@ class App:
         task_row.pack(fill="x", pady=(0, 4))
 
         tk.Label(task_row, text="Задача:").pack(side="left")
-        self.entry_task = tk.Entry(task_row, width=30)
+        self.entry_task = tk.Entry(task_row, width=50)
         self.entry_task.pack(side="left", padx=(4, 8))
         # Привязываем контекстное меню для копирования текста задачи
         self._setup_copy_menu(self.entry_task)
+        
+        # Отложить
+        btn_defer = tk.Button(
+            task_row,
+            text="+",
+            command=lambda: self.do_defer(is_important=False),
+            width=2,
+            bg="#e0ffe0",
+            activebackground="#c6e9c6"
+        )
+        btn_defer.pack(side="left", padx=(0, 2))
+
+        self.comboDefer = ttk.Combobox(task_row, values=helper.get10percentList(), width=10, state="readonly")
+        self.comboDefer.current(self.opts["combodefer"])
+        self.comboDefer.pack(side="left", padx=(0, 8))      # или grid, если используешь grid
+        self.comboDefer.bind("<<ComboboxSelected>>", self.on_combo_change)
 
         # Индикатор просроченных тихих задач на основной вкладке
         self.lbl_quiet_overdue_indicator = tk.Label(
@@ -527,6 +544,15 @@ class App:
         )
 
         self.tasks[task_id] = task_block
+
+    def on_combo_change(self, event=None):
+        current_idx = self.comboDefer.current()
+        saved_idx   = self.opts["combodefer"]
+
+        if current_idx != saved_idx:
+            self.opts["combodefer"] = current_idx
+            save_opts(self.data_dir, self.opts)
+
 
 if __name__ == "__main__":
     from datetime import datetime
