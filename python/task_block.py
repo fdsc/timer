@@ -21,6 +21,7 @@ class TaskBlock:
         self.parent       = parent
         self.task_id      = task_id
         self.alert_time   = alert_time
+        self.defer_time   = alert_time              # Не должен сохраняться
         self.text         = text
         self.is_quiet     = is_quiet
         self.is_important = is_important_initial
@@ -112,13 +113,6 @@ class TaskBlock:
                 menu.grab_release()
 
         label.bind("<Button-3>", popup)
-
-    def getRemained(self):
-        # Возвращает просрочку задачи в секундах (целое)
-        now = datetime.now()
-        delta = self.alert_time - now
-        return max(0, int(math.ceil(delta.total_seconds())))
-
 
     def upsetQuietTab(self):
         self.parent.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
@@ -328,4 +322,14 @@ class TaskBlock:
             self.parent.io_error_flag = True
             messagebox.showerror("Ошибка доступа к диску", f"Не удалось удалить файл задачи. Сохранение отключено. '{tasks_storage.get_tasks_dir()}'")
             self.parent._disable_add_buttons()
+
+    def set_defer_time(self, new_defer_time: datetime):
+        self.defer_time = new_defer_time
+        # Пересчитываем отображение таймера с учётом изменившихся величин
+        self.update_timer()
+
+    def getRemained(self):
+        now   = datetime.now()
+        delta = self.defer_time - now
+        return max(0, int(math.ceil(delta.total_seconds())))
 

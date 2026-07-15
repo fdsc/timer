@@ -82,15 +82,17 @@ class App:
         self.entry_task.pack(side="left", padx=(4, 8))
         # Привязываем контекстное меню для копирования текста задачи
         self._setup_copy_menu(self.entry_task)
-        
+
         # Отложить
         btn_defer = tk.Button(
             task_row,
-            text="+",
+            text="Отл",
             command=lambda: self.do_defer(is_important=False),
             width=2,
-            bg="#e0ffe0",
-            activebackground="#c6e9c6"
+            bg="#888888",
+            fg="#000000",
+            activebackground="#000000",
+            activeforeground="#FFFFFF"
         )
         btn_defer.pack(side="left", padx=(0, 2))
 
@@ -298,6 +300,10 @@ class App:
 
         # Привязка закрытия окна (без финального сохранения)
         root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        # Сортируем задачи в визуальном интерфейсе
+        self._reorder_tasks_in_frame(self.list_frame)
+        self._reorder_tasks_in_frame(self.quiet_list_frame)
 
 
     def get_quiet_tasks(self):
@@ -552,6 +558,83 @@ class App:
         if current_idx != saved_idx:
             self.opts["combodefer"] = current_idx
             save_opts(self.data_dir, self.opts)
+
+    def do_defer(self, is_important: bool = False):
+        """
+        Откладывает НЕ тихие задачи так, чтобы между ними был заданный интервал.
+
+        Параметры:
+          is_important=False: важные задачи откладываются с половинным интервалом.
+          is_important=True:  все задачи откладываются с полным интервалом.
+
+        Логика:
+          1. Игнорируем тихие задачи.
+          2. Сортируем все не тихие задачи по alert_time (не только просроченные).
+          3. Проходим по списку и «выравниваем» defer_time так, чтобы соседние задачи
+             отстояли друг от друга не меньше чем на нужный интервал.
+          4. Если очередная задача отстоит от предыдущей меньше чем на интервал —
+             сдвигаем её на этот интервал вперёд от предыдущей.
+          5. Как только встречаем задачу, которая уже отстоит больше чем на интервал,
+             дальше не трогаем (процесс завершается).
+        """
+
+        now = datetime.now()
+
+        # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
+        non_quiet_tasks = [t for t in self.tasks.values() if not t.is_quiet]
+        if not non_quiet_tasks:
+            return
+
+        non_quiet_tasks.sort(key=lambda t: t.alert_time)
+
+        # 2. Получаем интервал из comboDefer
+        combo_value_str = self.comboDefer.get()
+        try:
+            base_seconds = int(combo_value_str)*60
+        except (ValueError, TypeError):
+            base_seconds = 60
+
+        if base_seconds <= 0:
+            base_seconds = 60
+
+
+        important_interval = base_seconds // 2 if not is_important else base_seconds
+        normal_interval    = base_seconds
+
+        applied_count = 0
+
+        for i, task in enumerate(non_quiet_tasks):
+
+            # Определяем, какой интервал использовать для этой задачи
+            interval_seconds = important_interval if task.is_important else normal_interval
+
+            if i == 0:
+                delta_sec = (task.defer_time - now).total_seconds()
+                if delta_sec > interval_seconds:
+                    break
+
+                new_defer = max(now + timedelta(seconds=interval_seconds), task.defer_time)
+                if new_defer != task.defer_time:
+                    task.set_defer_time(new_defer)
+                    applied_count += 1
+
+                continue
+
+
+            prev_task = non_quiet_tasks[i - 1]
+            delta_sec = (task.defer_time - prev_task.defer_time).total_seconds()
+
+            if delta_sec <= interval_seconds:
+                # Задача слишком близко к предыдущей — сдвигаем её
+                new_defer = prev_task.defer_time + timedelta(seconds=interval_seconds)
+                task.set_defer_time(new_defer)
+                applied_count += 1
+            else:
+                break
+
+        # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
+        self._reorder_tasks_in_frame(self.list_frame)
+
 
 
 if __name__ == "__main__":
