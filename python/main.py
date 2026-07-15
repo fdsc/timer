@@ -40,7 +40,7 @@ class App:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Кастомные блоки задач (4 строки)")
+        self.root.title("Отслеживание задач")
 
         # Счётчик задач для именования новых задач
         self.task_id_counter=0
