@@ -1,5 +1,5 @@
 from config_manager import save_opts_debounced
-import constants
+from constants import *
 
 class AudioControlMixin:
     def _on_volume_change(self, val: str):
@@ -20,7 +20,6 @@ class AudioControlMixin:
 
     def toggle_mute(self):
         self.is_muted = not self.is_muted
-        from constants import COLOR_BTN_MUTE_ACTIVE_BG, COLOR_BTN_MUTE_INACTIVE_BG
         if self.is_muted:
             self.btn_mute.config(text="X", bg=COLOR_BTN_MUTE_ACTIVE_BG)
         else:
@@ -28,4 +27,4 @@ class AudioControlMixin:
 
     def _on_test_sound_click(self, event=None):
         from notifier import play_sound
-        play_sound(constants.TEST_SOUND_PATH, self.volume_factor)
+        play_sound(TEST_SOUND_PATH, self.volume_factor)
