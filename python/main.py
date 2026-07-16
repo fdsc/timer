@@ -35,7 +35,6 @@ from main_gui_tabs_layout import TabsLayoutMixin
 from main_gui_resize_handler import ResizeHandlerMixin
 from main_gui_task_frames_sorting_logic import TaskFramesSortingLogicMixin
 from main_gui_audio_control import AudioControlMixin
-from main_gui_clipboard import ClipboardMixin
 
 
 # nuitka???
@@ -46,8 +45,7 @@ class App(
     TabsLayoutMixin,
     ResizeHandlerMixin,
     TaskFramesSortingLogicMixin,
-    AudioControlMixin,
-    ClipboardMixin
+    AudioControlMixin
 ):
     def __init__(self, root):
         self.root = root
@@ -252,19 +250,6 @@ class App(
             return True
         else:
             return False
-
-    def _setup_copy_menu(self, widget):
-        """Создаёт контекстное меню с пунктом «Копировать» для виджета Entry."""
-        menu = tk.Menu(widget, tearoff=0)
-        menu.add_command(label="Копировать", command=lambda: widget.event_generate("<<Copy>>"))
-
-        def popup(event):
-            try:
-                menu.tk_popup(event.x_root, event.y_root)
-            finally:
-                menu.grab_release()
-
-        widget.bind("<Button-3>", popup)
 
     def _disable_add_buttons(self):
         """Блокирует кнопки добавления задач."""

@@ -19,7 +19,6 @@ class InputPanelMixin:
         tk.Label(task_row, text="Задача:").pack(side="left")
         self.entry_task = tk.Entry(task_row, width=50)
         self.entry_task.pack(side="left", padx=(4, 8))
-        self._setup_copy_menu(self.entry_task)
 
         btn_defer = tk.Button(
             task_row,

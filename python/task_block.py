@@ -333,7 +333,6 @@ class TaskBlock:
 
         return True
 
-
     def _cancel_delete_confirmation(self):
         """Сбрасывает режим подтверждения, если пользователь не подтвердил удаление за 10 секунд."""
         self._delete_confirm_active = False
