@@ -15,7 +15,6 @@ import fcntl
 import notifier
 import helper
 import tasks_storage
-from task_block import TaskBlock
 from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths, save_opts_debounced
 from date_utils import build_alert_time
 
@@ -76,7 +75,6 @@ class App(
         self.root.bind("<Configure>", self.rootResize)
 
         # Новое поле: состояние логики общего фонового сигнала
-        # !!!
         self.alert_sound_state = {
             "first_pending_add_time": None,      # datetime | None
             "is_general_mode_active": False,     # bool
@@ -131,105 +129,6 @@ class App(
     def get_non_quiet_tasks_not_remained(self):
         return [task for task in self.tasks.values() if not task.is_quiet and task.getRemained() <= 0]
 
-
-    def add_task(self, is_important: bool = False, is_quiet: bool = False):
-        """Добавляет задачу, создаёт TaskBlock и сохраняет на диск."""
-        if self.io_error_flag:
-            return
-
-        text = self.entry_task.get().strip()
-        if not text:
-            messagebox.showwarning("Ошибка ввода", "Наименование задачи не может быть пустым.")
-            return
-
-        alert_time = None
-
-        # Сначала пробуем абсолютную дату
-        year_str  = self.entry_abs_year.get() .strip()
-        month_str = self.entry_abs_month.get().strip()
-        day_str   = self.entry_abs_day.get()  .strip()
-        time_str  = self.entry_abs_time.get() .strip()
-
-        if year_str or month_str or day_str or time_str:
-            try:
-                alert_time = build_alert_time(year_str, month_str, day_str, time_str)
-            except ValueError as e:
-                messagebox.showerror("Ошибка", str(e))
-                return
-        else:
-            # Fallback на относительное время, если не задана полная абсолютная дата
-            try:
-                now         = datetime.now()
-                days_str    = self.entry_days.get()   .strip()
-                hours_str   = self.entry_hours.get()  .strip()
-                minutes_str = self.entry_minutes.get().strip()
-                seconds_str = self.entry_seconds.get().strip()
-
-                days    = int(days_str)    if days_str    else 0
-                hours   = int(hours_str)   if hours_str   else 0
-                minutes = int(minutes_str) if minutes_str else 0
-                seconds = int(seconds_str) if seconds_str else 0
-
-                total_seconds = (
-                    days    * SECONDS_PER_DAY    +
-                    hours   * SECONDS_PER_HOUR   +
-                    minutes * SECONDS_PER_MINUTE +
-                    seconds
-                )
-
-                if total_seconds <= 0:
-                    self._on_test_sound_click()
-                    raise ValueError
-
-                if total_seconds > MAX_DELAY_DAYS * SECONDS_PER_DAY:
-                    messagebox.showerror(
-                        "Ошибка",
-                        f"Слишком большая задержка. Максимум: {MAX_DELAY_DAYS} дней."
-                    )
-                    return
-
-                if total_seconds <= 0:
-                    messagebox.showerror("Ошибка", "Общее время должно быть больше 0 секунд.")
-                    return
-
-                alert_time = now + timedelta(seconds=total_seconds)
-            except Exception as e:
-                messagebox.showerror("Ошибка", f"Не удалось создать задачу: {e}")
-                return
-
-        task_id = self._generate_task_id()
-        self.task_id_counter += 1
-
-        block = TaskBlock(
-            parent=self,
-            task_id=task_id,
-            frame=self.quiet_list_frame if is_quiet else self.list_frame,
-            text=text,
-            alert_time=alert_time,
-            is_important_initial=is_important,
-            is_quiet=is_quiet
-        )
-        self.tasks[task_id] = block
-
-        self.entry_task.delete(0, tk.END)
-        # Сбрасываем относительные поля
-        self.entry_days.delete(0, tk.END)
-        self.entry_hours.delete(0, tk.END)
-        self.entry_minutes.delete(0, tk.END)
-        self.entry_seconds.delete(0, tk.END)
-        # Сбрасываем абсолютные поля
-        self.entry_abs_year.delete(0, tk.END)
-        self.entry_abs_month.delete(0, tk.END)
-        self.entry_abs_day.delete(0, tk.END)
-        self.entry_abs_time.delete(0, tk.END)
-
-
-        # Сохраняем на диск (alert_time=None превратится в текущее время)
-        block.save()
-
-        # Пересортировываем задачи по приоритету
-        frame=self.quiet_list_frame if block.is_quiet else self.list_frame
-        self._reorder_tasks_in_frame(frame)
 
     def check_bulk_alerts(self, countOfPendingNotifications):
         """
