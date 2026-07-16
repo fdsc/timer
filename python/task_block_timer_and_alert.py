@@ -61,15 +61,18 @@ class TimerAndAlertMixin:
         # Считаем, что «первичное оповещение наступило», если now >= alert_time
         is_alert_due = now >= self.alert_time
 
-        if is_alert_due and total_seconds <= 0:
+        if is_alert_due:
             # Оповещение наступило и задача не отложена — красный фон
             self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_OVERDUE)
-        elif is_alert_due and total_seconds > 0:
-            # Оповещение уже было, но задача отложена — голубой фон
-            self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_POSTPONED)
         else:
             # Всё ещё впереди — прозрачный фон
-            self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_NORMAL)
+            self.lbl_time_alert.config(bg=self.getBgColor())
+
+        if is_alert_due and total_seconds > 0:
+            # Оповещение уже было, но задача отложена — голубой фон
+            self.lbl_time_left.config(bg=COLOR_TIME_ALERT_POSTPONED)
+        else:
+            self.lbl_time_left.config(bg=self.getBgColor())
 
         if total_seconds <= 0:
             self.btn_del.config(bg=COLOR_BTN_DELETE_OVERDUE)

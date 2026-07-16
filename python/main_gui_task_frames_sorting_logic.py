@@ -16,8 +16,9 @@ class TaskFramesSortingLogicMixin:
                 return (True, 0, 0)
             
             now = datetime.now()
-            is_overdue = block.alert_time is not None and (now - block.alert_time).total_seconds() >= 0
-            
+            # Просроченная задача
+            is_overdue = block.alert_time is not None and block.getRemainedAlert() <= 0
+
             if is_overdue:
                 if block.is_important:
                     return (0, 0, block.alert_time.timestamp())
