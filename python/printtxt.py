@@ -6,10 +6,10 @@ import os
 files_to_show = [
     "main.py",
     "task_block.py",
-    "notifier.py",
-    "config_manager.py",
+#    "notifier.py",
+#    "config_manager.py",
     "date_utils.py",
-    "tasks_storage.py"
+#    "tasks_storage.py"
 ]
 
 current_dir = os.getcwd()

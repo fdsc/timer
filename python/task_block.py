@@ -13,6 +13,13 @@ class TaskBlock:
     COLOR_IMPORTANT_ACTIVE = "#ffcdd2"
     COLOR_FRAME_NORMAL     = "#ffffff"
     COLOR_FRAME_IMPORTANT  = "#fff0f0"
+    
+    COLOR_BTN_DELETE_NORMAL = "#f0f0f0"
+    COLOR_BTN_DELETE_OVERDUE = "#ffcccc"
+
+    COLOR_TIME_ALERT_OVERDUE   = "#ffcccc"
+    COLOR_TIME_ALERT_POSTPONED = "#cceeff"
+    COLOR_TIME_ALERT_NORMAL    = COLOR_NORMAL_BG
 
     def getBgColor(self):
         return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
@@ -57,7 +64,7 @@ class TaskBlock:
 
         self._setup_copy_menu_for_label(self.lbl_text, text)
 
-        self.lbl_time_info = tk.Label(
+        self.lbl_time_left = tk.Label(
             self.frame,
             text="",
             anchor="w",
@@ -65,7 +72,24 @@ class TaskBlock:
             fg="#555",
             bg=bg_color
         )
-        self.lbl_time_info.grid(row=1, column=0, sticky="w", columnspan=2)
+        self.lbl_time_left.grid(row=1, column=0, sticky="w", columnspan=2)
+
+        self.lbl_time_alert = tk.Label(
+            self.frame,
+            text="",
+            anchor="e",
+            justify="right",
+            fg="#000000",
+            bg=self.COLOR_TIME_ALERT_NORMAL,
+            font=("TkDefaultFont", 10)
+        )
+        self.lbl_time_alert.grid(row=1, column=1, sticky="e", padx=(8, 0))
+
+        # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
+        self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
+        # Клик по времени оповещения -> вставляет ЧЧ:ММ в entry_abs_time главного окна
+        self.lbl_time_alert.bind("<Button-1>", lambda e: self._on_click_alert_time())
+
 
         self.btn_del = tk.Button(
             self.frame,
@@ -73,7 +97,7 @@ class TaskBlock:
             #command=lambda: self.on_delete(self.task_id),
             command=self._start_delete_confirmation,
             width=10,
-            bg="#f0f0f0"
+            bg=self.COLOR_BTN_DELETE_NORMAL
         )
         self.btn_del.grid(row=2, column=0, padx=(0, 8), sticky="w")
 
@@ -134,11 +158,29 @@ class TaskBlock:
         hrs, mins = divmod(mins, 60)
 
         time_left_str = f"{hrs:02d}:{mins:02d}:{secs:02d}"
-        alert_datetime_str = self.alert_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        self.lbl_time_info.config(
-            text=f"Осталось: {time_left_str} | Оповещение: {alert_datetime_str}"
-        )
+        self.lbl_time_left.config(text=f"Осталось: {time_left_str} |")
+        alert_datetime_str = self.alert_time.strftime("%Y-%m-%d %H:%M:%S")
+        self.lbl_time_alert.config(text=f"Оповещение: {alert_datetime_str}")
+
+        # Логика цвета фона для «Оповещение»
+        # Считаем, что «первичное оповещение наступило», если now >= alert_time
+        is_alert_due = now >= self.alert_time
+
+        if is_alert_due and total_seconds <= 0:
+            # Оповещение наступило и задача не отложена — красный фон
+            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_OVERDUE)
+        elif is_alert_due and total_seconds > 0:
+            # Оповещение уже было, но задача отложена — голубой фон
+            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_POSTPONED)
+        else:
+            # Всё ещё впереди — прозрачный фон
+            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_NORMAL)
+
+        if total_seconds <= 0:
+            self.btn_del.config(bg=self.COLOR_BTN_DELETE_OVERDUE)
+        else:
+            self.btn_del.config(bg=self.COLOR_BTN_DELETE_NORMAL)
 
         # ЛОГИКА ОПОВЕЩЕНИЙ
         if total_seconds == 0:
@@ -231,6 +273,10 @@ class TaskBlock:
         self.save()
 
     def _update_priority_ui(self):
+        bg_color = self.getBgColor()
+        self.lbl_time_left.config(bg=bg_color)
+        self.lbl_time_alert.config(bg=bg_color)
+        
         if self.is_important:
             self.btn_priority.config(
                 text="Важная",
@@ -239,7 +285,6 @@ class TaskBlock:
             )
             self.frame.config(bg=self.COLOR_FRAME_IMPORTANT)
             self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c", bg=self.getBgColor())
-            self.lbl_time_info.config(bg=self.COLOR_FRAME_IMPORTANT)
         else:
             self.btn_priority.config(
                 text="Не важная",
@@ -248,7 +293,7 @@ class TaskBlock:
             )
             self.frame.config(bg=self.COLOR_FRAME_NORMAL)
             self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
-            self.lbl_time_info.config(bg=self.COLOR_FRAME_NORMAL)
+
 
     def _start_delete_confirmation(self):
         """Активирует режим подтверждения удаления: кнопка меняется на «Точно удалить» на 10 секунд."""
@@ -337,3 +382,23 @@ class TaskBlock:
         delta = self.defer_time - now
         return max(0, int(math.ceil(delta.total_seconds())))
 
+    def getRemainedAlert(self):
+        now   = datetime.now()
+        delta = self.alert_time - now
+        return max(0, int(math.ceil(delta.total_seconds())))
+
+    def _on_click_title(self):
+        """Вставляет текст задачи в поле ввода задачи главного окна."""
+        if not hasattr(self.parent, "entry_task") or not self.parent.entry_task.winfo_exists():
+            return
+        self.parent.entry_task.delete(0, tk.END)
+        self.parent.entry_task.insert(0, self.text)
+
+    def _on_click_alert_time(self):
+        """Вставляет часы:минуты из alert_time в поле entry_abs_time главного окна."""
+        if not hasattr(self.parent, "entry_abs_time") or not self.parent.entry_abs_time.winfo_exists():
+            return
+        t = self.alert_time
+        time_str = f"{t.hour:02d}:{t.minute:02d}"
+        self.parent.entry_abs_time.delete(0, tk.END)
+        self.parent.entry_abs_time.insert(0, time_str)
