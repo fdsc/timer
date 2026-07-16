@@ -1,7 +1,9 @@
-import tkinter    as tk
 import notifier
+import tkinter    as tk
+from   tkinter    import messagebox
 from   tkinter    import ttk
 from   datetime   import timedelta, datetime
+
 from   task_block import TaskBlock
 from   date_utils import build_alert_time
 from   constants  import *
