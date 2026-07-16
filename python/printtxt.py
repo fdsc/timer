@@ -21,6 +21,7 @@ files_to_show = [
 #    "task_block_gui_layout.py",
 #    "task_block_gui_priority_colors.py",
     "task_block.py",
+    "task_block_tasks.py",
 #    "task_block_timer_and_alert.py",
 #    "tasks_storage.py"
 ]

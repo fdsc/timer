@@ -1,9 +1,5 @@
 import tkinter as tk
-from constants import (
-    COLOR_FRAME_NORMAL, COLOR_FRAME_IMPORTANT,
-    COLOR_BTN_DELETE_NORMAL, COLOR_BTN_DELETE_OVERDUE,
-    COLOR_TIME_ALERT_OVERDUE, COLOR_TIME_ALERT_POSTPONED, COLOR_TIME_ALERT_NORMAL,COLOR_IMPORTANT_ACTIVE
-)
+from constants import *
 
 class TaskBlockLayoutMixin:
     def build_layout(self):
@@ -92,3 +88,27 @@ class TaskBlockLayoutMixin:
         self._container_frame.clipboard_clear()
         self._container_frame.clipboard_append(text)
 
+
+    def _on_click_title(self):
+        """Вставляет текст задачи в поле ввода задачи главного окна."""
+        if not hasattr(self.parent, "entry_task") or not self.parent.entry_task.winfo_exists():
+            return
+        self.parent.entry_task.delete(0, tk.END)
+        self.parent.entry_task.insert(0, self.text)
+
+    def _on_click_alert_time(self):
+        """Вставляет часы:минуты из alert_time в поле entry_abs_time главного окна."""
+        if not hasattr(self.parent, "entry_abs_time") or not self.parent.entry_abs_time.winfo_exists():
+            return
+        t = self.alert_time
+        time_str = f"{t.hour:02d}:{t.minute:02d}"
+        self.parent.entry_abs_time.delete(0, tk.END)
+        self.parent.entry_abs_time.insert(0, time_str)
+
+    def upsetQuietTab(self):
+        self.parent.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="----- Тихие -----")
+
+    def resetQuietTab(self):
+        self.parent.lbl_quiet_overdue_indicator.pack_forget()
+        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="Тихие")

@@ -104,9 +104,6 @@ def load_all_tasks(data_dir: Path, lock: threading.Lock) -> List[Dict[str, Any]]
             continue
 
         file_name = entry.name[:-5]  # убираем .json
-        if not file_name.isdigit():
-            print(f"[tasks_storage] Игнорируется файл с некорректным именем: {entry.name}")
-            continue
 
         with lock:
             task_data = _load_task_from_file(entry, current_time)
