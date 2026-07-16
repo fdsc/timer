@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import helper
+from datetime import timedelta, datetime
 from constants import (
     COLOR_BTN_DEFER_BG, COLOR_BTN_DEFER_FG, COLOR_BTN_DEFER_ACTIVE_BG,
     COLOR_BTN_DEFER_ACTIVE_FG, COLOR_BTN_ADD_NORMAL_BG, COLOR_BTN_ADD_NORMAL_ACTIVE_BG,
@@ -9,6 +10,105 @@ from constants import (
 )
 
 class InputPanelMixin:
+    
+    def on_combo_change(self, event=None):
+        current_idx = self.comboDefer.current()
+        saved_idx   = self.opts["combodefer"]
+
+        if current_idx != saved_idx:
+            self.opts["combodefer"] = current_idx
+            save_opts_debounced(self.data_dir, self.opts)
+
+    def do_defer_list(self, tlist, base_seconds: int, lastDefer: datetime) -> datetime:
+        applied_count = 0
+
+        for i, task in enumerate(tlist):
+
+            important_interval = base_seconds // 2 if not task.is_important else base_seconds
+            normal_interval    = base_seconds
+
+            # Определяем, какой интервал использовать для этой задачи
+            interval_seconds = important_interval if task.is_important else normal_interval
+
+            if i == 0:
+                delta_sec = (task.defer_time - lastDefer).total_seconds()
+                if delta_sec > interval_seconds:
+                    break
+
+                new_defer = max(lastDefer + timedelta(seconds=interval_seconds), task.defer_time)
+                if new_defer != task.defer_time:
+                    task.set_defer_time(new_defer)
+                    lastDefer = new_defer
+                    applied_count += 1
+
+                continue
+
+
+            prev_task = tlist[i - 1]
+            delta_sec = (task.defer_time - prev_task.defer_time).total_seconds()
+
+            if delta_sec <= interval_seconds:
+                # Задача слишком близко к предыдущей — сдвигаем её
+                new_defer = prev_task.defer_time + timedelta(seconds=interval_seconds)
+                task.set_defer_time(new_defer)
+                lastDefer = new_defer
+                applied_count += 1
+            else:
+                break
+
+        return lastDefer
+
+
+    def do_defer(self, is_important: bool = False):
+        """
+        Откладывает НЕ тихие задачи так, чтобы между ними был заданный интервал.
+
+        Параметры:
+          is_important=False: важные задачи откладываются с половинным интервалом.
+          is_important=True:  все задачи откладываются с полным интервалом.
+
+        Логика:
+          1. Игнорируем тихие задачи.
+          2. Сортируем все не тихие задачи по alert_time (не только просроченные).
+          3. Проходим по списку и «выравниваем» defer_time так, чтобы соседние задачи
+             отстояли друг от друга не меньше чем на нужный интервал.
+          4. Если очередная задача отстоит от предыдущей меньше чем на интервал —
+             сдвигаем её на этот интервал вперёд от предыдущей.
+          5. Как только встречаем задачу, которая уже отстоит больше чем на интервал,
+             дальше не трогаем (процесс завершается).
+        """
+
+        notifier.cancel_notify_for_task(notifier.BULK_TASK_ID)
+        for task in self.tasks.values():
+            notifier.cancel_notify_for_task(task.task_id)
+
+        now = datetime.now()
+
+        # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
+        non_quiet_tasks_i = [t for t in self.tasks.values() if not t.is_quiet and t.is_important]
+        non_quiet_tasks_n = [t for t in self.tasks.values() if not t.is_quiet and not t.is_important]
+        if not non_quiet_tasks_i and not non_quiet_tasks_n:
+            return
+
+        non_quiet_tasks_i.sort(key=lambda t: t.alert_time)
+        non_quiet_tasks_n.sort(key=lambda t: t.alert_time)
+
+        # 2. Получаем интервал из comboDefer
+        combo_value_str = self.comboDefer.get()
+        try:
+            base_seconds = int(combo_value_str)*60
+        except (ValueError, TypeError):
+            base_seconds = 60
+
+        if base_seconds <= 0:
+            base_seconds = 60
+
+        lastDefer = self.do_defer_list(non_quiet_tasks_i, base_seconds, now)
+        self.do_defer_list(non_quiet_tasks_n, base_seconds, lastDefer)
+
+        # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
+        self._reorder_tasks_in_frame(self.list_frame)
+
     def build_input_panel(self, root):
         top = tk.Frame(root)
         top.pack(fill="x", padx=8, pady=8)

@@ -1,5 +1,6 @@
-from config_manager import get_user_data_dir, load_or_create_opts, init_media_config, load_media_paths
 import notifier
+from config_manager import get_user_data_dir, load_or_create_opts, init_media_config, load_media_paths
+from task_block import TaskBlock
 from constants import TEST_SOUND_PATH
 
 class LoadConfigPathMixin:
@@ -15,3 +16,30 @@ class LoadConfigPathMixin:
         app.media_paths          = load_media_paths (app.media_config_path)
         notifier.MEDIA_PATHS     = app.media_paths
         notifier.TEST_SOUND_PATH = TEST_SOUND_PATH
+
+
+    def _restore_task_from_dict(self, data: dict):
+        """Восстанавливает задачу из словаря (после загрузки с диска) в UI."""
+        task_id = data.get("task_id", "")
+        if not task_id or task_id in self.tasks:
+            print(f"Обнаружена задача без id или копия задачи с id {task_id} и текстом {data.get("text")}. Игнорирована.")
+            return
+
+        text         = data.get("text", "ошибка загрузки")
+        is_important = bool(data.get("is_important", False))
+        is_quiet     = bool(data.get("is_quiet", False))
+        alert_time   = data.get("alert_time") # Уже переведено в datetime
+
+        frame = self.quiet_list_frame if is_quiet else self.list_frame
+
+        task_block = TaskBlock(
+            parent=self,
+            frame=frame,
+            task_id=task_id,
+            text=text,
+            alert_time=alert_time,
+            is_important_initial=is_important,
+            is_quiet=is_quiet
+        )
+
+        self.tasks[task_id] = task_block
