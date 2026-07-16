@@ -69,6 +69,12 @@ class TaskBlockLayoutMixin:
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 
+        sep = tk.Frame(self.frame, height=2, bg="gray")
+        sep.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(6, 0))
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(1, weight=1)
+
+
     def _setup_copy_menu_for_label(self, label, text):
         import tkinter as tk
         menu = tk.Menu(label, tearoff=0)
