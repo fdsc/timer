@@ -1,9 +1,11 @@
 import tkinter    as tk
+import notifier
 from   tkinter    import ttk
 from   datetime   import timedelta, datetime
 from   task_block import TaskBlock
 from   date_utils import build_alert_time
 from   constants  import *
+
 
 class InputPanelMixin:
     
@@ -86,7 +88,6 @@ class InputPanelMixin:
                 return
 
         task_id = self._generate_task_id()
-        self.task_id_counter += 1
 
         block = TaskBlock(
             parent=self,
