@@ -35,5 +35,22 @@ COLOR_BTN_MUTE_ACTIVE_BG = "#FF0000"
 COLOR_BTN_MUTE_INACTIVE_BG = "#888888"
 COLOR_BTN_MUTE_HOVER_BG = "#ffaaaa"
 
+
+# --- task_block.py ---
+COLOR_NORMAL_BG        = "#f0f0f0"
+COLOR_NORMAL_ACTIVE    = "#e0e0e0"
+COLOR_IMPORTANT_BG     = "#ffebee"
+COLOR_IMPORTANT_ACTIVE = "#ffcdd2"
+COLOR_FRAME_NORMAL     = "#ffffff"
+COLOR_FRAME_IMPORTANT  = "#fff0f0"
+
+COLOR_BTN_DELETE_NORMAL  = "#f0f0f0"
+COLOR_BTN_DELETE_OVERDUE = "#ffcccc"
+
+COLOR_TIME_ALERT_OVERDUE   = "#ffcccc"
+COLOR_TIME_ALERT_POSTPONED = "#cceeff"
+COLOR_TIME_ALERT_NORMAL    = COLOR_FRAME_NORMAL
+
+
 # --- Пути ---
 TEST_SOUND_PATH = "/usr/share/sounds/freedesktop/stereo/complete.oga"

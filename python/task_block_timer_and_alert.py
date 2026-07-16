@@ -1,7 +1,7 @@
 import threading
 from datetime import datetime
 import time
-from notifier import play_sound, notify_user
+#from notifier import play_sound, notify_user
 
 class TimerAndAlertMixin:
     def start_timer_loop(self):

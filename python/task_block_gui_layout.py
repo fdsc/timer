@@ -2,7 +2,7 @@ import tkinter as tk
 from constants import (
     COLOR_FRAME_NORMAL, COLOR_FRAME_IMPORTANT,
     COLOR_BTN_DELETE_NORMAL, COLOR_BTN_DELETE_OVERDUE,
-    COLOR_TIME_ALERT_OVERDUE, COLOR_TIME_ALERT_POSTPONED, COLOR_TIME_ALERT_NORMAL
+    COLOR_TIME_ALERT_OVERDUE, COLOR_TIME_ALERT_POSTPONED, COLOR_TIME_ALERT_NORMAL,COLOR_IMPORTANT_ACTIVE
 )
 
 class TaskBlockLayoutMixin:
@@ -44,8 +44,11 @@ class TaskBlockLayoutMixin:
         )
         self.lbl_time_alert.grid(row=1, column=1, sticky="w", padx=(0, 0))
 
+        # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
         self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
+        # Клик по времени оповещения -> вставляет ЧЧ:ММ в entry_abs_time главного окна
         self.lbl_time_alert.bind("<Button-1>", lambda e: self._on_click_alert_time())
+
 
         self.btn_del = tk.Button(
             self.frame,
@@ -62,7 +65,7 @@ class TaskBlockLayoutMixin:
             command=self.toggle_priority,
             width=12,
             bg="#f0f0f0",
-            activebackground=self.COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
+            activebackground=COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 

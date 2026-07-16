@@ -5,35 +5,33 @@ from notifier import show_alert,sound_alert,cancel_notify_for_task
 import math
 import tasks_storage
 
-import constants
-from constants import (
-    RETRY_DELAY_IMPORTANT_SEC,
-    RETRY_DELAY_IMPORTANT_SOUND_SEC,
-    RETRY_DELAY_NORMAL_SEC,
-    RETRY_DELAY_NORMAL_SOUND_SEC,
-    DELETE_CONFIRM_MAX_SECONDS,
-    DELETE_CONFIRM_MIN_SECONDS,
-    TICK_INTERVAL_MS,
-    ALERT_INTERVAL_MS,
-)
+from constants import *
+#import constants
+#from constants import (
+#    RETRY_DELAY_IMPORTANT_SEC,
+#    RETRY_DELAY_IMPORTANT_SOUND_SEC,
+#    RETRY_DELAY_NORMAL_SEC,
+#    RETRY_DELAY_NORMAL_SOUND_SEC,
+#    DELETE_CONFIRM_MAX_SECONDS,
+#    DELETE_CONFIRM_MIN_SECONDS,
+#    TICK_INTERVAL_MS,
+#    ALERT_INTERVAL_MS,
+#)
 
-class TaskBlock:
-    COLOR_NORMAL_BG        = "#f0f0f0"
-    COLOR_NORMAL_ACTIVE    = "#e0e0e0"
-    COLOR_IMPORTANT_BG     = "#ffebee"
-    COLOR_IMPORTANT_ACTIVE = "#ffcdd2"
-    COLOR_FRAME_NORMAL     = "#ffffff"
-    COLOR_FRAME_IMPORTANT  = "#fff0f0"
-    
-    COLOR_BTN_DELETE_NORMAL = "#f0f0f0"
-    COLOR_BTN_DELETE_OVERDUE = "#ffcccc"
+from task_block_gui_layout import TaskBlockLayoutMixin
+from task_block_timer_and_alert import TimerAndAlertMixin
+from task_block_gui_delete_confirmation_mixin import DeleteConfirmationMixin
+from task_block_gui_priority_colors import PriorityColorsMixin
 
-    COLOR_TIME_ALERT_OVERDUE   = "#ffcccc"
-    COLOR_TIME_ALERT_POSTPONED = "#cceeff"
-    COLOR_TIME_ALERT_NORMAL    = COLOR_FRAME_NORMAL
 
+class TaskBlock(
+    TaskBlockLayoutMixin,
+    TimerAndAlertMixin,
+    DeleteConfirmationMixin,
+    PriorityColorsMixin
+):
     def getBgColor(self):
-        return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
+        return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
 
     def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, is_quiet: bool = False):
         self.parent       = parent
@@ -44,77 +42,19 @@ class TaskBlock:
         self.is_quiet     = is_quiet
         self.is_important = is_important_initial
 
-        self._stopped = False
-        self._alerted_once = False
-        self._retry_scheduled = False
+        self._stopped               = False
+        self._alerted_once          = False
+        self._retry_scheduled       = False
         self._delete_confirm_active = False
 
         self._container_frame = frame
 
+        self.build_layout()
         self.root = parent.list_frame.winfo_toplevel()
 
-        bg_color = self.getBgColor()
-        self.frame = tk.Frame(self._container_frame, bd=1, relief="solid", padx=4, pady=4, bg=bg_color)
-        self.frame.pack(fill="x", pady=(0, 2))
+        self.build_layout()
+        #self.start_timer_loop()
 
-        self.lbl_text = tk.Label(
-            self.frame,
-            text=text,
-            anchor="w",
-            justify="left",
-            font=("TkDefaultFont", 11),
-            bg=bg_color,
-        )
-        self.lbl_text.grid(row=0, column=0, sticky="w", columnspan=2)
-
-        self._setup_copy_menu_for_label(self.lbl_text, text)
-
-        self.lbl_time_left = tk.Label(
-            self.frame,
-            text="",
-            anchor="w",
-            justify="left",
-            fg="#555",
-            bg=bg_color
-        )
-        self.lbl_time_left.grid(row=1, column=0, sticky="w", columnspan=2)
-
-        self.lbl_time_alert = tk.Label(
-            self.frame,
-            text="",
-            anchor="e",
-            justify="left",
-            fg="#555",
-            bg=self.COLOR_TIME_ALERT_NORMAL,
-            font=("TkDefaultFont", 10)
-        )
-        self.lbl_time_alert.grid(row=1, column=1, sticky="w", padx=(0, 0))
-
-        # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
-        self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
-        # Клик по времени оповещения -> вставляет ЧЧ:ММ в entry_abs_time главного окна
-        self.lbl_time_alert.bind("<Button-1>", lambda e: self._on_click_alert_time())
-
-
-        self.btn_del = tk.Button(
-            self.frame,
-            text="Удалить",
-            #command=lambda: self.on_delete(self.task_id),
-            command=self._start_delete_confirmation,
-            width=10,
-            bg=self.COLOR_BTN_DELETE_NORMAL
-        )
-        self.btn_del.grid(row=2, column=0, padx=(0, 8), sticky="w")
-
-        self.btn_priority = tk.Button(
-            self.frame,
-            text="",
-            command=self.toggle_priority,
-            width=12,
-            bg="#f0f0f0",
-            activebackground=self.COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
-        )
-        self.btn_priority.grid(row=2, column=1, sticky="w")
 
         sep = tk.Frame(self.frame, height=2, bg="gray")
         sep.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(6, 0))
@@ -174,18 +114,18 @@ class TaskBlock:
 
         if is_alert_due and total_seconds <= 0:
             # Оповещение наступило и задача не отложена — красный фон
-            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_OVERDUE)
+            self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_OVERDUE)
         elif is_alert_due and total_seconds > 0:
             # Оповещение уже было, но задача отложена — голубой фон
-            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_POSTPONED)
+            self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_POSTPONED)
         else:
             # Всё ещё впереди — прозрачный фон
-            self.lbl_time_alert.config(bg=self.COLOR_TIME_ALERT_NORMAL)
+            self.lbl_time_alert.config(bg=COLOR_TIME_ALERT_NORMAL)
 
         if total_seconds <= 0:
-            self.btn_del.config(bg=self.COLOR_BTN_DELETE_OVERDUE)
+            self.btn_del.config(bg=COLOR_BTN_DELETE_OVERDUE)
         else:
-            self.btn_del.config(bg=self.COLOR_BTN_DELETE_NORMAL)
+            self.btn_del.config(bg=COLOR_BTN_DELETE_NORMAL)
 
         # ЛОГИКА ОПОВЕЩЕНИЙ
         if total_seconds == 0:
@@ -285,18 +225,18 @@ class TaskBlock:
         if self.is_important:
             self.btn_priority.config(
                 text="Важная",
-                bg=self.COLOR_IMPORTANT_BG,
-                activebackground=self.COLOR_IMPORTANT_ACTIVE
+                bg=COLOR_IMPORTANT_BG,
+                activebackground=COLOR_IMPORTANT_ACTIVE
             )
-            self.frame.config(bg=self.COLOR_FRAME_IMPORTANT)
+            self.frame.config(bg=COLOR_FRAME_IMPORTANT)
             self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c", bg=self.getBgColor())
         else:
             self.btn_priority.config(
                 text="Не важная",
-                bg=self.COLOR_NORMAL_BG,
-                activebackground=self.COLOR_NORMAL_ACTIVE
+                bg=COLOR_NORMAL_BG,
+                activebackground=COLOR_NORMAL_ACTIVE
             )
-            self.frame.config(bg=self.COLOR_FRAME_NORMAL)
+            self.frame.config(bg=COLOR_FRAME_NORMAL)
             self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
 
 
