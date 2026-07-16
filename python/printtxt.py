@@ -1,28 +1,28 @@
-
 # Это служебный скрипт
 import os
 
 # Список файлов, содержимое которых нужно вывести
 files_to_show = [
-    "main.py",
-    "task_block.py",
-    "notifier.py",
+#    "app_singletone.py",
     "config_manager.py",
+#    "constants.py",
     "date_utils.py",
-    "tasks_storage.py",
-    "constants.py",
-    "app_singletone.py",
-    "main_load_config_path.py",
+#    "main_gui_audio_control.py",
+#    "main_gui_helper.py",
 #    "main_gui_input_panel.py",
-#    "main_gui_tabs_layout.py",
 #    "main_gui_resize_handler.py",
-    "main_gui_task_frames_sorting_logic.py",
-    "main_gui_audio_control.py",
-    "main_gui_clipboard.py",
-    "task_block_gui_layout.py",
-    "task_block_timer_and_alert.py",
-    "task_block_gui_delete_confirmation_mixin.py",
-    "task_block_gui_priority_colors.py",
+#    "main_gui_tabs_layout.py",
+#    "main_gui_task_frames_sorting_logic.py",
+#    "main_gui_window.py",
+#    "main_load_config_path.py",
+    "main.py",
+#    "notifier.py",
+#    "task_block_gui_delete_confirmation_mixin.py",
+#    "task_block_gui_layout.py",
+#    "task_block_gui_priority_colors.py",
+    "task_block.py",
+#    "task_block_timer_and_alert.py",
+#    "tasks_storage.py"
 ]
 
 current_dir = os.getcwd()

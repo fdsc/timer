@@ -1,9 +1,9 @@
-import tkinter as tk
-from tkinter import ttk
-import helper
-from datetime import timedelta, datetime
-from task_block import TaskBlock
-from constants import *
+import tkinter    as tk
+from   tkinter    import ttk
+from   datetime   import timedelta, datetime
+from   task_block import TaskBlock
+from   date_utils import build_alert_time
+from   constants  import *
 
 class InputPanelMixin:
     
@@ -14,6 +14,11 @@ class InputPanelMixin:
         if current_idx != saved_idx:
             self.opts["combodefer"] = current_idx
             save_opts_debounced(self.data_dir, self.opts)
+
+    def _disable_add_buttons(self):
+        """Блокирует кнопки добавления задач."""
+        for btn in [self.btn_add_normal, self.btn_add_important, self.btn_add_quiet]:
+            btn.config(state="disabled")
 
     def add_task(self, is_important: bool = False, is_quiet: bool = False):
         """Добавляет задачу, создаёт TaskBlock и сохраняет на диск."""
@@ -229,7 +234,7 @@ class InputPanelMixin:
         )
         btn_defer.pack(side="left", padx=(0, 2))
 
-        self.comboDefer = ttk.Combobox(task_row, values=helper.get10percentList(), width=10, state="readonly")
+        self.comboDefer = ttk.Combobox(task_row, values=self.get10percentList(), width=10, state="readonly")
         self.comboDefer.current(self.opts["combodefer"])
         self.comboDefer.pack(side="left", padx=(0, 8))
         self.comboDefer.bind("<<ComboboxSelected>>", self.on_combo_change)
