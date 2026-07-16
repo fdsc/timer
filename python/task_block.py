@@ -345,9 +345,9 @@ class TaskBlock:
         self._delete_confirm_active = False
         self._on_delete_direct()
 
-        if len(self.parent.get_quiet_tasks()) == 0:
+        if len(self.parent.get_quiet_tasks_not_remained()) == 0:
             self.resetQuietTab()
-        if len(self.parent.get_non_quiet_tasks()) == 0:
+        if len(self.parent.get_non_quiet_tasks_not_remained()) == 0:
             self.parent.is_muted = True
             self.parent.toggle_mute()
 

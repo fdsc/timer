@@ -1,4 +1,5 @@
 from config_manager import save_opts_debounced
+import constants
 
 class AudioControlMixin:
     def _on_volume_change(self, val: str):
@@ -27,4 +28,4 @@ class AudioControlMixin:
 
     def _on_test_sound_click(self, event=None):
         from notifier import play_sound
-        play_sound(TEST_SOUND_PATH, self.volume_factor)
+        play_sound(constants.TEST_SOUND_PATH, self.volume_factor)

@@ -123,9 +123,15 @@ class App(
 
     def get_quiet_tasks(self):
         return [task for task in self.tasks.values() if task.is_quiet]
+   
+    def get_quiet_tasks_not_remained(self):
+        return [task for task in self.tasks.values() if task.is_quiet and task.getRemained() <= 0]
 
     def get_non_quiet_tasks(self):
         return [task for task in self.tasks.values() if not task.is_quiet]
+
+    def get_non_quiet_tasks_not_remained(self):
+        return [task for task in self.tasks.values() if not task.is_quiet and task.getRemained() <= 0]
 
 
     def add_task(self, is_important: bool = False, is_quiet: bool = False):
@@ -247,12 +253,6 @@ class App(
         else:
             return False
 
-
-    def _on_test_sound_click(self, event=None):
-        """Проигрывает тестовый звук при клике по метке с процентом громкости."""
-        from notifier import play_sound
-        play_sound(TEST_SOUND_PATH, self.volume_factor)
-
     def _setup_copy_menu(self, widget):
         """Создаёт контекстное меню с пунктом «Копировать» для виджета Entry."""
         menu = tk.Menu(widget, tearoff=0)
@@ -265,14 +265,6 @@ class App(
                 menu.grab_release()
 
         widget.bind("<Button-3>", popup)
-
-    def toggle_mute(self):
-        self.is_muted = not self.is_muted
-        if self.is_muted:
-            self.btn_mute.config(text="X", bg=constants.COLOR_BTN_MUTE_ACTIVE_BG)
-        else:
-            self.btn_mute.config(text="O", bg=constants.COLOR_BTN_MUTE_INACTIVE_BG)
-
 
     def _disable_add_buttons(self):
         """Блокирует кнопки добавления задач."""
