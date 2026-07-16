@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime, timedelta
-from notifier import show_alert,sound_alert,cancel_notify_for_task
+from notifier import cancel_notify_for_task
 import math
 import tasks_storage
 

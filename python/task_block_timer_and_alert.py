@@ -1,8 +1,8 @@
 import threading
 from datetime import datetime
 import time
-#from notifier import play_sound, notify_user
 from constants import *
+from notifier import show_alert,sound_alert
 
 class TimerAndAlertMixin:
     def start_timer_loop(self):
@@ -131,4 +131,4 @@ class TimerAndAlertMixin:
                     if tss > RETRY_DELAY_NORMAL_SOUND_SEC:
                         sound_alert(self)
 
-        self.frame.after(constants.ALERT_INTERVAL_MS, self.trigger_retry_alert)
+        self.frame.after(ALERT_INTERVAL_MS, self.trigger_retry_alert)
