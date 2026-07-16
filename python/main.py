@@ -19,6 +19,15 @@ from task_block import TaskBlock
 from config_manager import get_user_data_dir, load_or_create_opts, save_opts, init_media_config, load_media_paths, save_opts_debounced
 from date_utils import build_alert_time
 
+import constants
+from constants import (
+    SECONDS_PER_MINUTE,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_DAY,
+    MAX_DELAY_DAYS,
+    TEST_SOUND_PATH,
+)
+
 
 # nuitka???
 
@@ -102,11 +111,12 @@ class App:
             text="Отл",
             command=lambda: self.do_defer(is_important=False),
             width=2,
-            bg="#888888",
-            fg="#000000",
-            activebackground="#000000",
-            activeforeground="#FFFFFF"
+            bg=constants.COLOR_BTN_DEFER_BG,
+            fg=constants.COLOR_BTN_DEFER_FG,
+            activebackground=constants.COLOR_BTN_DEFER_ACTIVE_BG,
+            activeforeground=constants.COLOR_BTN_DEFER_ACTIVE_FG
         )
+
         btn_defer.pack(side="left", padx=(0, 2))
 
         self.comboDefer = ttk.Combobox(task_row, values=helper.get10percentList(), width=10, state="readonly")
@@ -137,8 +147,8 @@ class App:
             text="+",
             command=lambda: self.add_task(is_important=False),
             width=2,
-            bg="#e0ffe0",
-            activebackground="#c6e9c6"
+            bg=constants.COLOR_BTN_ADD_NORMAL_BG,
+            activebackground=constants.COLOR_BTN_ADD_NORMAL_ACTIVE_BG
         )
         self.btn_add_normal.pack(side="left", padx=(0, 8))
 
@@ -147,8 +157,8 @@ class App:
             text="!",
             command=lambda: self.add_task(is_important=True),
             width=2,
-            bg="#ffebee",
-            activebackground="#ffcdd2"
+            bg=constants.COLOR_BTN_ADD_IMPORTANT_BG,
+            activebackground=constants.COLOR_BTN_ADD_IMPORTANT_ACTIVE_BG
         )
         self.btn_add_important.pack(side="left", padx=(0, 16))
 
@@ -158,8 +168,8 @@ class App:
             text="V",
             command=lambda: self.add_task(is_important=False, is_quiet=True),
             width=2,
-            bg="#888888",
-            activebackground="#AAAAAA"
+            bg=constants.COLOR_BTN_ADD_QUIET_BG,
+            activebackground=constants.COLOR_BTN_ADD_QUIET_ACTIVE_BG
         )
         self.btn_add_quiet.pack(side="left", padx=(0, 8))
 
@@ -219,7 +229,7 @@ class App:
             text="O",
             command=self.toggle_mute,
             width=2,
-            activebackground="#ffaaaa"
+            activebackground=constants.COLOR_BTN_MUTE_HOVER_BG
         )
         self.toggle_mute()
         self.btn_mute.pack(side="left", padx=(4, 8))
@@ -364,12 +374,18 @@ class App:
                 minutes = int(minutes_str) if minutes_str else 0
                 seconds = int(seconds_str) if seconds_str else 0
 
-                total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
+                total_seconds = (
+                    days    * SECONDS_PER_DAY    +
+                    hours   * SECONDS_PER_HOUR   +
+                    minutes * SECONDS_PER_MINUTE +
+                    seconds
+                )
+
                 if total_seconds <= 0:
+                    self._on_test_sound_click()
                     raise ValueError
 
-                MAX_DELAY_DAYS = 380
-                if total_seconds > MAX_DELAY_DAYS * 86400:
+                if total_seconds > MAX_DELAY_DAYS * SECONDS_PER_DAY:
                     messagebox.showerror(
                         "Ошибка",
                         f"Слишком большая задержка. Максимум: {MAX_DELAY_DAYS} дней."
@@ -479,6 +495,10 @@ class App:
 
     def _on_volume_change(self, val: str):
         """Обработчик изменения громкости: обновляет метку, множитель и сохраняет в opts.json."""
+        # Проверка того, что окно вообще не закрыто
+        if not hasattr(self, "lbl_vol_value") or not self.lbl_vol_value.winfo_exists():
+            return
+
         #val = re.sub(r'[^0-9-.]', '.', val)    # Заменяем запятые на точки, если нужно
         v = float(val.replace(',', '.'))
         self.lbl_vol_value.config(text=f"{v}%")
@@ -494,9 +514,8 @@ class App:
 
     def _on_test_sound_click(self, event=None):
         """Проигрывает тестовый звук при клике по метке с процентом громкости."""
-        sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
         from notifier import play_sound
-        play_sound(sound_file, self.volume_factor)
+        play_sound(TEST_SOUND_PATH, self.volume_factor)
 
     def _setup_copy_menu(self, widget):
         """Создаёт контекстное меню с пунктом «Копировать» для виджета Entry."""
@@ -514,9 +533,10 @@ class App:
     def toggle_mute(self):
         self.is_muted = not self.is_muted
         if self.is_muted:
-            self.btn_mute.config(text="X", bg="#FF0000")
+            self.btn_mute.config(text="X", bg=constants.COLOR_BTN_MUTE_ACTIVE_BG)
         else:
-            self.btn_mute.config(text="O", bg="#888888")
+            self.btn_mute.config(text="O", bg=constants.COLOR_BTN_MUTE_INACTIVE_BG)
+
 
     def _disable_add_buttons(self):
         """Блокирует кнопки добавления задач."""
@@ -678,13 +698,16 @@ class App:
             self.lock_fd.close()
         except Exception:
             pass
+
+        self.root.destroy()
         super().destroy() if hasattr(super(), "destroy") else None
+
 
     def quit_window(self):
         """Выход из приложения"""
         save_opts(self.data_dir, self.opts)
         self.root.quit()
-        self.root.destroy()
+        self.destroy()
 
 if __name__ == "__main__":
     from datetime import datetime

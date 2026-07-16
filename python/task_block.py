@@ -5,6 +5,17 @@ from notifier import show_alert,sound_alert,cancel_notify_for_task
 import math
 import tasks_storage
 
+import constants
+from constants import (
+    RETRY_DELAY_IMPORTANT_SEC,
+    RETRY_DELAY_IMPORTANT_SOUND_SEC,
+    RETRY_DELAY_NORMAL_SEC,
+    RETRY_DELAY_NORMAL_SOUND_SEC,
+    DELETE_CONFIRM_MAX_SECONDS,
+    DELETE_CONFIRM_MIN_SECONDS,
+    TICK_INTERVAL_MS,
+    ALERT_INTERVAL_MS,
+)
 
 class TaskBlock:
     COLOR_NORMAL_BG        = "#f0f0f0"
@@ -19,7 +30,7 @@ class TaskBlock:
 
     COLOR_TIME_ALERT_OVERDUE   = "#ffcccc"
     COLOR_TIME_ALERT_POSTPONED = "#cceeff"
-    COLOR_TIME_ALERT_NORMAL    = COLOR_NORMAL_BG
+    COLOR_TIME_ALERT_NORMAL    = COLOR_FRAME_NORMAL
 
     def getBgColor(self):
         return self.COLOR_FRAME_IMPORTANT if self.is_important else self.COLOR_FRAME_NORMAL
@@ -36,12 +47,6 @@ class TaskBlock:
         self._stopped = False
         self._alerted_once = False
         self._retry_scheduled = False
-        self._retry_delay_sec_important   = 60
-        self._retry_delay_sec_important_s = 15
-        self._retry_delay_sec_normal      = 300
-        self._retry_delay_sec_normal_s    = 60
-        self._delete_confirmation_max_interval=10;
-        self._delete_confirmation_min_interval=0.350;
         self._delete_confirm_active = False
 
         self._container_frame = frame
@@ -207,7 +212,7 @@ class TaskBlock:
             self.resetQuietTab()
 
         # Следующий тик через 1 секунду
-        self.frame.after(1000, self.update_timer)
+        self.frame.after(TICK_INTERVAL_MS, self.update_timer)
 
     def trigger_retry_alert(self):
         # Проверяем, существует ли ещё этот блок (не удалили ли задачу)
@@ -227,17 +232,17 @@ class TaskBlock:
 
             if not self.is_quiet:
                 if self.is_important:
-                    if ts  > self._retry_delay_sec_important:
+                    if ts  > RETRY_DELAY_IMPORTANT_SEC:
                         show_alert(self)
-                    if tss > self._retry_delay_sec_important_s:
+                    if tss > RETRY_DELAY_IMPORTANT_SOUND_SEC:
                         sound_alert(self)
                 else:
-                    if ts  > self._retry_delay_sec_normal:
+                    if ts  > RETRY_DELAY_NORMAL_SEC:
                         show_alert(self)
-                    if tss > self._retry_delay_sec_normal_s:
+                    if tss > RETRY_DELAY_NORMAL_SOUND_SEC:
                         sound_alert(self)
 
-        self.frame.after(1000, self.trigger_retry_alert)
+        self.frame.after(constants.ALERT_INTERVAL_MS, self.trigger_retry_alert)
 
 
     def save(self):
@@ -306,7 +311,8 @@ class TaskBlock:
         self.btn_del.config(text="Точно удалить?")
 
         # Планируем сброс через 10 секунд
-        self.frame.after(10000, self._cancel_delete_confirmation)
+        self.frame.after(int(constants.DELETE_CONFIRM_MAX_SECONDS * 1000), self._cancel_delete_confirmation)
+
 
     def getDeleteConfirmationTime(self):
         """Возвращает время в секундах (float), прошедшее с момента первого нажатия на кнопку 'удалить'"""
@@ -320,9 +326,9 @@ class TaskBlock:
     def getDeleteConfirmationResult(self):
         time = self.getDeleteConfirmationTime()
         # Если значение времени, прошедшее с момента нажатия кнопки "удалить", слишком мало
-        if time <= self._delete_confirmation_min_interval:
+        if time <= DELETE_CONFIRM_MIN_SECONDS:
             return False
-        if time >= self._delete_confirmation_max_interval:
+        if time >= DELETE_CONFIRM_MAX_SECONDS:
             return False
 
         return True
