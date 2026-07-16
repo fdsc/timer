@@ -28,25 +28,27 @@ from constants import (
     TEST_SOUND_PATH,
 )
 
+from app_singletone import AppSingletone
+from main_load_config_path import LoadConfigPathMixin
+from main_gui_input_panel import InputPanelMixin
+from main_gui_tabs_layout import TabsLayoutMixin
+from main_gui_resize_handler import ResizeHandlerMixin
+from main_gui_task_frames_sorting_logic import TaskFramesSortingLogicMixin
+from main_gui_audio_control import AudioControlMixin
+from main_gui_clipboard import ClipboardMixin
+
 
 # nuitka???
 
-class App:
-    def rootResize(self, e):
-        g = self.root.geometry()
-        if g == self.opts["geometry"]:
-            return
-
-        self.opts["geometry"] = g
-        save_opts_debounced(self.data_dir, self.opts)
-
-        for task in self.tasks.values():
-            if task._stopped: continue
-
-            task.lbl_text.configure(
-                wraplength=self.canvas_m.winfo_width() - self.scrollbar.winfo_width()-8
-            )
-
+class App(
+    LoadConfigPathMixin,
+    InputPanelMixin,
+    TabsLayoutMixin,
+    ResizeHandlerMixin,
+    TaskFramesSortingLogicMixin,
+    AudioControlMixin,
+    ClipboardMixin
+):
     def __init__(self, root):
         self.root = root
         self.root.title("Отслеживание задач")
@@ -58,246 +60,36 @@ class App:
         # Флаг неисправности ввода-вывода
         self.io_error_flag = False
 
-        # Получаем путь к папке данных (спрашивает при первом запуске)
-        self.data_dir = get_user_data_dir()
+        # Загружаем основные пути к настройкам
+        LoadConfigPathMixin.load_config(self)
 
-        # ------------------------------------------------------
-        # Блокировка для предотвращения запуска двух экземпляров
-        self.lock_file_path = Path(self.data_dir) / ".lock"
-        self._acquire_single_instance_lock()
+        # Блокировка для предотвращения запуска двух экземпляров приложения
+        self.lock_mgr = AppSingletone(self.data_dir)
+        self.lock_mgr.acquire()
 
-        # Загружаем или создаём opts.json
+        # Загружаем или создаём opts.json (основной файл настроек)
         self.opts = load_or_create_opts(self.data_dir)
         # Инициализируем громкость из настроек
         self.volume_factor = self.opts.get("volume_percent", 100) / 100.0
         # Несохранённое значение громкости
         self._pending_volume_value = None
 
-
         self.root.geometry(self.opts["geometry"])
         self.root.bind("<Configure>", self.rootResize)
 
-        # Инициализируем media.conf, если нет
-        self.media_config_path = init_media_config(self.data_dir)
-
-        # Загружаем пути к медиафайлам
-        media_paths = load_media_paths(self.media_config_path)
-        notifier.MEDIA_PATHS = media_paths  # передаём в notifier
-
         # Новое поле: состояние логики общего фонового сигнала
+        # !!!
         self.alert_sound_state = {
             "first_pending_add_time": None,      # datetime | None
             "is_general_mode_active": False,     # bool
             "general_sound_timer_id": None       # int | None (ID от root.after)
         }
 
-
-        top = tk.Frame(root)
-        top.pack(fill="x", padx=8, pady=8)
-
-        # Строка 1: текст задачи
-        task_row = tk.Frame(top)
-        task_row.pack(fill="x", pady=(0, 4))
-
-        tk.Label(task_row, text="Задача:").pack(side="left")
-        self.entry_task = tk.Entry(task_row, width=50)
-        self.entry_task.pack(side="left", padx=(4, 8))
-        # Привязываем контекстное меню для копирования текста задачи
-        self._setup_copy_menu(self.entry_task)
-
-        # Отложить
-        btn_defer = tk.Button(
-            task_row,
-            text="Отл",
-            command=lambda: self.do_defer(is_important=False),
-            width=2,
-            bg=constants.COLOR_BTN_DEFER_BG,
-            fg=constants.COLOR_BTN_DEFER_FG,
-            activebackground=constants.COLOR_BTN_DEFER_ACTIVE_BG,
-            activeforeground=constants.COLOR_BTN_DEFER_ACTIVE_FG
-        )
-
-        btn_defer.pack(side="left", padx=(0, 2))
-
-        self.comboDefer = ttk.Combobox(task_row, values=helper.get10percentList(), width=10, state="readonly")
-        self.comboDefer.current(self.opts["combodefer"])
-        self.comboDefer.pack(side="left", padx=(0, 8))      # или grid, если используешь grid
-        self.comboDefer.bind("<<ComboboxSelected>>", self.on_combo_change)
-
-        # Индикатор просроченных тихих задач на основной вкладке
-        self.lbl_quiet_overdue_indicator = tk.Label(
-            top,
-            text="⚠️ Есть просроченные тихие задачи!",
-            fg="#b71c1c",
-            font=("TkDefaultFont", 10, "bold"),
-            anchor="w",
-            justify="left"
-        )
-        self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
-        self.lbl_quiet_overdue_indicator.pack_forget()  # скрываем по умолчанию
-
-
-        # Строка 2: кнопки добавления + компоненты времени (справа от кнопок)
-        time_and_btn_row = tk.Frame(top)
-        time_and_btn_row.pack(fill="x", pady=(0, 0))
-
-        # Кнопки добавления (слева во второй строке)
-        self.btn_add_normal = tk.Button(
-            time_and_btn_row,
-            text="+",
-            command=lambda: self.add_task(is_important=False),
-            width=2,
-            bg=constants.COLOR_BTN_ADD_NORMAL_BG,
-            activebackground=constants.COLOR_BTN_ADD_NORMAL_ACTIVE_BG
-        )
-        self.btn_add_normal.pack(side="left", padx=(0, 8))
-
-        self.btn_add_important = tk.Button(
-            time_and_btn_row,
-            text="!",
-            command=lambda: self.add_task(is_important=True),
-            width=2,
-            bg=constants.COLOR_BTN_ADD_IMPORTANT_BG,
-            activebackground=constants.COLOR_BTN_ADD_IMPORTANT_ACTIVE_BG
-        )
-        self.btn_add_important.pack(side="left", padx=(0, 16))
-
-        # Кнопка тихой задачи
-        self.btn_add_quiet = tk.Button(
-            time_and_btn_row,
-            text="V",
-            command=lambda: self.add_task(is_important=False, is_quiet=True),
-            width=2,
-            bg=constants.COLOR_BTN_ADD_QUIET_BG,
-            activebackground=constants.COLOR_BTN_ADD_QUIET_ACTIVE_BG
-        )
-        self.btn_add_quiet.pack(side="left", padx=(0, 8))
-
-        # Компоненты времени (справа во второй строке)
-        time_frame = tk.Frame(time_and_btn_row)
-        time_frame.pack(side="left")
-
-        tk.Label(time_frame, text="Д:").pack(side="left")
-        self.entry_days = tk.Entry(time_frame, width=5)
-        self.entry_days.pack(side="left", padx=(0, 8))
-
-        tk.Label(time_frame, text="Ч:").pack(side="left")
-        self.entry_hours = tk.Entry(time_frame, width=5)
-        self.entry_hours.pack(side="left", padx=(0, 8))
-
-        tk.Label(time_frame, text="М:").pack(side="left")
-        self.entry_minutes = tk.Entry(time_frame, width=5)
-        self.entry_minutes.pack(side="left", padx=(0, 8))
-
-        tk.Label(time_frame, text="С:").pack(side="left")
-        self.entry_seconds = tk.Entry(time_frame, width=5)
-        self.entry_seconds.pack(side="left", padx=(0, 0))
-
-        # Третья строка: абсолютная дата и регулятор громкости
-        third_row = tk.Frame(root)
-        third_row.pack(fill="x", padx=8, pady=4)
-
-        # Абсолютная дата (слева)
-        abs_date_frame = tk.Frame(third_row)
-        abs_date_frame.pack(side="left", anchor="e")
-
-        tk.Label(abs_date_frame, text="Год:").pack(side="left")
-        self.entry_abs_year = tk.Entry(abs_date_frame, width=7)
-        self.entry_abs_year.pack(side="left", padx=(0, 8))
-
-        tk.Label(abs_date_frame, text="Месяц:").pack(side="left")
-        self.entry_abs_month = tk.Entry(abs_date_frame, width=5)
-        self.entry_abs_month.pack(side="left", padx=(0, 8))
-
-        tk.Label(abs_date_frame, text="День:").pack(side="left")
-        self.entry_abs_day = tk.Entry(abs_date_frame, width=5)
-        self.entry_abs_day.pack(side="left", padx=(0, 8))
-
-        tk.Label(abs_date_frame, text="Время (Ч:М):").pack(side="left")
-        self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
-        self.entry_abs_time.insert(0, "")
-        self.entry_abs_time.pack(side="left", padx=(0, 0))
-
-        # Регулятор громкости (справа)
-        vol_frame = tk.Frame(third_row)
-        vol_frame.pack(side="right", anchor="e")  # anchor="e" прижмёт фрейм вправо
-
-        # Кнопка глушения звука
-        self.is_muted = True
-        self.btn_mute = tk.Button(
-            vol_frame,
-            text="O",
-            command=self.toggle_mute,
-            width=2,
-            activebackground=constants.COLOR_BTN_MUTE_HOVER_BG
-        )
-        self.toggle_mute()
-        self.btn_mute.pack(side="left", padx=(4, 8))
-
-        # Сначала метка «Громкость:»
-        lbl_vol_label = tk.Label(vol_frame, text="Громкость:")
-        lbl_vol_label.pack(side="left", padx=(0, 8))
-
-        # Слайдер
-        self.scale_volume = tk.Scale(
-            vol_frame,
-            from_=0,
-            to=100,
-            resolution=0.5,
-            orient="horizontal",
-            length=200,
-            showvalue=False,
-            tickinterval=0,
-            command=self._on_volume_change
-        )
-        self.scale_volume.set(self.volume_factor*100)
-        self.scale_volume.pack(side="left", padx=(4, 0))
-
-        # Метка с процентами (справа от слайдера)
-        self.lbl_vol_value = tk.Label(vol_frame, text=str(int(self.volume_factor*100)) + "%", width=5, anchor="e")
-        self.lbl_vol_value.pack(side="left", padx=(8, 0))
-
-        # Привязываем клик по метке громкости для ручного теста звука
-        self.lbl_vol_value.bind("<Button-1>", self._on_test_sound_click)
-
         # Здесь размещаются как тихие задачи, так и обычные
         self.tasks = {}
 
-        # ----- Вкладки -----
-        self.notebook = ttk.Notebook(root)
-        self.notebook.pack(fill="both", expand=True, padx=4, pady=4)
-
-        # Основная вкладка
-        self.main_tab_frame = tk.Frame(self.notebook)
-        self.notebook.add(self.main_tab_frame, text="Задачи")
-        
-        self.canvas_m = tk.Canvas(self.main_tab_frame, highlightthickness=0)
-        self.canvas_m.pack(side="left", fill="both", expand=True)
-        
-        self.scrollbar = ttk.Scrollbar(self.main_tab_frame, orient="vertical", command=self.canvas_m.yview)
-        self.scrollbar.pack(side="right", fill="y")
-        self.canvas_m.configure(yscrollcommand=self.scrollbar.set)
-
-        self.list_frame = tk.Frame(self.canvas_m)
-        self.list_frame.bind("<Configure>", lambda e: self.canvas_m.configure(scrollregion=self.canvas_m.bbox("all")))
-        self.canvas_m.create_window((0, 0), window=self.list_frame, anchor="nw")
-        #self.list_frame.pack(fill="both", expand=True, padx=4, pady=4)
-
-        # Вкладка тихих задач
-        self.quiet_tab_frame = tk.Frame(self.notebook)
-        self.notebook.add(self.quiet_tab_frame, text="Тихие")
-
-        self.canvas_q = tk.Canvas(self.quiet_tab_frame, highlightthickness=0)
-        self.canvas_q.pack(side="left", fill="both", expand=True)
-
-        self.scrollbar = ttk.Scrollbar(self.quiet_tab_frame, orient="vertical", command=self.canvas_q.yview)
-        self.scrollbar.pack(side="right", fill="y")
-        self.canvas_q.configure(yscrollcommand=self.scrollbar.set)
-
-        self.quiet_list_frame = tk.Frame(self.canvas_q)
-        self.quiet_list_frame.bind("<Configure>", lambda e: self.canvas_q.configure(scrollregion=self.canvas_q.bbox("all")))
-        self.canvas_q.create_window((0, 0), window=self.quiet_list_frame, anchor="nw")
-
+        self.build_input_panel(root)
+        self.build_tabs(root)
 
         # ------------------------------------------------
         # Инициализация хранилища задач
@@ -435,43 +227,6 @@ class App:
         frame=self.quiet_list_frame if block.is_quiet else self.list_frame
         self._reorder_tasks_in_frame(frame)
 
-
-    def _reorder_tasks_in_frame(self, frame: tk.Frame):
-        """Переупаковывает блоки задач в frame согласно приоритету: важные и просроченные — выше."""
-        # Получаем все виджеты-потомки (это наши TaskBlock.frame)
-        children = list(frame.winfo_children())
-        # Сортируем: сначала важные, потом просроченные, потом по времени создания (по убыванию task_id)
-        def sort_key(child):
-            # child — это frame внутри TaskBlock; нужно получить сам TaskBlock
-            # У нас нет прямой ссылки, поэтому ищем по task_id в self.tasks
-            # Предполагаем, что task_id хранится в self у TaskBlock, а frame уникален
-            block = None
-            for t in self.tasks.values():
-                if t.frame is child:
-                    block = t
-                    break
-            if not block:
-                return (True, 0, 0)  # на всякий случай — в конец
-            now = datetime.now()
-            is_overdue = block.alert_time is not None and (now - block.alert_time).total_seconds() >= 0
-            # Приоритет: (не просрочен → 1, (не важный → 1, важный → 0), просрочен → 0), затем alert_time (чем больше, тем новее)
-            if is_overdue:
-                if block.is_important:
-                    return (0, 0, block.alert_time.timestamp())
-                else:
-                    return (0, 1, block.alert_time.timestamp())
-            else:
-                return (1, 0, block.alert_time.timestamp())
-
-        children.sort(key=sort_key)
-
-        # Переpack-им в новом порядке
-        for child in children:
-            child.pack_forget()
-        for child in children:
-            child.pack(fill="x", pady=(0, 2))
-
-
     def check_bulk_alerts(self, countOfPendingNotifications):
         """
         Проверяет количество активных задач и при необходимости показывает
@@ -491,25 +246,6 @@ class App:
             return True
         else:
             return False
-
-
-    def _on_volume_change(self, val: str):
-        """Обработчик изменения громкости: обновляет метку, множитель и сохраняет в opts.json."""
-        # Проверка того, что окно вообще не закрыто
-        if not hasattr(self, "lbl_vol_value") or not self.lbl_vol_value.winfo_exists():
-            return
-
-        #val = re.sub(r'[^0-9-.]', '.', val)    # Заменяем запятые на точки, если нужно
-        v = float(val.replace(',', '.'))
-        self.lbl_vol_value.config(text=f"{v}%")
-        self.volume_factor = v / 100.0
-
-        # Обновляем значение в словаре настроек
-        self.opts["volume_percent"] = v
-        self._pending_volume_value  = v
-
-        # Сохраняем в файл с отложенным выполнением
-        save_opts_debounced(self.data_dir, self.opts)
 
 
     def _on_test_sound_click(self, event=None):
@@ -693,12 +429,7 @@ class App:
             raise SystemExit(1)
 
     def destroy(self):
-        try:
-            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-            self.lock_fd.close()
-        except Exception:
-            pass
-
+        self.lock_mgr.release()
         self.root.destroy()
         super().destroy() if hasattr(super(), "destroy") else None
 

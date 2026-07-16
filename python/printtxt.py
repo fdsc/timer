@@ -6,11 +6,23 @@ import os
 files_to_show = [
     "main.py",
     "task_block.py",
-#    "notifier.py",
-#    "config_manager.py",
-#    "date_utils.py",
-#    "tasks_storage.py",
-    "constants.py"
+    "notifier.py",
+    "config_manager.py",
+    "date_utils.py",
+    "tasks_storage.py",
+    "constants.py",
+    "app_singletone.py",
+    "main_load_config_path.py",
+#    "main_gui_input_panel.py",
+#    "main_gui_tabs_layout.py",
+#    "main_gui_resize_handler.py",
+    "main_gui_task_frames_sorting_logic.py",
+    "main_gui_audio_control.py",
+    "main_gui_clipboard.py",
+    "task_block_gui_layout.py",
+    "task_block_timer_and_alert.py",
+    "task_block_gui_delete_confirmation_mixin.py",
+    "task_block_gui_priority_colors.py",
 ]
 
 current_dir = os.getcwd()
@@ -32,7 +44,7 @@ for filename in files_to_show:
                 print("[Бинарный файл — вывод в виде байтов]")
                 print(content)
         except Exception as e:
-            print(f"[Ошибка при чтении файла: {e}]")
+            print(f"ERROR: [Ошибка при чтении файла: {e}]")
         print(f'Конец файла "{filename}"\n')
     else:
-        print(f'Файл "{filename}" не найден в текущей директории.\n')
+        print(f'ERROR: Файл "{filename}" не найден в текущей директории.\n')

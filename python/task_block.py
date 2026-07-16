@@ -83,12 +83,12 @@ class TaskBlock:
             self.frame,
             text="",
             anchor="e",
-            justify="right",
-            fg="#000000",
+            justify="left",
+            fg="#555",
             bg=self.COLOR_TIME_ALERT_NORMAL,
             font=("TkDefaultFont", 10)
         )
-        self.lbl_time_alert.grid(row=1, column=1, sticky="e", padx=(8, 0))
+        self.lbl_time_alert.grid(row=1, column=1, sticky="w", padx=(0, 0))
 
         # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
         self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
@@ -164,7 +164,7 @@ class TaskBlock:
 
         time_left_str = f"{hrs:02d}:{mins:02d}:{secs:02d}"
 
-        self.lbl_time_left.config(text=f"Осталось: {time_left_str} |")
+        self.lbl_time_left.config(text=f"Осталось: {time_left_str}")
         alert_datetime_str = self.alert_time.strftime("%Y-%m-%d %H:%M:%S")
         self.lbl_time_alert.config(text=f"Оповещение: {alert_datetime_str}")
 
