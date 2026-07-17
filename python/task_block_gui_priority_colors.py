@@ -1,15 +1,15 @@
-from constants import (
-    COLOR_FRAME_NORMAL, COLOR_FRAME_IMPORTANT,
-    COLOR_BTN_DELETE_NORMAL, COLOR_BTN_DELETE_OVERDUE
-)
+from constants import *
 
 class PriorityColorsMixin:
 
     def getBgColor(self):
         if self.is_unpaired:
-            return "#FFCC88" if self.is_important else "#FFFFCC"
+            return COLOR_UNPAIRED_IMPORTANT if self.is_important else COLOR_UNPAIRED_NOTIMPORTANT
 
-        return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
+        if self.is_control:
+            return COLOR_PAIRED_IMPORTANT if self.is_important else COLOR_PAIRED_NOTIMPORTANT
+        else:
+            return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
 
     def toggle(self):
         self.is_important = not self.is_important

@@ -22,16 +22,17 @@ class TaskFramesSortingLogicMixin:
             else:
                 is_overdue = block.alert_time is None or block.getRemainedAlert() <= 0
 
+            ta = block.text if block.is_control else block.alert_time.timestamp()
             if is_overdue or block.is_unpaired:
                 if block.is_important:
-                    return (0, 0, block.alert_time.timestamp())
+                    return (0, 0, ta)
                 else:
-                    return (0, 1, block.alert_time.timestamp())
+                    return (0, 1, ta)
             else:
                 if block.is_control:
-                    return (1, int(not block.is_important), block.alert_time.timestamp())
+                    return (1, int(not block.is_important), ta)
                 else:
-                    return (1, 0, block.alert_time.timestamp())
+                    return (1, 0, ta)
 
         childrens.sort(key=sort_key)
 
