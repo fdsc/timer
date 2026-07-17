@@ -186,10 +186,11 @@ def normalize_day(year: int, month: int, day: int) -> tuple[int, int, int]:
 
 
 def build_alert_time(
-    year_str: str,
+    year_str:  str,
     month_str: str,
-    day_str: str,
-    time_str: str
+    day_str:   str,
+    time_str:  str,
+    eday_str:  str
 ) -> datetime:
     """
     Собирает alert_time из строк.
@@ -225,6 +226,11 @@ def build_alert_time(
     year_explicit  = is_explicit(year_str)
     month_explicit = is_explicit(month_str)
     day_explicit   = is_explicit(day_str)
+    eday_explicit  = is_explicit(eday_str)
+
+    if not day_explicit and eday_explicit:
+        day_str = "+" + eday_str
+        day_explicit = is_explicit(day_str)
 
     month_str = parse_month(month_str)
 

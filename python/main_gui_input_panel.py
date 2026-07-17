@@ -57,17 +57,18 @@ class InputPanelMixin:
         total_seconds = 0
 
         # Сначала пробуем абсолютную дату
-        year_str  = self.entry_abs_year.get() .strip()
+        year_str  = self.entry_abs_year .get().strip()
         month_str = self.entry_abs_month.get().strip()
-        day_str   = self.entry_abs_day.get()  .strip()
-        time_str  = self.entry_abs_time.get() .strip()
+        day_str   = self.entry_abs_day  .get().strip()
+        eday_str  = self.entry_days     .get().strip()
+        time_str  = self.entry_abs_time .get().strip()
 
         task_type = self._calculate_task_type(is_quiet=is_quiet, is_control=is_control)
         frame     = self._get_frame_by_task_type(task_type)
 
         if year_str or month_str or day_str or time_str:
             try:
-                alert_time = build_alert_time(year_str, month_str, day_str, time_str)
+                alert_time = build_alert_time(year_str, month_str, day_str, time_str, eday_str)
             except ValueError as e:
                 messagebox.showerror("Ошибка", str(e))
                 return
