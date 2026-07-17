@@ -27,7 +27,7 @@ class TaskBlockLayoutMixin:
             fg="#555",
             bg=bg_color
         )
-        self.lbl_time_left.grid(row=1, column=0, sticky="w", columnspan=2)
+        self.lbl_time_left.grid(row=1, column=0, sticky="w", columnspan=1)
 
         self.lbl_time_alert = tk.Label(
             self.frame,
@@ -38,7 +38,7 @@ class TaskBlockLayoutMixin:
             bg=COLOR_TIME_ALERT_NORMAL,
             font=("TkDefaultFont", 10)
         )
-        self.lbl_time_alert.grid(row=1, column=1, sticky="w", padx=(0, 0))
+        self.lbl_time_alert.grid(row=1, column=0 if self.is_control else 1, sticky="w", padx=(0, 0), columnspan=1 if self.is_control else 2)
 
         # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
         self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
@@ -100,10 +100,15 @@ class TaskBlockLayoutMixin:
         """Вставляет часы:минуты из alert_time в поле entry_abs_time главного окна."""
         if not hasattr(self.parent, "entry_abs_time") or not self.parent.entry_abs_time.winfo_exists():
             return
-        t = self.alert_time
-        time_str = f"{t.hour:02d}:{t.minute:02d}"
-        self.parent.entry_abs_time.delete(0, tk.END)
-        self.parent.entry_abs_time.insert(0, time_str)
+        
+        if self.control_interval == 0:
+            t = self.alert_time
+            time_str = f"{t.hour:02d}:{t.minute:02d}"
+            self.parent.entry_abs_time.delete(0, tk.END)
+            self.parent.entry_abs_time.insert(0, time_str)
+        else:
+            self.parent.entry_seconds.delete(0, tk.END)
+            self.parent.entry_seconds.insert(0, str(self.control_interval))
 
     def upsetQuietTab(self):
         self.parent.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))

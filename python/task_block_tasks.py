@@ -53,11 +53,12 @@ class TasksMixin:
         isSuccess = tasks_storage.save_task(
             data_dir=self.parent.data_dir,
             task_data={
-                "task_id":      self.task_id,
-                "text":         self.text,
-                "alert_time":   self.alert_time,
-                "is_important": self.is_important,
-                "type":         self.type
+                "task_id":          self.task_id,
+                "text":             self.text,
+                "alert_time":       self.alert_time,
+                "is_important":     self.is_important,
+                "type":             self.type,
+                "control_interval": self.control_interval,
             },
             lock=self.parent.storage_lock,
             io_error_flag=self.parent.io_error_flag

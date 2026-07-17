@@ -31,6 +31,7 @@ class LoadConfigPathMixin:
         is_important = bool(data.get("is_important", False))
         _type        = TaskType(data.get("type", TaskType.NORMAL))
         alert_time   = data.get("alert_time") # Уже переведено в datetime
+        control_interval = int(data.get("control_interval", 0))
 
         frame = self._get_frame_by_task_type(_type)
 
@@ -41,7 +42,8 @@ class LoadConfigPathMixin:
             text=text,
             alert_time=alert_time,
             is_important_initial=is_important,
-            _type=_type
+            _type=_type,
+            control_interval=control_interval
         )
 
         self.tasks[task_id] = task_block

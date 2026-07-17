@@ -16,7 +16,7 @@ class TaskBlock(
     PriorityColorsMixin,
     TasksMixin
 ):
-    def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, _type: TaskType = TaskType.NORMAL):
+    def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, _type: TaskType = TaskType.NORMAL, control_interval: int = 0):
         self.parent       = parent
         self.task_id      = task_id
         self.alert_time   = alert_time
@@ -24,6 +24,7 @@ class TaskBlock(
         self.text         = text
         self.type         = _type
         self.is_important = is_important_initial
+        self.control_interval = control_interval
 
         self._stopped               = False
         self._alerted_once          = False

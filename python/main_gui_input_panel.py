@@ -53,7 +53,8 @@ class InputPanelMixin:
             messagebox.showwarning("Ошибка ввода", "Наименование задачи не может быть пустым.")
             return
 
-        alert_time = None
+        alert_time    = None
+        total_seconds = 0
 
         # Сначала пробуем абсолютную дату
         year_str  = self.entry_abs_year.get() .strip()
@@ -120,7 +121,8 @@ class InputPanelMixin:
             text=text,
             alert_time=alert_time,
             is_important_initial=is_important,
-            _type=task_type
+            _type=task_type,
+            control_interval=total_seconds
         )
         self.tasks[task_id] = block
 
