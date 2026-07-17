@@ -8,16 +8,17 @@ class TaskFramesSortingLogicMixin:
 
         def sort_key(child):
             block = None
+
             for t in self.tasks.values():
                 if t.frame is child:
                     block = t
                     break
             if not block:
-                return (True, 0, 0)
-            
+                return (0, 0, 0)
+
             now = datetime.now()
             # Просроченная задача
-            is_overdue = block.alert_time is not None and block.getRemainedAlert() <= 0
+            is_overdue = block.alert_time is None or block.getRemainedAlert() <= 0
 
             if is_overdue:
                 if block.is_important:
@@ -34,3 +35,9 @@ class TaskFramesSortingLogicMixin:
             child.pack_forget()
         for child in childrens:
             child.pack(fill="x", pady=(0, 2))
+
+    def _reorder_tasks(self):
+        # Добавляем сортировку для всех типов задач
+        self._reorder_tasks_in_frame(self.list_frame)
+        self._reorder_tasks_in_frame(self.quiet_list_frame)
+        self._reorder_tasks_in_frame(self.control_list_frame)

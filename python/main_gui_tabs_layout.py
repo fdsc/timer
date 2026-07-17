@@ -18,7 +18,10 @@ class TabsLayoutMixin:
         self.canvas_m.configure(yscrollcommand=self.scrollbar.set)
 
         self.list_frame = tk.Frame(self.canvas_m)
-        self.list_frame.bind("<Configure>", lambda e: self.canvas_m.configure(scrollregion=self.canvas_m.bbox("all")))
+        self.list_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas_m.configure(scrollregion=self.canvas_m.bbox("all"))
+        )
         self.canvas_m.create_window((0, 0), window=self.list_frame, anchor="nw")
 
         # -------- Вкладка "Тихие" --------
@@ -33,7 +36,10 @@ class TabsLayoutMixin:
         self.canvas_q.configure(yscrollcommand=self.q_scrollbar.set)
 
         self.quiet_list_frame = tk.Frame(self.canvas_q)
-        self.quiet_list_frame.bind("<Configure>", lambda e: self.canvas_q.configure(scrollregion=self.canvas_q.bbox("all")))
+        self.quiet_list_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas_q.configure(scrollregion=self.canvas_q.bbox("all"))
+        )
         self.canvas_q.create_window((0, 0), window=self.quiet_list_frame, anchor="nw")
 
         # -------- Вкладка "Контрольные" --------
@@ -43,9 +49,16 @@ class TabsLayoutMixin:
         self.canvas_c = tk.Canvas(self.control_tab, highlightthickness=0)
         self.canvas_c.pack(side="left", fill="both", expand=True)
 
-        # создание фрейма для контрольных задач
-        self.control_list_frame = tk.Frame(self.control_tab)
-        self.control_list_frame.pack(fill="both", expand=True)
+        self.c_scrollbar = ttk.Scrollbar(self.control_tab, orient="vertical", command=self.canvas_c.yview)
+        self.c_scrollbar.pack(side="right", fill="y")
+        self.canvas_c.configure(yscrollcommand=self.c_scrollbar.set)
 
-        
-        
+        # создание фрейма для контрольных задач
+        self.control_list_frame = tk.Frame(self.canvas_c)
+        self.control_list_frame.bind(
+            "<Configure>", 
+            lambda e: self.canvas_c.configure(scrollregion=self.canvas_c.bbox("all"))
+        )
+        self.canvas_c.create_window((0, 0), window=self.control_list_frame, anchor="nw")
+
+

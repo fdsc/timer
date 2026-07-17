@@ -78,7 +78,7 @@ class TasksMixin:
 
         if len(self.parent.get_quiet_tasks_not_remained()) == 0:
             self.resetQuietTab()
-        if len(self.parent.get_non_quiet_tasks_not_remained()) == 0:
+        if len(self.parent.get_normal_tasks_not_remained()) == 0:
             self.parent.is_muted = True
             self.parent.toggle_mute()
 

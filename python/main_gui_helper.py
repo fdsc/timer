@@ -4,7 +4,9 @@ import tkinter  as tk
 from   tkinter  import ttk,messagebox
 from   datetime import timedelta, datetime
 
-from config_manager import save_opts, save_opts_debounced
+from task_block_tasks import TaskType
+from config_manager   import save_opts, save_opts_debounced
+
 
 class Main_HelperMixin:
     
@@ -14,11 +16,11 @@ class Main_HelperMixin:
     def get_quiet_tasks_not_remained(self):
         return [task for task in self.tasks.values() if task.is_quiet and task.getRemained() <= 0]
 
-    def get_non_quiet_tasks(self):
-        return [task for task in self.tasks.values() if not task.is_quiet]
+    def get_normal_tasks(self):
+        return [task for task in self.tasks.values() if task.type == TaskType.NORMAL]
 
-    def get_non_quiet_tasks_not_remained(self):
-        return [task for task in self.tasks.values() if not task.is_quiet and task.getRemained() <= 0]
+    def get_normal_tasks_not_remained(self):
+        return [task for task in self.tasks.values() if task.type == TaskType.NORMAL and task.getRemained() <= 0]
 
     def check_bulk_alerts(self, countOfPendingNotifications):
         """

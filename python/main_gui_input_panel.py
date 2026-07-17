@@ -25,7 +25,25 @@ class InputPanelMixin:
         for btn in [self.btn_add_normal, self.btn_add_important, self.btn_add_quiet]:
             btn.config(state="disabled")
 
-    def add_task(self, is_important: bool = False, is_quiet: bool = False):
+    def _calculate_task_type(self, is_quiet: bool, is_control: bool) -> TaskType:
+        if is_control:
+            return TaskType.CONTROL
+        elif is_quiet:
+            return TaskType.QUIET
+        else:
+            return TaskType.NORMAL
+
+    def _get_frame_by_task_type(self, task_type: TaskType) -> tk.Frame:
+        if task_type == TaskType.CONTROL:
+            return self.control_list_frame
+        elif task_type == TaskType.QUIET:
+            return self.quiet_list_frame
+        elif task_type == TaskType.NORMAL:
+            return self.list_frame
+        else:
+            raise ValueError(f"Неизвестный тип задачи: {task_type}")
+
+    def add_task(self, is_important: bool = False, is_quiet: bool = False, is_control: bool = False):
         """Добавляет задачу, создаёт TaskBlock и сохраняет на диск."""
         if self.io_error_flag:
             return
@@ -92,14 +110,17 @@ class InputPanelMixin:
 
         task_id = self._generate_task_id()
 
+        task_type = self._calculate_task_type(is_quiet=is_quiet, is_control=is_control)
+        frame     = self._get_frame_by_task_type(task_type)
+
         block = TaskBlock(
             parent=self,
             task_id=task_id,
-            frame=self.quiet_list_frame if is_quiet else self.list_frame,
+            frame=frame,
             text=text,
             alert_time=alert_time,
             is_important_initial=is_important,
-            _type=TaskType.QUIET if is_quiet else TaskType.NORMAL
+            _type=task_type
         )
         self.tasks[task_id] = block
 
@@ -120,7 +141,6 @@ class InputPanelMixin:
         block.save()
 
         # Пересортировываем задачи по приоритету
-        frame=self.quiet_list_frame if block.is_quiet else self.list_frame
         self._reorder_tasks_in_frame(frame)
 
     def do_defer_list(self, tlist, base_seconds: int, lastDefer: datetime) -> datetime:
@@ -190,13 +210,13 @@ class InputPanelMixin:
         now = datetime.now()
 
         # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
-        non_quiet_tasks_i = [t for t in self.tasks.values() if not t.type != TaskType.QUIET and     t.is_important]
-        non_quiet_tasks_n = [t for t in self.tasks.values() if not t.type != TaskType.QUIET and not t.is_important]
-        if not non_quiet_tasks_i and not non_quiet_tasks_n:
+        normal_tasks_i = [t for t in self.tasks.values() if not t.type == TaskType.NORMAL and     t.is_important]
+        normal_tasks_n = [t for t in self.tasks.values() if not t.type == TaskType.NORMAL and not t.is_important]
+        if not normal_tasks_i and not normal_tasks_n:
             return
 
-        non_quiet_tasks_i.sort(key=lambda t: t.alert_time)
-        non_quiet_tasks_n.sort(key=lambda t: t.alert_time)
+        normal_tasks_i.sort(key=lambda t: t.alert_time)
+        normal_tasks_n.sort(key=lambda t: t.alert_time)
 
         # 2. Получаем интервал из comboDefer
         combo_value_str = self.comboDefer.get()
@@ -208,8 +228,8 @@ class InputPanelMixin:
         if base_seconds <= 0:
             base_seconds = 60
 
-        lastDefer = self.do_defer_list(non_quiet_tasks_i, base_seconds, now)
-        self.do_defer_list(non_quiet_tasks_n, base_seconds, lastDefer)
+        lastDefer = self.do_defer_list(normal_tasks_i, base_seconds, now)
+        self.do_defer_list(normal_tasks_n, base_seconds, lastDefer)
 
         # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
         self._reorder_tasks_in_frame(self.list_frame)
@@ -290,7 +310,7 @@ class InputPanelMixin:
         self.btn_add_control = tk.Button(
             time_and_btn_row,
             text="K",
-            command=lambda: self.add_task(is_important=False, task_type=2),
+            command=lambda: self.add_task(is_important=False, is_quiet=False, is_control=True),
             width=2,
             bg="#8B4513",  # темно-коричневый цвет
             activebackground="#A52A2A"

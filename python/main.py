@@ -113,9 +113,7 @@ class App(
         root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Сортируем задачи в визуальном интерфейсе
-        self._reorder_tasks_in_frame(self.list_frame)
-        self._reorder_tasks_in_frame(self.quiet_list_frame)
-
+        self._reorder_tasks()
 
 if __name__ == "__main__":
     from datetime import datetime

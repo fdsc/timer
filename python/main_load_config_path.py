@@ -32,7 +32,7 @@ class LoadConfigPathMixin:
         _type        = TaskType(data.get("type", TaskType.NORMAL))
         alert_time   = data.get("alert_time") # Уже переведено в datetime
 
-        frame = self.quiet_list_frame if _type == TaskType.QUIET else self.list_frame
+        frame = self._get_frame_by_task_type(_type)
 
         task_block = TaskBlock(
             parent=self,
