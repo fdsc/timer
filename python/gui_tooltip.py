@@ -8,6 +8,10 @@ class ToolTip:
         widget.tooltip_text = text
 
         def show_tooltip_after_delay():
+            if not is_mouse_over():
+                widget.after_id = None
+                return
+
             if not widget.tooltip:
                 widget.tooltip = tk.Toplevel(widget)
                 widget.tooltip.wm_overrideredirect(True)

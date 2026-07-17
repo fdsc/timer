@@ -414,7 +414,7 @@ class InputPanelMixin:
         self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
         self.entry_abs_time.insert(0, "")
         self.entry_abs_time.pack(side="left", padx=(0, 0))
-        self.create_tooltip(self.entry_abs_time, "Время срабатывания часы:минуты (11:15) или только часы 11. Обратите внимание, если минуты не заданы, они берутся из текущего времени. Например, если сейчас 07:35. то \"11\" будет истрактовано как 11:35")
+        self.create_tooltip(self.entry_abs_time, "Время срабатывания часы:минуты (11:15) или только часы 11.\nОбратите внимание, если минуты не заданы, они берутся из текущего времени.\nНапример, если сейчас 07:35. то \"11\" будет истрактовано как 11:35")
 
         # Регулятор громкости (справа)
         vol_frame = tk.Frame(third_row)
