@@ -8,9 +8,11 @@ class ToolTip:
         widget.tooltip_text = text
 
         def show_tooltip_after_delay():
+            widget.after_id = None
             if not widget.tooltip:
                 widget.tooltip = tk.Toplevel(widget)
                 widget.tooltip.wm_overrideredirect(True)
+                widget.tooltip.wm_attributes("-topmost", True)
                 # Получаем координаты относительно корневого окна
                 x = widget.winfo_rootx() + 20
                 y = widget.winfo_rooty() + 10
@@ -26,20 +28,42 @@ class ToolTip:
                     pady=4,
                     font=("TkDefaultFont", 10)
                 ).pack()
+            else:
+                widget.tooltip.deiconify()
+
+            widget.after(1000, conditional_hide)
+
+        def conditional_hide():
+            if is_mouse_over():
+                widget.after(1000, conditional_hide)
+                return
+
+            hide_tooltip(None)
+
 
         def show_tooltip(event):
             # Устанавливаем задержку появления
             if not widget.alt_pressed:
-                widget.after_id = widget.after(self.tooltip_delay, show_tooltip_after_delay)
+                if not widget.after_id:
+                    widget.after_id = widget.after(self.tooltip_delay, show_tooltip_after_delay)
             else:
                 show_tooltip_after_delay()
+
+        def is_mouse_over():
+            x_root, y_root = widget.winfo_pointerxy()          # координаты мыши на экране
+            wx = widget.winfo_rootx()                          # левый верхний угол виджета на экране
+            wy = widget.winfo_rooty()
+            w_width  = widget.winfo_width()
+            w_height = widget.winfo_height()
+
+            return wx <= x_root < wx + w_width and wy <= y_root < wy + w_height
 
         def hide_tooltip(event):
             if widget.after_id:
                 widget.after_cancel(widget.after_id)
                 widget.after_id = None
             if widget.tooltip:
-                widget.tooltip.destroy()
+                widget.tooltip.withdraw()
                 widget.tooltip = None
 
         def on_alt_press( event):
@@ -52,16 +76,18 @@ class ToolTip:
         def on_alt_release( event):
             widget.alt_pressed = False
             if widget.tooltip:
-                widget.tooltip.destroy()
-                widget.tooltip = None
+                widget.tooltip.withdraw()
+                #widget.tooltip.destroy()
+                #widget.tooltip = None
 
 
         widget.after_id    = None
         widget.alt_pressed = False
         widget.tooltip     = None
         # Привязываем события мыши
-        widget.bind("<Enter>", show_tooltip)
-        widget.bind("<Leave>", hide_tooltip)
+        widget.bind("<Enter>",       show_tooltip)
+        # widget.bind("<Leave>",       hide_tooltip)
+        widget.bind("<ButtonPress>", hide_tooltip)
 
         # Добавляем обработку клавиш
         #widget.bind("<Alt_L>",            on_alt_press)
