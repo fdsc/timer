@@ -24,6 +24,7 @@ from constants import (
     TEST_SOUND_PATH,
 )
 
+from gui_tooltip             import ToolTip
 from app_singletone          import AppSingletone
 from main_load_config_path   import LoadConfigPathMixin
 from main_gui_input_panel    import InputPanelMixin
@@ -46,7 +47,8 @@ class App(
     AudioControlMixin,
     WindowMixin,
     Main_HelperMixin,
-    CheckControlTasksMixin
+    CheckControlTasksMixin,
+    ToolTip
 ):
     def __init__(self, root):
         self.root = root

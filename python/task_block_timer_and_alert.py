@@ -117,17 +117,6 @@ class TimerAndAlertMixin:
 
                 self.parent._reorder_tasks_in_frame(self._container_frame)
 
-
-        has_overdue_quiet = any(
-            t.is_quiet and t.alert_time is not None and (now - t.alert_time).total_seconds() >= 0
-            for t in self.parent.tasks.values()
-        )
-
-        if has_overdue_quiet:
-            self.upsetQuietTab()
-        else:
-            self.resetQuietTab()
-
         # Следующий тик через 1 секунду
         self.frame.after(TICK_INTERVAL_MS, self.update_timer)
 

@@ -78,8 +78,7 @@ class TasksMixin:
         self._on_delete_direct()
         self.parent.check_control_tasks()
 
-        if len(self.parent.get_quiet_tasks_not_remained()) == 0:
-            self.resetQuietTab()
+        self.parent.SetUpTabsWarning()
         if len(self.parent.get_normal_tasks_not_remained()) == 0:
             self.parent.is_muted = True
             self.parent.toggle_mute()

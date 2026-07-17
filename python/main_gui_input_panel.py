@@ -234,6 +234,17 @@ class InputPanelMixin:
         # Пересортировать задачи в UI по defer_time, чтобы порядок соответствовал новому расписанию
         self._reorder_tasks_in_frame(self.list_frame)
 
+    def clear_input_fields(self):
+        """Очищает все поля ввода новой задачи"""
+        self.entry_task.delete(0, tk.END)
+        self.entry_days.delete(0, tk.END)
+        self.entry_hours.delete(0, tk.END)
+        self.entry_minutes.delete(0, tk.END)
+        self.entry_seconds.delete(0, tk.END)
+        self.entry_abs_year.delete(0, tk.END)
+        self.entry_abs_month.delete(0, tk.END)
+        self.entry_abs_day.delete(0, tk.END)
+        self.entry_abs_time.delete(0, tk.END)
 
     def build_input_panel(self, root):
         top = tk.Frame(root)
@@ -245,8 +256,9 @@ class InputPanelMixin:
         tk.Label(task_row, text="Задача:").pack(side="left")
         self.entry_task = tk.Entry(task_row, width=50)
         self.entry_task.pack(side="left", padx=(4, 8))
+        self.create_tooltip(self.entry_task, "Введите имя задачи")
 
-        btn_defer = tk.Button(
+        self.btn_defer = tk.Button(
             task_row,
             text="Отл",
             command=lambda: self.do_defer(is_important=False),
@@ -256,23 +268,26 @@ class InputPanelMixin:
             activebackground=COLOR_BTN_DEFER_ACTIVE_BG,
             activeforeground=COLOR_BTN_DEFER_ACTIVE_FG
         )
-        btn_defer.pack(side="left", padx=(0, 2))
+        self.btn_defer.pack(side="left", padx=(0, 2))
+        self.create_tooltip(self.btn_defer, "Отложить задачи")
 
         self.comboDefer = ttk.Combobox(task_row, values=self.get10percentList(), width=10, state="readonly")
         self.comboDefer.current(self.opts["combodefer"])
         self.comboDefer.pack(side="left", padx=(0, 8))
         self.comboDefer.bind("<<ComboboxSelected>>", self.on_combo_change)
+        self.create_tooltip(self.comboDefer, "Интервал, с которым будут идти отложенные задачи")
 
-        self.lbl_quiet_overdue_indicator = tk.Label(
-            top,
-            text="⚠️ Есть просроченные тихие задачи!",
-            fg="#b71c1c",
-            font=("TkDefaultFont", 10, "bold"),
-            anchor="w",
-            justify="left"
+        # Кнопка очистки
+        self.btn_clear = tk.Button(
+            task_row,
+            text="X",
+            command=self.clear_input_fields,
+            width=2,
+            bg=COLOR_NORMAL_BG,
+            activebackground="#FFFFFF"
         )
-        self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
-        self.lbl_quiet_overdue_indicator.pack_forget()
+        self.btn_clear.pack(side="left")
+        self.create_tooltip(self.btn_clear, "Очистить поля ввода")
 
         time_and_btn_row = tk.Frame(top)
         time_and_btn_row.pack(fill="x", pady=(0, 0))
@@ -335,6 +350,28 @@ class InputPanelMixin:
         tk.Label(time_frame, text="С:").pack(side="left")
         self.entry_seconds = tk.Entry(time_frame, width=5)
         self.entry_seconds.pack(side="left", padx=(0, 0))
+
+        self.lbl_quiet_overdue_indicator = tk.Label(
+            top,
+            text="⚠️ Есть просроченные тихие задачи! ⚠️",
+            fg="#b71c1c",
+            font=("TkDefaultFont", 10, "bold"),
+            anchor="w",
+            justify="left"
+        )
+        self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.lbl_quiet_overdue_indicator.pack_forget()
+
+        self.lbl_control_unpaired_indicator = tk.Label(
+            top,
+            text="⚠️ Есть непоставленные контрольные задачи! ⚠️",
+            fg="#b71c1c",
+            font=("TkDefaultFont", 10, "bold"),
+            anchor="w",
+            justify="left"
+        )
+        self.lbl_control_unpaired_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.lbl_control_unpaired_indicator.pack_forget()
 
         # Третья строка: абсолютная дата и регулятор громкости
         third_row = tk.Frame(root)
@@ -402,3 +439,42 @@ class InputPanelMixin:
 
         # Привязываем клик по метке громкости для ручного теста звука
         self.lbl_vol_value.bind("<Button-1>", self._on_test_sound_click)
+
+    def SetUpTabsWarning(self):
+        now = datetime.now()
+        # Показываем оповещение о наличии просроченных тихих задачах. Если необходимо
+        has_overdue_quiet = any(
+            t.is_quiet and t.alert_time is not None and (now - t.alert_time).total_seconds() >= 0
+            for t in self.tasks.values()
+        )
+
+        if has_overdue_quiet:
+            self.upsetQuietTab()
+        else:
+            self.resetQuietTab()
+
+        # Показываем оповещение о наличии непарных контрольных задачах. Если необходимо
+        has_control_unpaired = any(
+            t.is_unpaired for t in self.tasks.values()
+        )
+
+        if has_control_unpaired:
+            self.upsetControlTab()
+        else:
+            self.resetControlTab()
+
+    def upsetQuietTab(self):
+        self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.notebook.tab(self.quiet_tab_frame, text="----- Тихие -----")
+
+    def resetQuietTab(self):
+        self.lbl_quiet_overdue_indicator.pack_forget()
+        self.notebook.tab(self.quiet_tab_frame, text="Тихие")
+
+    def upsetControlTab(self):
+        self.lbl_control_unpaired_indicator.pack(fill="x", padx=4, pady=(0, 4))
+        self.notebook.tab(self.control_tab, text="----- К -----")
+
+    def resetControlTab(self):
+        self.lbl_control_unpaired_indicator.pack_forget()
+        self.notebook.tab(self.control_tab, text="К")

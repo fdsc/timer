@@ -42,6 +42,8 @@ class TaskFramesSortingLogicMixin:
         for child in childrens:
             child.pack(fill="x", pady=(0, 2))
 
+        self.SetUpTabsWarning()
+
     def _reorder_tasks(self):
         # Устанавливаем is_unpaired для задач
         self.check_control_tasks()

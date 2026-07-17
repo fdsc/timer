@@ -109,11 +109,3 @@ class TaskBlockLayoutMixin:
         else:
             self.parent.entry_seconds.delete(0, tk.END)
             self.parent.entry_seconds.insert(0, str(self.control_interval))
-
-    def upsetQuietTab(self):
-        self.parent.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
-        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="----- Тихие -----")
-
-    def resetQuietTab(self):
-        self.parent.lbl_quiet_overdue_indicator.pack_forget()
-        self.parent.notebook.tab(self.parent.quiet_tab_frame, text="Тихие")
