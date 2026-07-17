@@ -13,8 +13,8 @@ class ToolTip:
                 widget.tooltip.wm_overrideredirect(True)
                 widget.tooltip.wm_attributes("-topmost", True)
                 # Получаем координаты относительно корневого окна
-                x = widget.winfo_rootx() + 5
-                y = widget.winfo_rooty() + 25
+                x = widget.winfo_rootx() + 0
+                y = widget.winfo_rooty() + 30
                 widget.tooltip.wm_geometry(f"+{x}+{y}")
 
                 tk.Label(
