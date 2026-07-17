@@ -14,7 +14,11 @@ class TimerAndAlertMixin:
             return
 
         self.is_important = not self.is_important
+        if self.is_control:
+            self.alert_time = datetime.now()
+
         self._update_priority_ui()
+        self.parent._reorder_tasks_in_frame(self._container_frame)
         self.save()
 
     def _update_priority_ui(self):
