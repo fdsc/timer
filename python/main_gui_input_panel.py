@@ -320,7 +320,7 @@ class InputPanelMixin:
 
         self.btn_add_quiet = tk.Button(
             time_and_btn_row,
-            text="V",
+            text="T",
             command=lambda: self.add_task(is_important=False, is_quiet=True),
             width=2,
             bg=COLOR_BTN_ADD_QUIET_BG,
