@@ -185,6 +185,13 @@ def normalize_day(year: int, month: int, day: int) -> tuple[int, int, int]:
             year += 1
 
 
+def is_int_string(s: str) -> bool:
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 def build_alert_time(
     year_str:  str,
     month_str: str,
@@ -207,6 +214,8 @@ def build_alert_time(
     """
     now = datetime.now()
 
+    
+    
     # Определяем, были ли поля заданы явно (не пустые и не только "+")
     def is_explicit(val: str) -> bool:
         s = (val or "").strip()
@@ -221,15 +230,17 @@ def build_alert_time(
         # Если это код дня недели — считаем НЕявным, т.к. мы его интерпретируем как «ближайший такой день»
         if any(s.lower().startswith(p) for p in WEEKDAY_MAP.keys()):
             return False
+        if any(s.lower().startswith(p) for p in MONTHS_PREFIX_MAP.keys()):
+            return False
         return True
 
     year_explicit  = is_explicit(year_str)
     month_explicit = is_explicit(month_str)
     day_explicit   = is_explicit(day_str)
-    eday_explicit  = is_explicit(eday_str)
+    eday_explicit  = is_int_string(eday_str)
 
     if not day_explicit and eday_explicit:
-        day_str = "+" + eday_str
+        day_str = "+" + str(int(eday_str))
         day_explicit = is_explicit(day_str)
 
     month_str = parse_month(month_str)
