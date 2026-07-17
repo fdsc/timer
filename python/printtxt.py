@@ -1,31 +1,33 @@
 # Это служебный скрипт
+# python3 printtxt.py > /inRamA/txt.txt
 import os
 
 # Список файлов, содержимое которых нужно вывести
 files_to_show = [
-    "config_manager.py",
-    "date_utils.py",
     "main.py",
     "task_block.py",
-    "task_block_tasks.py"
 ]
 
-files_to_show.append("app_singletone.py")
-files_to_show.append("constants.py")
-files_to_show.append("main_gui_audio_control.py")
-files_to_show.append("main_gui_helper.py")
-files_to_show.append("main_gui_input_panel.py")
-files_to_show.append("main_gui_resize_handler.py")
-files_to_show.append("main_gui_tabs_layout.py")
-files_to_show.append("main_gui_task_frames_sorting_logic.py")
-files_to_show.append("main_gui_window.py")
-files_to_show.append("main_load_config_path.py")
-files_to_show.append("notifier.py")
-files_to_show.append("task_block_gui_delete_confirmation_mixin.py")
-files_to_show.append("task_block_gui_layout.py")
-files_to_show.append("task_block_gui_priority_colors.py")
+
+#files_to_show.append("app_singletone.py")
+#files_to_show.append("config_manager.py")
+#files_to_show.append("constants.py")
+#files_to_show.append("date_utils.py")
+#files_to_show.append("main_gui_audio_control.py")
+#files_to_show.append("main_gui_helper.py")
+#files_to_show.append("main_gui_input_panel.py")
+#files_to_show.append("main_gui_resize_handler.py")
+#files_to_show.append("main_gui_tabs_layout.py")
+#files_to_show.append("main_gui_task_frames_sorting_logic.py")
+#files_to_show.append("main_gui_window.py")
+#files_to_show.append("main_load_config_path.py")
+#files_to_show.append("notifier.py")
+#files_to_show.append("task_block_gui_delete_confirmation_mixin.py")
+#files_to_show.append("task_block_gui_layout.py")
+#files_to_show.append("task_block_gui_priority_colors.py")
+#files_to_show.append("task_block_tasks.py")
 files_to_show.append("task_block_timer_and_alert.py")
-files_to_show.append("tasks_storage.py")
+#files_to_show.append("tasks_storage.py")
 
 
 current_dir = os.getcwd()

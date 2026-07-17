@@ -40,6 +40,18 @@ class TimerAndAlertMixin:
             self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
 
 
+    def formatTimeLeftStr(self, total_seconds: int):
+        days, remainder = divmod(total_seconds, SECONDS_PER_DAY)
+        hrs,  mins      = divmod(remainder,     SECONDS_PER_HOUR)
+        mins, secs      = divmod(mins, 60)
+
+        if days > 0:
+            time_left_str = f"{int(days)}д {int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
+        else:
+            time_left_str = f"{int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
+
+        return time_left_str
+
 
     def update_timer(self):
         if self._stopped:
@@ -47,11 +59,7 @@ class TimerAndAlertMixin:
 
         now = datetime.now()
         total_seconds = self.getRemained()
-
-        mins, secs = divmod(total_seconds, 60)
-        hrs,  mins = divmod(mins, 60)
-
-        time_left_str = f"{hrs:02d}:{mins:02d}:{secs:02d}"
+        time_left_str = self.formatTimeLeftStr(total_seconds)
 
         self.lbl_time_left.config(text=f"Осталось: {time_left_str}")
         alert_datetime_str = self.alert_time.strftime("%Y-%m-%d %H:%M:%S")
