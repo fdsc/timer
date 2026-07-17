@@ -10,7 +10,6 @@ files_to_show = [
     "task_block_tasks.py"
 ]
 
-# Добавляем закомментированные файлы с помощью append
 files_to_show.append("app_singletone.py")
 files_to_show.append("constants.py")
 files_to_show.append("main_gui_audio_control.py")
