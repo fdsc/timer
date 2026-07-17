@@ -8,7 +8,6 @@ class ToolTip:
         widget.tooltip_text = text
 
         def show_tooltip_after_delay():
-            widget.after_id = None
             if not widget.tooltip:
                 widget.tooltip = tk.Toplevel(widget)
                 widget.tooltip.wm_overrideredirect(True)
