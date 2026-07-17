@@ -255,10 +255,12 @@ class InputPanelMixin:
 
         self.init_tooltip()
 
-        tk.Label(task_row, text="Задача:").pack(side="left")
+        self.task_capt  = tk.Label(task_row, text="Задача:")
+        self.task_capt.pack(side="left")
+        self.create_tooltip(self.task_capt, "Введите имя задачи")
+
         self.entry_task = tk.Entry(task_row, width=50)
         self.entry_task.pack(side="left", padx=(4, 8))
-        self.create_tooltip(self.entry_task, "Введите имя задачи")
 
         self.btn_defer = tk.Button(
             task_row,
@@ -401,7 +403,7 @@ class InputPanelMixin:
         tk.Label(abs_date_frame, text="Месяц:").pack(side="left")
         self.entry_abs_month = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_month.pack(side="left", padx=(0, 8))
-        self.create_tooltip(self.entry_abs_month, "Месяц срабатывания (числом; 1==январь) или интервал в месяцах (+1)")
+        self.create_tooltip(self.entry_abs_month, "Месяц срабатывания (числом или строкой, например, \"янв\" или \"1\") или интервал в месяцах (+1)")
 
         tk.Label(abs_date_frame, text="День:").pack(side="left")
         self.entry_abs_day = tk.Entry(abs_date_frame, width=5)
@@ -412,7 +414,7 @@ class InputPanelMixin:
         self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
         self.entry_abs_time.insert(0, "")
         self.entry_abs_time.pack(side="left", padx=(0, 0))
-        self.create_tooltip(self.entry_abs_time, "Время срабатывания часы:минуты (11:15) или только часы (11 то же, что и 11:00)")
+        self.create_tooltip(self.entry_abs_time, "Время срабатывания часы:минуты (11:15) или только часы 11. Обратите внимание, если минуты не заданы, они берутся из текущего времени. Например, если сейчас 07:35. то \"11\" будет истрактовано как 11:35")
 
         # Регулятор громкости (справа)
         vol_frame = tk.Frame(third_row)

@@ -13,6 +13,42 @@ WEEKDAY_MAP = {
     "вс": 6, "вос": 6,
 }
 
+MONTHS_PREFIX_MAP = {
+    "ян": 1,
+    "фе": 2,
+    "мар": 3,
+    "ап": 4,
+    "май": 5,
+    "июн": 6,
+    "июл": 7,
+    "ав": 8,
+    "се": 9,
+    "окт": 10,
+    "но": 11,
+    "де": 12,
+}
+
+def parse_month(value: str) -> int | None:
+    if not value:
+        return None
+
+    s = value.strip().lower()
+
+    # Число
+    if s.isdigit():
+        n = int(s)
+        if 1 <= n <= 12:
+            return n
+        return None
+
+    # По префиксам (как ты указал)
+    for prefix, month_num in MONTHS_PREFIX_MAP.items():
+        if s.startswith(prefix):
+            return month_num
+
+    return None
+
+
 def parse_weekday_to_date(day_str: str, now: datetime) -> tuple[int | None, int | None, int | None]:
     """
     Если day_str — это код дня недели (опционально с суффиксом *N), возвращает (год, месяц, день)
@@ -93,8 +129,12 @@ def parse_with_plus(val: str, base: int) -> Optional[int]:
     Если val начинается с '+' — прибавляет число к base.
     Иначе пытается распарсить как целое число.
     """
+    if isinstance(val, int):
+        return val
+
     if not val:
         return base
+
     if val.startswith('+'):
         try:
             delta = int(val[1:])
@@ -186,6 +226,8 @@ def build_alert_time(
     month_explicit = is_explicit(month_str)
     day_explicit   = is_explicit(day_str)
 
+    month_str = parse_month(month_str)
+
     # Сначала проверяем, не задан ли день как день недели
     parsed_year, parsed_month, parsed_day = parse_weekday_to_date(day_str, now)
     use_weekday_logic = parsed_year is not None
@@ -211,7 +253,7 @@ def build_alert_time(
     year, month, day = normalize_day  (year, month, day)
 
     hour   = now.hour
-    minute = 0 # now.minute
+    minute = now.minute
     if time_str:
         parts = time_str.split(":")
         if len(parts) == 1:
