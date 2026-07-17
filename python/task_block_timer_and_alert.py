@@ -19,25 +19,25 @@ class TimerAndAlertMixin:
 
     def _update_priority_ui(self):
         bg_color = self.getBgColor()
-        self.lbl_time_left.config(bg=bg_color)
+        self.frame.config         (bg=bg_color)
+        self.lbl_text.config      (bg=bg_color)
+        self.lbl_time_left.config (bg=bg_color)
         self.lbl_time_alert.config(bg=bg_color)
-        
+
         if self.is_important:
             self.btn_priority.config(
                 text="Важная",
                 bg=COLOR_IMPORTANT_BG,
                 activebackground=COLOR_IMPORTANT_ACTIVE
             )
-            self.frame.config(bg=COLOR_FRAME_IMPORTANT)
-            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg="#b71c1c", bg=self.getBgColor())
+            self.lbl_text.config(font=("TkDefaultFont", 11, "bold"), fg=COLOR_TEXT_IMPORTANT)
         else:
             self.btn_priority.config(
                 text="Не важная",
                 bg=COLOR_NORMAL_BG,
                 activebackground=COLOR_NORMAL_ACTIVE
             )
-            self.frame.config(bg=COLOR_FRAME_NORMAL)
-            self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000", bg=self.getBgColor())
+            self.lbl_text.config(font=("TkDefaultFont", 11), fg="#000000")
 
 
     def formatTimeLeftStr(self, total_seconds: int):

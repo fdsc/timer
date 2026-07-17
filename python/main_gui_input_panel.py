@@ -62,6 +62,9 @@ class InputPanelMixin:
         day_str   = self.entry_abs_day.get()  .strip()
         time_str  = self.entry_abs_time.get() .strip()
 
+        task_type = self._calculate_task_type(is_quiet=is_quiet, is_control=is_control)
+        frame     = self._get_frame_by_task_type(task_type)
+
         if year_str or month_str or day_str or time_str:
             try:
                 alert_time = build_alert_time(year_str, month_str, day_str, time_str)
@@ -89,10 +92,6 @@ class InputPanelMixin:
                     seconds
                 )
 
-                if total_seconds <= 0:
-                    self._on_test_sound_click()
-                    raise ValueError
-
                 if total_seconds > MAX_DELAY_DAYS * SECONDS_PER_DAY:
                     messagebox.showerror(
                         "Ошибка",
@@ -100,7 +99,7 @@ class InputPanelMixin:
                     )
                     return
 
-                if total_seconds <= 0:
+                if total_seconds <= 0 and task_type != TaskType.CONTROL:
                     messagebox.showerror("Ошибка", "Общее время должно быть больше 0 секунд.")
                     return
 
@@ -110,9 +109,6 @@ class InputPanelMixin:
                 return
 
         task_id = self._generate_task_id()
-
-        task_type = self._calculate_task_type(is_quiet=is_quiet, is_control=is_control)
-        frame     = self._get_frame_by_task_type(task_type)
 
         block = TaskBlock(
             parent=self,
@@ -143,7 +139,9 @@ class InputPanelMixin:
         block.save()
 
         # Пересортировываем задачи по приоритету
+        self.check_control_tasks()
         self._reorder_tasks_in_frame(frame)
+
 
     def do_defer_list(self, tlist, base_seconds: int, lastDefer: datetime) -> datetime:
         """Вспомогательная функция, откладывающая задачи из выбранного списка"""

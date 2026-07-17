@@ -24,15 +24,16 @@ from constants import (
     TEST_SOUND_PATH,
 )
 
-from app_singletone import AppSingletone
-from main_load_config_path import LoadConfigPathMixin
-from main_gui_input_panel import InputPanelMixin
-from main_gui_tabs_layout import TabsLayoutMixin
+from app_singletone          import AppSingletone
+from main_load_config_path   import LoadConfigPathMixin
+from main_gui_input_panel    import InputPanelMixin
+from main_gui_tabs_layout    import TabsLayoutMixin
 from main_gui_resize_handler import ResizeHandlerMixin
+from main_gui_window         import WindowMixin
+from main_gui_helper         import Main_HelperMixin
+from main_gui_audio_control  import AudioControlMixin
+from main_gui_check_control_tasks import CheckControlTasksMixin
 from main_gui_task_frames_sorting_logic import TaskFramesSortingLogicMixin
-from main_gui_audio_control import AudioControlMixin
-from main_gui_window import WindowMixin
-from main_gui_helper import Main_HelperMixin
 
 # nuitka???
 
@@ -44,7 +45,8 @@ class App(
     TaskFramesSortingLogicMixin,
     AudioControlMixin,
     WindowMixin,
-    Main_HelperMixin
+    Main_HelperMixin,
+    CheckControlTasksMixin
 ):
     def __init__(self, root):
         self.root = root
@@ -112,7 +114,7 @@ class App(
         # Привязка закрытия окна (без финального сохранения)
         root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # Сортируем задачи в визуальном интерфейсе
+        # Сортируем задачи в визуальном интерфейсе, одновременно обновляя is_unpaired
         self._reorder_tasks()
 
 if __name__ == "__main__":

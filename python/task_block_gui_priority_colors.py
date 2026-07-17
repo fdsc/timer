@@ -6,6 +6,9 @@ from constants import (
 class PriorityColorsMixin:
 
     def getBgColor(self):
+        if self.is_unpaired:
+            return "#FFCC88" if self.is_important else "#FFFFCC"
+
         return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
 
     def toggle(self):
@@ -23,6 +26,3 @@ class PriorityColorsMixin:
             text="Снять важность" if self.is_important else "Сделать важным",
             bg="#ffe0b2" if self.is_important else "#e8f5e9"
         )
-
-    def getBgColor(self):
-        return COLOR_FRAME_IMPORTANT if getattr(self, 'is_important', False) else COLOR_FRAME_NORMAL

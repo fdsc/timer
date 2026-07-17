@@ -76,6 +76,7 @@ class TasksMixin:
         # Сбрасываем флаг подтверждения перед удалением
         self._delete_confirm_active = False
         self._on_delete_direct()
+        self.parent.check_control_tasks()
 
         if len(self.parent.get_quiet_tasks_not_remained()) == 0:
             self.resetQuietTab()

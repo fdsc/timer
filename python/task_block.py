@@ -30,6 +30,7 @@ class TaskBlock(
         self._alerted_once          = False
         self._retry_scheduled       = False
         self._delete_confirm_active = False
+        self.is_unpaired            = False             # Для контрольных задач
 
         self._container_frame = frame
 

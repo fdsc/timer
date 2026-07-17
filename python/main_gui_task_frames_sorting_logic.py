@@ -37,6 +37,8 @@ class TaskFramesSortingLogicMixin:
             child.pack(fill="x", pady=(0, 2))
 
     def _reorder_tasks(self):
+        # Устанавливаем is_unpaired для задач
+        self.check_control_tasks()
         # Добавляем сортировку для всех типов задач
         self._reorder_tasks_in_frame(self.list_frame)
         self._reorder_tasks_in_frame(self.quiet_list_frame)

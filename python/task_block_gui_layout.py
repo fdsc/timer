@@ -38,7 +38,7 @@ class TaskBlockLayoutMixin:
             bg=COLOR_TIME_ALERT_NORMAL,
             font=("TkDefaultFont", 10)
         )
-        self.lbl_time_alert.grid(row=1, column=0 if self.is_control else 1, sticky="w", padx=(0, 0), columnspan=1 if self.is_control else 2)
+        self.lbl_time_alert.grid(row=1, column=0 if self.is_control else 1, sticky="w", padx=(0, 0), columnspan=2 if self.is_control else 1)
 
         # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
         self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
@@ -60,8 +60,8 @@ class TaskBlockLayoutMixin:
             text="",
             command=self.toggle_priority,
             width=12,
-            bg="#f0f0f0",
-            activebackground=COLOR_IMPORTANT_ACTIVE if self.is_important else "#e0e0e0"
+            bg=COLOR_NORMAL_BG,
+            activebackground=COLOR_IMPORTANT_ACTIVE if self.is_important else COLOR_NORMAL_ACTIVE,
         )
         self.btn_priority.grid(row=2, column=1, sticky="w")
 
