@@ -429,6 +429,7 @@ class InputPanelMixin:
         )
         self.toggle_mute()
         self.btn_mute.pack(side="left", padx=(4, 8))
+        self.create_tooltip(self.entry, "Нажмите, чтобы заглушить звук. После удаления всех просроченных задач, звук включится сам.")
 
         # Сначала метка «Громкость:»
         lbl_vol_label = tk.Label(vol_frame, text="Громкость:")
@@ -448,13 +449,16 @@ class InputPanelMixin:
         )
         self.scale_volume.set(self.volume_factor*100)
         self.scale_volume.pack(side="left", padx=(4, 0))
+        self.create_tooltip(self.scale_volume, "Регулятор громкости звукового оповещения")
 
         # Метка с процентами (справа от слайдера)
         self.lbl_vol_value = tk.Label(vol_frame, text=str(int(self.volume_factor*100)) + "%", width=5, anchor="e")
         self.lbl_vol_value.pack(side="left", padx=(8, 0))
+        self.create_tooltip(self.lbl_vol_value, "Громкость звукового оповещения. Нажмите, чтобы прослушать")
 
         # Привязываем клик по метке громкости для ручного теста звука
         self.lbl_vol_value.bind("<Button-1>", self._on_test_sound_click)
+
 
     def SetUpTabsWarning(self):
         now = datetime.now()
