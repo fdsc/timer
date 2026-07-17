@@ -253,6 +253,8 @@ class InputPanelMixin:
         task_row = tk.Frame(top)
         task_row.pack(fill="x", pady=(0, 4))
 
+        self.init_tooltip()
+
         tk.Label(task_row, text="Задача:").pack(side="left")
         self.entry_task = tk.Entry(task_row, width=50)
         self.entry_task.pack(side="left", padx=(4, 8))
@@ -301,6 +303,7 @@ class InputPanelMixin:
             activebackground=COLOR_BTN_ADD_NORMAL_ACTIVE_BG
         )
         self.btn_add_normal.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.btn_add_normal, "Добавить обычную задачу в список")
 
         self.btn_add_important = tk.Button(
             time_and_btn_row,
@@ -311,6 +314,7 @@ class InputPanelMixin:
             activebackground=COLOR_BTN_ADD_IMPORTANT_ACTIVE_BG
         )
         self.btn_add_important.pack(side="left", padx=(0, 16))
+        self.create_tooltip(self.btn_add_important, "Добавить важную задачу\n[задача будет подсвечена и при просрочке и отложении будет приоритетной]")
 
         self.btn_add_quiet = tk.Button(
             time_and_btn_row,
@@ -321,6 +325,7 @@ class InputPanelMixin:
             activebackground=COLOR_BTN_ADD_QUIET_ACTIVE_BG
         )
         self.btn_add_quiet.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.btn_add_quiet, "Добавить \"Тихую\" задачу\n[Тихие задачи работают без уведомлений]")
 
         self.btn_add_control = tk.Button(
             time_and_btn_row,
@@ -331,6 +336,7 @@ class InputPanelMixin:
             activebackground="#A52A2A"
         )
         self.btn_add_control.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.btn_add_control, "Добавить контрольную задачу\n[Контрольные задачи будут напоминать, если не поставлена такая же задачу во вкладку задач или тихих задач]")
 
         time_frame = tk.Frame(time_and_btn_row)
         time_frame.pack(side="left")
@@ -338,18 +344,22 @@ class InputPanelMixin:
         tk.Label(time_frame, text="Д:").pack(side="left")
         self.entry_days = tk.Entry(time_frame, width=5)
         self.entry_days.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_days, "Количество полных суток до того, как необходимо оповещение о задаче")
 
         tk.Label(time_frame, text="Ч:").pack(side="left")
         self.entry_hours = tk.Entry(time_frame, width=5)
         self.entry_hours.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_hours, "Количество полных часов до того, как необходимо оповещение о задаче")
 
         tk.Label(time_frame, text="М:").pack(side="left")
         self.entry_minutes = tk.Entry(time_frame, width=5)
         self.entry_minutes.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_minutes, "Количество полных минут до того, как необходимо оповещение о задаче")
 
         tk.Label(time_frame, text="С:").pack(side="left")
         self.entry_seconds = tk.Entry(time_frame, width=5)
         self.entry_seconds.pack(side="left", padx=(0, 0))
+        self.create_tooltip(self.entry_seconds, "Количество полных секунд до того, как необходимо оповещение о задаче")
 
         self.lbl_quiet_overdue_indicator = tk.Label(
             top,
@@ -361,6 +371,7 @@ class InputPanelMixin:
         )
         self.lbl_quiet_overdue_indicator.pack(fill="x", padx=4, pady=(0, 4))
         self.lbl_quiet_overdue_indicator.pack_forget()
+        self.create_tooltip(self.lbl_quiet_overdue_indicator, "Зайдите на вкладку \"Тихие\" для просмотра")
 
         self.lbl_control_unpaired_indicator = tk.Label(
             top,
@@ -372,6 +383,7 @@ class InputPanelMixin:
         )
         self.lbl_control_unpaired_indicator.pack(fill="x", padx=4, pady=(0, 4))
         self.lbl_control_unpaired_indicator.pack_forget()
+        self.create_tooltip(self.lbl_control_unpaired_indicator, "Зайдите на вкладку \"К\" для просмотра")
 
         # Третья строка: абсолютная дата и регулятор громкости
         third_row = tk.Frame(root)
@@ -384,19 +396,23 @@ class InputPanelMixin:
         tk.Label(abs_date_frame, text="Год:").pack(side="left")
         self.entry_abs_year = tk.Entry(abs_date_frame, width=7)
         self.entry_abs_year.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_abs_year, "Полный год (2026)")
 
         tk.Label(abs_date_frame, text="Месяц:").pack(side="left")
         self.entry_abs_month = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_month.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_abs_month, "Введите текст")
 
         tk.Label(abs_date_frame, text="День:").pack(side="left")
         self.entry_abs_day = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_day.pack(side="left", padx=(0, 8))
+        self.create_tooltip(self.entry_abs_day, "Введите текст")
 
         tk.Label(abs_date_frame, text="Время (Ч:М):").pack(side="left")
         self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
         self.entry_abs_time.insert(0, "")
         self.entry_abs_time.pack(side="left", padx=(0, 0))
+        self.create_tooltip(self.entry_abs_time, "Введите текст")
 
         # Регулятор громкости (справа)
         vol_frame = tk.Frame(third_row)

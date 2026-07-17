@@ -107,6 +107,13 @@ def parse_with_plus(val: str, base: int) -> Optional[int]:
         return None
 
 
+def normalize_year(year: int) -> int:
+    if year < 2000:
+        return year + 2000
+
+    return year
+
+
 def normalize_month(year: int, month: int) -> tuple[int, int]:
     """
     Нормализует месяц: если <1 или >12, переносит в соседние годы.
@@ -199,8 +206,9 @@ def build_alert_time(
         month = try_parse_base(month_str, now.month)
         day   = try_parse_base(day_str, now.day)
 
-    year, month = normalize_month(year, month)
-    year, month, day = normalize_day(year, month, day)
+    year             = normalize_year (year)
+    year, month      = normalize_month(year, month)
+    year, month, day = normalize_day  (year, month, day)
 
     hour = now.hour
     minute = now.minute
