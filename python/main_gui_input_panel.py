@@ -429,7 +429,7 @@ class InputPanelMixin:
         )
         self.toggle_mute()
         self.btn_mute.pack(side="left", padx=(4, 8))
-        self.create_tooltip(self.entry, "Нажмите, чтобы заглушить звук. После удаления всех просроченных задач, звук включится сам.")
+        self.create_tooltip(self.btn_mute, "Нажмите, чтобы заглушить звук. После удаления всех просроченных задач, звук включится сам.")
 
         # Сначала метка «Громкость:»
         lbl_vol_label = tk.Label(vol_frame, text="Громкость:")
