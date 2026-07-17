@@ -396,23 +396,23 @@ class InputPanelMixin:
         tk.Label(abs_date_frame, text="Год:").pack(side="left")
         self.entry_abs_year = tk.Entry(abs_date_frame, width=7)
         self.entry_abs_year.pack(side="left", padx=(0, 8))
-        self.create_tooltip(self.entry_abs_year, "Полный год (2026)")
+        self.create_tooltip(self.entry_abs_year, "Год срабатывания (2026; 26) или интервал в годах (+1)")
 
         tk.Label(abs_date_frame, text="Месяц:").pack(side="left")
         self.entry_abs_month = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_month.pack(side="left", padx=(0, 8))
-        self.create_tooltip(self.entry_abs_month, "Введите текст")
+        self.create_tooltip(self.entry_abs_month, "Месяц срабатывания (числом; 1==январь) или интервал в месяцах (+1)")
 
         tk.Label(abs_date_frame, text="День:").pack(side="left")
         self.entry_abs_day = tk.Entry(abs_date_frame, width=5)
         self.entry_abs_day.pack(side="left", padx=(0, 8))
-        self.create_tooltip(self.entry_abs_day, "Введите текст")
+        self.create_tooltip(self.entry_abs_day, "День срабатывания (числом или двухбуквенной аббривеатурой, например. ср) или интервал в днях (+1)")
 
         tk.Label(abs_date_frame, text="Время (Ч:М):").pack(side="left")
         self.entry_abs_time = tk.Entry(abs_date_frame, width=9)
         self.entry_abs_time.insert(0, "")
         self.entry_abs_time.pack(side="left", padx=(0, 0))
-        self.create_tooltip(self.entry_abs_time, "Введите текст")
+        self.create_tooltip(self.entry_abs_time, "Время срабатывания часы:минуты (11:15) или только часы (11 то же, что и 11:00)")
 
         # Регулятор громкости (справа)
         vol_frame = tk.Frame(third_row)

@@ -202,16 +202,16 @@ def build_alert_time(
         day   = parsed_day
         day_explicit = True
     else:
-        year  = try_parse_base(year_str, now.year)
+        year  = try_parse_base(year_str,  now.year)
         month = try_parse_base(month_str, now.month)
-        day   = try_parse_base(day_str, now.day)
+        day   = try_parse_base(day_str,   now.day)
 
     year             = normalize_year (year)
     year, month      = normalize_month(year, month)
     year, month, day = normalize_day  (year, month, day)
 
-    hour = now.hour
-    minute = now.minute
+    hour   = now.hour
+    minute = 0 # now.minute
     if time_str:
         parts = time_str.split(":")
         if len(parts) == 1:
