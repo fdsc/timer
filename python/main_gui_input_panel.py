@@ -4,9 +4,10 @@ from   tkinter    import messagebox
 from   tkinter    import ttk
 from   datetime   import timedelta, datetime
 
-from   task_block import TaskBlock
-from   date_utils import build_alert_time
-from   constants  import *
+from   task_block_tasks import TaskType
+from   task_block       import TaskBlock
+from   date_utils       import build_alert_time
+from   constants        import *
 
 
 class InputPanelMixin:
@@ -98,7 +99,7 @@ class InputPanelMixin:
             text=text,
             alert_time=alert_time,
             is_important_initial=is_important,
-            is_quiet=is_quiet
+            _type=TaskType.QUIET if is_quiet else TaskType.NORMAL
         )
         self.tasks[task_id] = block
 
@@ -189,8 +190,8 @@ class InputPanelMixin:
         now = datetime.now()
 
         # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
-        non_quiet_tasks_i = [t for t in self.tasks.values() if not t.is_quiet and t.is_important]
-        non_quiet_tasks_n = [t for t in self.tasks.values() if not t.is_quiet and not t.is_important]
+        non_quiet_tasks_i = [t for t in self.tasks.values() if not t.type != TaskType.QUIET and     t.is_important]
+        non_quiet_tasks_n = [t for t in self.tasks.values() if not t.type != TaskType.QUIET and not t.is_important]
         if not non_quiet_tasks_i and not non_quiet_tasks_n:
             return
 
@@ -285,6 +286,16 @@ class InputPanelMixin:
             activebackground=COLOR_BTN_ADD_QUIET_ACTIVE_BG
         )
         self.btn_add_quiet.pack(side="left", padx=(0, 8))
+
+        self.btn_add_control = tk.Button(
+            time_and_btn_row,
+            text="K",
+            command=lambda: self.add_task(is_important=False, task_type=2),
+            width=2,
+            bg="#8B4513",  # темно-коричневый цвет
+            activebackground="#A52A2A"
+        )
+        self.btn_add_control.pack(side="left", padx=(0, 8))
 
         time_frame = tk.Frame(time_and_btn_row)
         time_frame.pack(side="left")

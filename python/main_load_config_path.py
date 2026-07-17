@@ -1,7 +1,9 @@
 import notifier
-from config_manager import get_user_data_dir, load_or_create_opts, init_media_config, load_media_paths
-from task_block import TaskBlock
-from constants import TEST_SOUND_PATH
+from config_manager   import get_user_data_dir, load_or_create_opts, init_media_config, load_media_paths
+from task_block       import TaskBlock
+from constants        import TEST_SOUND_PATH
+from task_block_tasks import TaskType
+
 
 class LoadConfigPathMixin:
     @staticmethod
@@ -27,10 +29,10 @@ class LoadConfigPathMixin:
 
         text         = data.get("text", "ошибка загрузки")
         is_important = bool(data.get("is_important", False))
-        is_quiet     = bool(data.get("is_quiet", False))
+        _type        = TaskType(data.get("type", TaskType.NORMAL))
         alert_time   = data.get("alert_time") # Уже переведено в datetime
 
-        frame = self.quiet_list_frame if is_quiet else self.list_frame
+        frame = self.quiet_list_frame if _type == TaskType.QUIET else self.list_frame
 
         task_block = TaskBlock(
             parent=self,
@@ -39,7 +41,7 @@ class LoadConfigPathMixin:
             text=text,
             alert_time=alert_time,
             is_important_initial=is_important,
-            is_quiet=is_quiet
+            _type=_type
         )
 
         self.tasks[task_id] = task_block

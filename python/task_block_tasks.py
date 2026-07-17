@@ -4,14 +4,39 @@ from   notifier import cancel_notify_for_task
 import math
 import tasks_storage
 
+from enum import IntEnum
+
+class TaskType(IntEnum):
+    NORMAL  = 0
+    QUIET   = 1
+    CONTROL = 2
+
+
 class TasksMixin:
-   
+
+    @property
+    def is_normal(self):
+        return self.type == TaskType.NORMAL
+
+    @property
+    def is_quiet(self):
+        return self.type == TaskType.QUIET
+
+    @property
+    def is_control(self):
+        return self.type == TaskType.CONTROL
+
     def set_defer_time(self, new_defer_time: datetime):
         self.defer_time = new_defer_time
         # Пересчитываем отображение таймера с учётом изменившихся величин
         self.update_timer()
 
     def getRemained(self):
+        if self.is_control:
+            now = datetime.now()
+            delta = (now - self.alert_time).total_seconds()
+            return max(1, int(delta))
+
         now   = datetime.now()
         delta = self.defer_time - now
         return max(0, int(math.ceil(delta.total_seconds())))
@@ -32,7 +57,7 @@ class TasksMixin:
                 "text":         self.text,
                 "alert_time":   self.alert_time,
                 "is_important": self.is_important,
-                "is_quiet":     self.is_quiet,
+                "type":         self.type
             },
             lock=self.parent.storage_lock,
             io_error_flag=self.parent.io_error_flag

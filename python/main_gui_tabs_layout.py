@@ -6,6 +6,7 @@ class TabsLayoutMixin:
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill="both", expand=True, padx=4, pady=4)
 
+        # -------- Вкладка "Задачи" --------
         self.main_tab_frame = tk.Frame(self.notebook)
         self.notebook.add(self.main_tab_frame, text="Задачи")
         
@@ -20,6 +21,7 @@ class TabsLayoutMixin:
         self.list_frame.bind("<Configure>", lambda e: self.canvas_m.configure(scrollregion=self.canvas_m.bbox("all")))
         self.canvas_m.create_window((0, 0), window=self.list_frame, anchor="nw")
 
+        # -------- Вкладка "Тихие" --------
         self.quiet_tab_frame = tk.Frame(self.notebook)
         self.notebook.add(self.quiet_tab_frame, text="Тихие")
 
@@ -34,3 +36,16 @@ class TabsLayoutMixin:
         self.quiet_list_frame.bind("<Configure>", lambda e: self.canvas_q.configure(scrollregion=self.canvas_q.bbox("all")))
         self.canvas_q.create_window((0, 0), window=self.quiet_list_frame, anchor="nw")
 
+        # -------- Вкладка "Контрольные" --------
+        self.control_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.control_tab, text="К")
+
+        self.canvas_c = tk.Canvas(self.control_tab, highlightthickness=0)
+        self.canvas_c.pack(side="left", fill="both", expand=True)
+
+        # создание фрейма для контрольных задач
+        self.control_list_frame = tk.Frame(self.control_tab)
+        self.control_list_frame.pack(fill="both", expand=True)
+
+        
+        

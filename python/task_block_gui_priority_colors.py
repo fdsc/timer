@@ -4,6 +4,10 @@ from constants import (
 )
 
 class PriorityColorsMixin:
+
+    def getBgColor(self):
+        return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
+
     def toggle(self):
         self.is_important = not self.is_important
         self._apply_priority_style()

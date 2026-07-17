@@ -6,6 +6,7 @@ from task_block_timer_and_alert import TimerAndAlertMixin
 from task_block_gui_delete_confirmation_mixin import DeleteConfirmationMixin
 from task_block_gui_priority_colors import PriorityColorsMixin
 from task_block_tasks import TasksMixin
+from task_block_tasks import TaskType
 
 
 class TaskBlock(
@@ -15,16 +16,13 @@ class TaskBlock(
     PriorityColorsMixin,
     TasksMixin
 ):
-    def getBgColor(self):
-        return COLOR_FRAME_IMPORTANT if self.is_important else COLOR_FRAME_NORMAL
-
-    def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, is_quiet: bool = False):
+    def __init__(self, parent, frame: tk.Frame, task_id, text, alert_time, is_important_initial: bool = False, _type: TaskType = TaskType.NORMAL):
         self.parent       = parent
         self.task_id      = task_id
         self.alert_time   = alert_time
         self.defer_time   = alert_time              # Не должен сохраняться
         self.text         = text
-        self.is_quiet     = is_quiet
+        self.type         = _type
         self.is_important = is_important_initial
 
         self._stopped               = False

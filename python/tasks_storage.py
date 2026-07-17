@@ -4,13 +4,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import threading
+from task_block_tasks import TaskType
 
 DEFAULT_TASK = {
     "task_id": "",
     "text": "ошибка загрузки",
     "alert_time": None,          # будет заменено на текущее время при загрузке
     "is_important": False,
-    "is_quiet": False,
+    "type": TaskType.NORMAL,
 }
 
 def datetime_to_iso(dt: Optional[datetime]) -> str:
@@ -63,8 +64,14 @@ def _load_task_from_file(file_path: Path, current_time: datetime) -> Dict[str, A
 
     if "is_important" in data:
         result["is_important"] = bool(data["is_important"])
-    if "is_quiet" in data:
-        result["is_quiet"] = bool(data["is_quiet"])
+
+    # Обрабатываем как старые, так и новые значения
+    if 'type' in data:
+        result["type"] = TaskType(data["type"])
+    elif "is_quiet" in data:
+        result["type"] = TaskType.QUIET if bool(data["is_quiet"]) else TaskType.NORMAL
+    else:
+        result["type"] = TaskType.NORMAL
 
     # alert_time: если есть валидная строка — парсим, иначе ставим текущее время
     raw_alert = data.get("alert_time")
@@ -131,10 +138,10 @@ def save_task(data_dir: Path, task_data: Dict[str, Any], lock: threading.Lock, i
 
     # Подготавливаем данные для сохранения
     save_data = {
-        "task_id": task_id,
-        "text": task_data.get("text", ""),
+        "task_id":      task_id,
+        "text":         task_data.get("text", ""),
         "is_important": bool(task_data.get("is_important", False)),
-        "is_quiet": bool(task_data.get("is_quiet", False)),
+        "type":         task_data["type"],
     }
 
     # Если alert_time None — ставим текущее время, иначе конвертируем в ISO
