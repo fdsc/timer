@@ -33,12 +33,12 @@ class TaskBlockLayoutMixin:
             self.frame,
             text="",
             anchor="e",
-            justify="left",
+            justify="center",
             fg="#555",
             bg=COLOR_TIME_ALERT_NORMAL,
             font=("TkDefaultFont", 10)
         )
-        self.lbl_time_alert.grid(row=1, column=0 if self.is_control else 1, sticky="w", padx=(0, 0), columnspan=2 if self.is_control else 1)
+        self.lbl_time_alert.grid(row=1, column=0 if self.is_control else 1, sticky="w", padx=0, columnspan=2 if self.is_control else 1)
 
         # Клик по заголовку задачи -> вставляет текст в entry_task главного окна
         self.lbl_text.bind("<Button-1>", lambda e: self._on_click_title())
