@@ -15,7 +15,7 @@ _fallback_sound="/usr/share/sounds/freedesktop/stereo/complete.oga"
 _active_notify_handles = {}
 
 _general_sound_timeout    = 60*1000
-_general_sound_entry_time = 18
+_general_sound_entry_time = 180
 BULK_TASK_ID = -1
 _state_lock  = threading.RLock()
 
@@ -122,7 +122,7 @@ def sound_alert(task_obj: Any) -> None:
     
     if task_obj.parent.is_muted:
         return;
-    
+
     task_obj.last_sound = datetime.now()
 
     is_important = bool(getattr(task_obj, "is_important", False))
@@ -210,9 +210,9 @@ def show_alert(task_obj: Any) -> None:
             if state["general_sound_timer_id"] is not None:
                 app.root.after_cancel(state["general_sound_timer_id"])
                 state["general_sound_timer_id"] = None
-
-        if task_id in _pending_alert_tasks:
-            return
+        else:
+            if task_id in _pending_alert_tasks:
+                return
 
         _pending_alert_tasks.add(task_id)
         task_obj.last_notification = datetime.now()

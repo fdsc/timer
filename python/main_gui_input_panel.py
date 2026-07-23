@@ -211,8 +211,8 @@ class InputPanelMixin:
         now = datetime.now()
 
         # 1. Получаем все НЕ тихие задачи и сортируем по alert_time
-        normal_tasks_i = [t for t in self.tasks.values() if not t.type == TaskType.NORMAL and     t.is_important]
-        normal_tasks_n = [t for t in self.tasks.values() if not t.type == TaskType.NORMAL and not t.is_important]
+        normal_tasks_i = [t for t in self.tasks.values() if t.type == TaskType.NORMAL and     t.is_important]
+        normal_tasks_n = [t for t in self.tasks.values() if t.type == TaskType.NORMAL and not t.is_important]
         if not normal_tasks_i and not normal_tasks_n:
             return
 

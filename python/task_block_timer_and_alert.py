@@ -136,7 +136,7 @@ class TimerAndAlertMixin:
             delta = now - self.last_sound
             tss   = delta.total_seconds()
 
-            if not self.is_quiet:
+            if self.is_normal:
                 if self.is_important:
                     if ts  > RETRY_DELAY_IMPORTANT_SEC:
                         show_alert(self)
