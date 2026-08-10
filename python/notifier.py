@@ -15,6 +15,7 @@ _fallback_sound="/usr/share/sounds/freedesktop/stereo/complete.oga"
 _active_notify_handles = {}
 
 _general_sound_timeout    = 60*1000
+# _general_sound_entry_time = 180
 _general_sound_entry_time = 180
 BULK_TASK_ID = -1
 _state_lock  = threading.RLock()
@@ -30,12 +31,12 @@ def _on_notify_finished(task_id: int, app: Any | None) -> None:
         _pending_alert_tasks.discard(task_id)
 
         # Проверка: если в очереди осталась ровно одна задача и это BULK_TASK_ID
-        if len(_pending_alert_tasks) == 1 and BULK_TASK_ID in _pending_alert_tasks:
-            cancel_notify_for_task(BULK_TASK_ID)
+        #if len(_pending_alert_tasks) == 1 and BULK_TASK_ID in _pending_alert_tasks:
+        #    cancel_notify_for_task(BULK_TASK_ID)
 
         # Стандартная проверка: если очередь пуста — сбрасываем состояние общего сигнала
-        if app is not None and len(_pending_alert_tasks) == 0:
-            app.root.after(0, lambda: reset_alert_sound_state(app))
+        #if app is not None and len(_pending_alert_tasks) == 0:
+        #    app.root.after(0, lambda: reset_alert_sound_state(app))
 
 
 def _run_notify_with_wait(title: str, message: str, task_id, app: Any, urgency: str = "normal", icon_path: str | None = None) -> bool:
@@ -85,7 +86,9 @@ def notify(title: str, message: str, task_id, app: Any | None, urgency: str = "n
 
 def _play_sound_async(sound_path: str, volume_factor: float = 1.0) -> None:
     if not sound_path or not Path(sound_path).exists():
+        print(f"{sound_path} not exists")
         return
+
     try:
         cmd = ["play", "-q", sound_path, "vol", str(volume_factor)]
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -119,9 +122,8 @@ def sound_alert(task_obj: Any) -> None:
     # 2. Проверяем, нужно ли активировать общий режим
     app = task_obj.parent  # это экземпляр App
     maybe_activate_general_mode(app)
-    
     if task_obj.parent.is_muted:
-        return;
+        return
 
     task_obj.last_sound = datetime.now()
 
@@ -204,12 +206,13 @@ def show_alert(task_obj: Any) -> None:
     
         if len(_pending_alert_tasks) == 0:
             state = app.alert_sound_state
-            state["first_pending_add_time"] = datetime.now()
-            state["is_general_mode_active"] = False
+            #if state["first_pending_add_time"] is None:
+            #    state["first_pending_add_time"] = datetime.now()
+            # state["is_general_mode_active"] = False
             # Если был таймер — сбрасываем его на всякий случай
-            if state["general_sound_timer_id"] is not None:
-                app.root.after_cancel(state["general_sound_timer_id"])
-                state["general_sound_timer_id"] = None
+            #if state["general_sound_timer_id"] is not None:
+            #    app.root.after_cancel(state["general_sound_timer_id"])
+            #    state["general_sound_timer_id"] = None
         else:
             if task_id in _pending_alert_tasks:
                 return
@@ -222,8 +225,8 @@ def show_alert(task_obj: Any) -> None:
             fallback_messagebox(title, message)
             _pending_alert_tasks.discard(task_id)
             # При fallback тоже нужно проверить, не стала ли очередь пустой
-            if len(_pending_alert_tasks) == 0:
-                reset_alert_sound_state(app)
+            #if len(_pending_alert_tasks) == 0:
+            #    reset_alert_sound_state(app)
 
 
 def show_bulk_critical_alert(app, tasks_list, icon_path: str | None = None) -> None:
@@ -269,6 +272,7 @@ def show_bulk_critical_alert(app, tasks_list, icon_path: str | None = None) -> N
         sound_file = MEDIA_PATHS[3]
 
     if not Path(sound_file).exists():
+        print(f"{sound_file} not exists")
         sound_file = _fallback_sound
 
     volume_factor = getattr(app, "volume_factor", 1.0)
@@ -287,8 +291,8 @@ def show_bulk_critical_alert(app, tasks_list, icon_path: str | None = None) -> N
                 import tkinter.messagebox as mb
                 mb.showwarning(title, message)
                 _pending_alert_tasks.discard(task_id)
-                if len(_pending_alert_tasks) == 0:
-                    reset_alert_sound_state(app)
+                #if len(_pending_alert_tasks) == 0:
+                #    reset_alert_sound_state(app)
             except Exception:
                 pass
 
@@ -318,10 +322,11 @@ def maybe_activate_general_mode(app: Any) -> bool:
     """
     state = app.alert_sound_state
     with _state_lock:
-        if not _pending_alert_tasks:
+        if not _pending_alert_tasks and len(app.sound_eligible_tasks) == 0:
             return False
 
     if state["first_pending_add_time"] is None:
+        state["first_pending_add_time"] = datetime.now()
         return False
 
     elapsed = (datetime.now() - state["first_pending_add_time"]).total_seconds()
@@ -351,7 +356,7 @@ def check_and_play_general_sound(app: Any) -> None:
     """
     state = app.alert_sound_state
     with _state_lock:
-        if not _pending_alert_tasks:
+        if not _pending_alert_tasks and len(app.sound_eligible_tasks) == 0:
             # Очередь пуста: сбрасываем состояние и останавливаем таймер
             reset_alert_sound_state(app)
             return
@@ -364,6 +369,7 @@ def check_and_play_general_sound(app: Any) -> None:
         volume_factor = getattr(app, "volume_factor", 1.0)
         sound_file = MEDIA_PATHS[4] if len(MEDIA_PATHS) > 4 else MEDIA_PATHS[3]
         if not Path(sound_file).exists():
+            print(f"{sound_file} not exists")
             sound_file = _fallback_sound
 
         if sound_file and Path(sound_file).exists():

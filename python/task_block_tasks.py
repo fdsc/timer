@@ -29,6 +29,7 @@ class TasksMixin:
     def set_defer_time(self, new_defer_time: datetime):
         self.defer_time = new_defer_time
         # Пересчитываем отображение таймера с учётом изменившихся величин
+        self._update_sound_eligibility()
         self.update_timer()
 
     def getRemained(self):
@@ -92,8 +93,10 @@ class TasksMixin:
             return
 
         del self.parent.tasks[self.task_id]
+        self.parent.remove_sound_eligible_task(self.task_id)
         if hasattr(self, "frame") and self.frame.winfo_exists():
             self.frame.destroy()
+
         self._stopped = True
         cancel_notify_for_task(self.task_id)
 

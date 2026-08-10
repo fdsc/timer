@@ -10,6 +10,8 @@ class LoadConfigPathMixin:
     def load_config(app):
         app.data_dir = get_user_data_dir()
         app.opts     = load_or_create_opts(app.data_dir)
+        
+        print(f"Start with data in {app.data_dir}")
 
         app.volume_factor         = app.opts.get("volume_percent", 100) / 100.0
         app._pending_volume_value = None

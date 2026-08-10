@@ -91,6 +91,8 @@ class App(
         self.build_input_panel(root)
         self.build_tabs(root)
 
+        self.sound_eligible_tasks = set()
+
         # ------------------------------------------------
         # Инициализация хранилища задач
         if not tasks_storage.ensure_tasks_dir(self.data_dir):
@@ -118,6 +120,28 @@ class App(
 
         # Сортируем задачи в визуальном интерфейсе, одновременно обновляя is_unpaired
         self._reorder_tasks()
+
+
+    def add_sound_eligible_task(self, task_id):
+        with self.storage_lock:
+            was_empty = len(self.sound_eligible_tasks) == 0
+            self.sound_eligible_tasks.add(task_id)
+            if was_empty:
+                # Запускаем отсчёт времени для перехода в общий режим
+                self.alert_sound_state["first_pending_add_time"] = datetime.now()
+                self.alert_sound_state["is_general_mode_active"] = False
+                # Если таймер был – сбрасываем на всякий случай
+                if self.alert_sound_state["general_sound_timer_id"] is not None:
+                    self.root.after_cancel(self.alert_sound_state["general_sound_timer_id"])
+                    self.alert_sound_state["general_sound_timer_id"] = None
+
+    def remove_sound_eligible_task(self, task_id):
+        with self.storage_lock:
+            self.sound_eligible_tasks.discard(task_id)
+
+        if len(self.sound_eligible_tasks) == 0:
+            notifier.reset_alert_sound_state(self)
+
 
 if __name__ == "__main__":
     from datetime import datetime

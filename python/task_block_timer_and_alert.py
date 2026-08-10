@@ -126,9 +126,10 @@ class TimerAndAlertMixin:
             return
 
         total_seconds = self.getRemained()
+        self._update_sound_eligibility()
         # Если задача отложена, то может быть, что total_seconds снова больше 0
         if total_seconds <= 0:
-        
+
             now   = datetime.now()
             delta = now - self.last_notification
             ts    = delta.total_seconds()
@@ -149,3 +150,15 @@ class TimerAndAlertMixin:
                         sound_alert(self)
 
         self.frame.after(ALERT_INTERVAL_MS, self.trigger_retry_alert)
+
+    def _update_sound_eligibility(self):
+        """Обновляет статус задачи в sound_eligible_tasks родительского App."""
+        # Звуковые оповещения нужны только для обычных (не тихих, не контрольных) задач
+        if not self.is_normal or self._stopped:
+            return
+
+        if self.getRemained() <= 0:
+            self.parent.add_sound_eligible_task(self.task_id)
+        else:
+            self.parent.remove_sound_eligible_task(self.task_id)
+
