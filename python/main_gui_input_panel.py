@@ -7,11 +7,12 @@ from   datetime   import timedelta, datetime
 from   task_block_tasks import TaskType
 from   task_block       import TaskBlock
 from   date_utils       import build_alert_time
+from   config_manager   import save_opts_debounced
 from   constants        import *
 
 
 class InputPanelMixin:
-    
+
     def on_combo_change(self, event=None):
         current_idx = self.comboDefer.current()
         saved_idx   = self.opts["combodefer"]

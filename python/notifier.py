@@ -84,11 +84,34 @@ def notify(title: str, message: str, task_id, app: Any | None, urgency: str = "n
     return _run_notify_with_wait(title, message, task_id, app, urgency, icon_path)
 
 
+#def _play_sound_async(sound_path: str, volume_factor: float = 1.0) -> None:
+#    if not sound_path or not Path(sound_path).exists():
+#        print(f"{sound_path} not exists")
+#        return
+#
+#    try:
+#        cmd = ["play", "-q", sound_path, "vol", str(volume_factor)]
+#        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+#    except Exception:
+#        pass
+
 def _play_sound_async(sound_path: str, volume_factor: float = 1.0) -> None:
     if not sound_path or not Path(sound_path).exists():
         print(f"{sound_path} not exists")
         return
 
+    # Проверяем наличие команды paplay
+    try:
+        paplay_command = "paplay"
+        if os.system(f"{paplay_command} --version >/dev/null 2>&1") == 0:
+            # Используем paplay
+            cmd = [paplay_command, "--volume={:.0f}".format((volume_factor ** (1/3)) * 65536), sound_path]
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return
+    except Exception:
+        pass
+
+    # Если paplay не доступен, используем play
     try:
         cmd = ["play", "-q", sound_path, "vol", str(volume_factor)]
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -203,7 +226,7 @@ def show_alert(task_obj: Any) -> None:
     # --- ЛОГИКА ОБЩЕЙ СИГНАЛИЗАЦИИ ---
 
     # 1. Если очередь была пустой, фиксируем момент появления первой активной задачи
-    
+
         if len(_pending_alert_tasks) == 0:
             state = app.alert_sound_state
             #if state["first_pending_add_time"] is None:
@@ -276,7 +299,8 @@ def show_bulk_critical_alert(app, tasks_list, icon_path: str | None = None) -> N
         sound_file = _fallback_sound
 
     volume_factor = getattr(app, "volume_factor", 1.0)
-    play_sound(sound_file, volume_factor)
+    if not app.is_muted:
+        play_sound(sound_file, volume_factor)
 
     task_id = BULK_TASK_ID  # специальный ID для bulk-оповещения
     with _state_lock:
@@ -354,6 +378,7 @@ def check_and_play_general_sound(app: Any) -> None:
     Вызывается раз в 60 секунд. Если общий режим активен и есть активные задачи —
     проигрывает общий звук (MEDIA_PATHS[4]). Если очередь пуста — останавливает таймер.
     """
+
     state = app.alert_sound_state
     with _state_lock:
         if not _pending_alert_tasks and len(app.sound_eligible_tasks) == 0:
