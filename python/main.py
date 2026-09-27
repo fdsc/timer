@@ -1,5 +1,5 @@
 #!/bin/python3
-# Требуются пакеты sox, tk, zenity
+# Требуются пакеты tk, zenity, [sox]
 # Проверка наличия tkinter: python3 -m tkinter
 
 import tkinter as tk
