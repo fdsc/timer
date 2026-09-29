@@ -9,6 +9,8 @@ from pathlib import Path
 import traceback
 import threading
 import fcntl
+import sys
+import os
 
 
 import notifier
@@ -139,12 +141,20 @@ class App(
         with self.storage_lock:
             self.sound_eligible_tasks.discard(task_id)
 
-        if len(self.sound_eligible_tasks) == 0:
-            notifier.reset_alert_sound_state(self)
+            if len(self.sound_eligible_tasks) == 0:
+                notifier.reset_alert_sound_state(self)
 
+def cwdToMain():
+    if getattr(sys, "frozen", False):
+        # PyInstaller / cx_Freeze
+        _base = Path(sys.executable).resolve().parent
+    else:
+        _base = Path(__file__).resolve().parent
+    os.chdir(_base)
 
 if __name__ == "__main__":
     from datetime import datetime
+    cwdToMain()
     root = tk.Tk()
     app = App(root)
     root.mainloop()
