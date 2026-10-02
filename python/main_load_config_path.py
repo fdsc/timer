@@ -8,7 +8,9 @@ from task_block_tasks import TaskType
 class LoadConfigPathMixin:
     @staticmethod
     def load_config(app):
+        print("!!!cfg1")
         app.data_dir = get_user_data_dir()
+        print("!!!cfg2")
         app.opts     = load_or_create_opts(app.data_dir)
         
         print(f"Start with data in {app.data_dir}")

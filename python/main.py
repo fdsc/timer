@@ -155,6 +155,9 @@ def cwdToMain():
 if __name__ == "__main__":
     from datetime import datetime
     cwdToMain()
+
     root = tk.Tk()
     app = App(root)
+
     root.mainloop()
+

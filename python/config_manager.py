@@ -22,8 +22,13 @@ _save_timer_start_times = {}
 def get_folder_via_zenity(text, initialDir) -> str | None:
     # zenity --file-selection --directory --filename="$HOME/.config/" --title="Выберите папку для задач"
     try:
+        #print(f"DISPLAY={os.environ.get('DISPLAY')}")
+        #print(f"WAYLAND_DISPLAY={os.environ.get('WAYLAND_DISPLAY')}")
+        #print(f"XAUTHORITY={os.environ.get('XAUTHORITY')}")
+        #print(f"XDG_RUNTIME_DIR={os.environ.get('XDG_RUNTIME_DIR')}")
+        #print(f"DBUS_SESSION_BUS_ADDRESS={os.environ.get('DBUS_SESSION_BUS_ADDRESS')}")
         result = subprocess.run(
-            ["zenity", "--file-selection", "--directory", f"--title=\"{text}\"", f"--filename=\"initialDir\""],
+            ["zenity", "--file-selection", "--directory", f"--title=\"{text}\"", f"--filename={initialDir}"],
             capture_output=True,
             text=True,
             check=False  # не выбрасываем исключение при отмене
@@ -53,11 +58,10 @@ def get_user_data_dir() -> Path:
                     return saved_path
         except (json.JSONDecodeError, KeyError, TypeError):
             pass
-
     # Диалог выбора папки
     root = tk.Tk()
-    root.withdraw()
     root.attributes("-topmost", True)
+    root.withdraw()
 
     initial_dir = str(Path.home() / ".config")
     data_dir = get_folder_via_zenity("Выберите папку для хранения задач и настроек", initial_dir)
